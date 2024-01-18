@@ -12,6 +12,8 @@
 //    luminance.
 //    human presense.
 //    CO2 levels?
+// NOte: LD2410 devices can hit 48C, so quite hot! 
+// Hence need isolating from any temo sensor.
 
 class EnvironmentSensor
 {
