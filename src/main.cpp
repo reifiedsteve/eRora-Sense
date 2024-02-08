@@ -48,6 +48,8 @@ void loop() {
 #include "Environment/EnvironmentMonitor.h"
 #include "Environment/EnvironmentLogger.h"
 
+#include "MIDI/MIDIConnection.h"
+
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -77,6 +79,8 @@ void setup()
   std::ostringstream os;
   os << "Built: " << BUILD_DATE << "@" << BUILD_TIME;
   Log.infoln(os.str().c_str());
+
+  midi_setup();
 
 /**
   if (!bme.begin()) {
@@ -182,6 +186,8 @@ envSensor.loop();
 personSensor.loop();
 
 envMonitor.loop();
+
+midi_loop();
 
   // delay(2000);
 }
