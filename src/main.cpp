@@ -50,6 +50,8 @@ void loop() {
 
 #include "MIDI/MIDIConnection.h"
 
+#include <WiFi.h>
+
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -69,18 +71,32 @@ LD2410Sensor personSensor(27);
 EnvironmentMonitor envMonitor;
 EnvironmentLogger envLogger;
 
+void wifi_setup()
+{
+    WiFi.begin("133381B", "spongebob2000");
+
+    // Connect to the Wi-Fi network and start the captive portal
+    while (WiFi.status() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+    }
+
+    Serial.println("connected.");
+}
+
 void setup()
 {
-  Serial.begin(115200);
-  while (!Serial);
+    Serial.begin(115200);
+    while (!Serial);
 
-  initLogging(LOG_LEVEL_VERBOSE);
+    initLogging(LOG_LEVEL_VERBOSE);
 
-  std::ostringstream os;
-  os << "Built: " << BUILD_DATE << "@" << BUILD_TIME;
-  Log.infoln(os.str().c_str());
+    std::ostringstream os;
+    os << "Built: " << BUILD_DATE << "@" << BUILD_TIME;
+    Log.infoln(os.str().c_str());
 
-  midi_setup();
+    wifi_setup();
+    midi_setup();
 
 /**
   if (!bme.begin()) {
@@ -98,6 +114,8 @@ void setup()
   bme.setGasHeater(320, 150); // 320*C for 150 ms
 */
 
+/***
+ 
   envSensor.setup();
   personSensor.setup();
 
@@ -111,6 +129,8 @@ void setup()
   envMonitor.addOccupancyObserver(envLogger);
   envMonitor.addTemperatureObserver(envLogger);
   envMonitor.addHumidityObserver(envLogger);
+
+  ***/
 }
 
 void loop() 
@@ -182,10 +202,14 @@ envMonitor.addTemperatureObserver(envLogger, true);
 */
 
 
+/***
+ 
 envSensor.loop();
 personSensor.loop();
 
 envMonitor.loop();
+
+***/
 
 midi_loop();
 
