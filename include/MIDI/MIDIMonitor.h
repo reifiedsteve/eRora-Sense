@@ -8,9 +8,9 @@
 #include <WiFi.h>
 #include <WiFiUDP.h>
 
-#include "MIDI/MIDIHandler.h"
+#include "MIDI/MIDIEventObserver.h"
 
-class MIDIRouter   // TODO: rename to MIDIRouterRTP
+class MIDIMonitor   // TODO: rename to MIDIRouterRTP
 {
 private:
 
@@ -21,7 +21,7 @@ private:
 
 public:
     
-    typedef MIDIHandler Handler;
+    typedef MIDIEventObserver Observer;
 
     static void setup(const char* midiSessionName = "rtpMIDI-ESP32", uint16_t port = DEFAULT_CONTROL_PORT);
     static void loop();
@@ -29,10 +29,10 @@ public:
     static void setDeviceName(const std::string& deviceName);
     static std::string getDeviceName();
 
-    static void addHandler(Handler* handler);
-    static void removeHandler(Handler* handler);
+    static void addEventObserver(Observer* handler);
+    static void removeEventObserver(Observer* handler);
 
-    MIDIRouter() = delete;
+    MIDIMonitor() = delete;
 
 private:
 
@@ -52,7 +52,7 @@ private:
     typedef _Sessions::const_iterator _SessionsConstIter;
     typedef _Sessions::iterator _SessionsIter;
     
-    typedef Handler _Handler;
+    typedef Observer _Handler;
     typedef std::list<_Handler*> _Handlers;
 
     static _Session _rtpSession;

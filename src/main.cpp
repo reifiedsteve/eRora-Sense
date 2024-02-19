@@ -48,7 +48,7 @@ void loop() {
 #include "Environment/EnvironmentMonitor.h"
 #include "Environment/EnvironmentLogger.h"
 
-#include "MIDI/MIDIRouter.h"
+#include "MIDI/MIDIMonitor.h"
 #include "MIDI/MIDILogger.h"
 
 #include <WiFi.h>
@@ -133,8 +133,8 @@ void setup()
 
     wifi_setup();
 
-    MIDIRouter::setup("eRora-0A0B0C");
-    MIDIRouter::addHandler(&midiMonitor);
+    MIDIMonitor::setup("eRora-0A0B0C");
+    MIDIMonitor::addEventObserver(&midiMonitor);
 
 /**
   if (!bme.begin()) {
@@ -250,7 +250,7 @@ envMonitor.loop();
 ***/
 
 midiMonitor.loop();
-MIDIRouter::loop();
+MIDIMonitor::loop();
 
   // delay(2000);
 }
