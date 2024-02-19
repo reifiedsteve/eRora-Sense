@@ -48,7 +48,8 @@ void loop() {
 #include "Environment/EnvironmentMonitor.h"
 #include "Environment/EnvironmentLogger.h"
 
-#include "MIDI/MIDIConnection.h"
+#include "MIDI/MIDIRouter.h"
+#include "MIDI/MIDIMonitor.h"
 
 #include <WiFi.h>
 
@@ -71,6 +72,39 @@ LD2410Sensor personSensor(27);
 EnvironmentMonitor envMonitor;
 EnvironmentLogger envLogger;
 
+
+#if 0
+
+#include <functional>
+
+class Foo
+{
+public:
+
+    using NoteOnCallback = void (*)(byte channel, byte note, byte velocity);
+
+    inline void setHandleNoteOn(NoteOnCallback fptr) { mNoteOnCallback = fptr; }
+
+private:
+
+    NoteOnCallback mNoteOnCallback;
+
+};
+
+class SubFoo : public Foo
+{
+public:
+
+    typedef std::function(void(byte channel, byte note, byte velocity)) NoteOnObserver;
+
+    inline void observeNoteOn(NoteOnObserver observer) {
+        setHandleNoteOn(observer);
+    }
+
+};
+
+#endif
+
 void wifi_setup()
 {
     WiFi.begin("133381B", "spongebob2000");
@@ -84,6 +118,8 @@ void wifi_setup()
     Serial.println("connected.");
 }
 
+MIDIMonitor midiMonitor;
+
 void setup()
 {
     Serial.begin(115200);
@@ -96,7 +132,9 @@ void setup()
     Log.infoln(os.str().c_str());
 
     wifi_setup();
-    midi_setup();
+
+    MIDIRouter::setup("eRora-0A0B0C");
+    MIDIRouter::addHandler(&midiMonitor);
 
 /**
   if (!bme.begin()) {
@@ -211,7 +249,8 @@ envMonitor.loop();
 
 ***/
 
-midi_loop();
+midiMonitor.loop();
+MIDIRouter::loop();
 
   // delay(2000);
 }
