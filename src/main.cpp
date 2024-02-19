@@ -49,7 +49,7 @@ void loop() {
 #include "Environment/EnvironmentLogger.h"
 
 #include "MIDI/MIDIRouter.h"
-#include "MIDI/MIDIMonitor.h"
+#include "MIDI/MIDILogger.h"
 
 #include <WiFi.h>
 
@@ -118,7 +118,7 @@ void wifi_setup()
     Serial.println("connected.");
 }
 
-MIDIMonitor midiMonitor;
+MIDILogger midiMonitor;
 
 void setup()
 {

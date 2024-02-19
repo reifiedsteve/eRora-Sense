@@ -3,7 +3,7 @@
 #include "MIDI/MIDIHandler.h"
 #include "Diagnostics/Logging.h"
 
-class MIDIMonitor : public MIDIHandler
+class MIDILogger : public MIDIHandler
 {
 public:
 
