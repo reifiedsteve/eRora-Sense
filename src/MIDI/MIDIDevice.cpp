@@ -1,4 +1,4 @@
-#include "MIDI/MIDIMonitor.h"
+#include "MIDI/MIDIDevice.h"
 
 #include "Diagnostics/Logging.h"
 
@@ -13,13 +13,13 @@
 // APPLEMIDI_NAMESPACE::AppleMIDISession<WiFiUDP> appleMIDI("AppleMIDI-ESP32", DEFAULT_CONTROL_PORT);
 // MIDI_NAMESPACE::MidiInterface<APPLEMIDI_NAMESPACE::AppleMIDISession<WiFiUDP>, APPLEMIDI_NAMESPACE::AppleMIDISettings> midiSession((APPLEMIDI_NAMESPACE::AppleMIDISession<WiFiUDP> &)appleMIDI);
 
-void MIDIMonitor::setup(const char* midiSessionName, uint16_t port)
+void RtpMidiConnection::setup(const char* midiSessionName, uint16_t port)
 {
     _rtpSession.setName(midiSessionName);
     _rtpSession.setPort(port);
 
     _rtpSession.begin();
-    _midi.begin();
+    _midi.begin(); // can add optional channel number here - defaults to 1.
 
     _rtpSession.setHandleConnected(_addSession);
     _rtpSession.setHandleDisconnected(_removeSession);
@@ -34,34 +34,39 @@ void MIDIMonitor::setup(const char* midiSessionName, uint16_t port)
     _midi.setHandleSystemExclusive(_routeSystemExclusive);
 }
 
-void MIDIMonitor::loop() {
+void RtpMidiConnection::loop() {
     _rtpSession.read();
     _midi.read();
 }
 
-void MIDIMonitor::setDeviceName(const std::string& deviceName) {
+void RtpMidiConnection::setDeviceChannel(Channel channel) {
+    _channel = channel;
+    _midi.setInputChannel(_channel); // can add optional channel number here - defaults to 1.
+}
+
+void RtpMidiConnection::setDeviceName(const std::string& deviceName) {
     _rtpSession.setName(deviceName.c_str());
 }
 
-std::string MIDIMonitor::getDeviceName() {
+std::string RtpMidiConnection::getDeviceName() {
     return std::string(_rtpSession.getName());
 }
 
-void MIDIMonitor::addEventObserver(Observer* handler) {
+void RtpMidiConnection::addEventObserver(Observer* handler) {
     if (handler) {
         Log.verboseln("MIDIRouter: registering handler \"%s\".", handler->midiObserverName());
         _handlers.push_back(handler);
     }
 }
 
-void MIDIMonitor::removeEventObserver(Observer* handler) {
+void RtpMidiConnection::removeEventObserver(Observer* handler) {
     if (handler) {
         Log.verboseln("MIDIRouter: deregistering handler \"%s\".", handler->midiObserverName());
         _handlers.remove(handler);
     }
 }
 
-void MIDIMonitor::_addSession(const _SessionID & sid, const char* name)
+void RtpMidiConnection::_addSession(const _SessionID & sid, const char* name)
 {
     _SessionsIter iter(_sessions.find(sid));
 
@@ -81,7 +86,7 @@ void MIDIMonitor::_addSession(const _SessionID & sid, const char* name)
     }
 }
 
-void MIDIMonitor::_removeSession(const _SessionID & sid)
+void RtpMidiConnection::_removeSession(const _SessionID & sid)
 {
     _SessionsConstIter iter(_sessions.find(sid));
 
@@ -102,7 +107,13 @@ void MIDIMonitor::_removeSession(const _SessionID & sid)
     }
 }
 
-void MIDIMonitor::_routeNoteOn(Channel channel, byte note, byte velocity) {
+void RtpMidiConnection::_routeNoteOn(Channel channel, byte note, byte velocity) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfNoteOn(channel, note, velocity);
+    }
+}
+
+void RtpMidiConnection::_notifyOfNoteOn(Channel channel, byte note, byte velocity) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, note, velocity](_Handler* handler) {
         if (handler) {
             handler->onMidiNoteOn(channel, note, velocity);
@@ -110,7 +121,13 @@ void MIDIMonitor::_routeNoteOn(Channel channel, byte note, byte velocity) {
     });
 }
 
-void MIDIMonitor::_routeNoteOff(Channel channel, byte note, byte velocity) {
+void RtpMidiConnection::_routeNoteOff(Channel channel, byte note, byte velocity) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfNoteOff(channel, note, velocity);
+    }
+}
+
+void RtpMidiConnection::_notifyOfNoteOff(Channel channel, byte note, byte velocity) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, note, velocity](_Handler* handler) {
         if (handler) {
             handler->onMidiNoteOff(channel, note, velocity);
@@ -118,7 +135,13 @@ void MIDIMonitor::_routeNoteOff(Channel channel, byte note, byte velocity) {
     });
 }
 
-void MIDIMonitor::_routeControlChange(Channel channel, byte type, byte value) {
+void RtpMidiConnection::_routeControlChange(Channel channel, byte type, byte value) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfControlChange(channel, type, value);
+    }
+}
+
+void RtpMidiConnection::_notifyOfControlChange(Channel channel, byte type, byte value) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, type, value](_Handler* handler) {
         if (handler) {
             handler->onMidiControlChange(channel, type, value);
@@ -126,7 +149,13 @@ void MIDIMonitor::_routeControlChange(Channel channel, byte type, byte value) {
     });
 }
 
-void MIDIMonitor::_routeProgramChange(Channel channel, byte patch) {
+void RtpMidiConnection::_routeProgramChange(Channel channel, byte patch) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfProgramChange(channel, patch);
+    }
+}
+
+void RtpMidiConnection::_notifyOfProgramChange(Channel channel, byte patch) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, patch](_Handler* handler) {
         if (handler) {
             handler->onMidiProgramChange(channel, patch);
@@ -134,7 +163,13 @@ void MIDIMonitor::_routeProgramChange(Channel channel, byte patch) {
     });
 }
 
-void MIDIMonitor::_routeAfterTouchChannel(Channel channel, byte pressure) {
+void RtpMidiConnection::_routeAfterTouchChannel(Channel channel, byte pressure) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfAfterTouchChannel(channel, pressure);
+    }
+}
+
+void RtpMidiConnection::_notifyOfAfterTouchChannel(Channel channel, byte pressure) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, pressure](_Handler* handler) {
         if (handler) {
             handler->onMidiAfterTouchChannel(channel, pressure);
@@ -142,7 +177,13 @@ void MIDIMonitor::_routeAfterTouchChannel(Channel channel, byte pressure) {
     });
 }
 
-void MIDIMonitor::_routeAfterTouchPoly(Channel channel, byte note, byte pressure) {
+void RtpMidiConnection::_routeAfterTouchPoly(Channel channel, byte note, byte pressure) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfAfterTouchPoly(channel, note, pressure);
+    }
+}
+
+void RtpMidiConnection::_notifyOfAfterTouchPoly(Channel channel, byte note, byte pressure) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, note, pressure](_Handler* handler) {
         if (handler) {
             handler->onMidiAfterTouchPoly(channel, note, pressure);
@@ -150,7 +191,13 @@ void MIDIMonitor::_routeAfterTouchPoly(Channel channel, byte note, byte pressure
     });
 }
 
-void MIDIMonitor::_routePitchBend(Channel channel, int bend) {
+void RtpMidiConnection::_routePitchBend(Channel channel, int bend) {
+    if (_isChannelOfInterest(channel)) {
+        _notifyOfPitchBend(channel, bend);
+    }
+}
+
+void RtpMidiConnection::_notifyOfPitchBend(Channel channel, int bend) {
     std::for_each(_handlers.begin(), _handlers.end(), [channel, bend](_Handler* handler) {
         if (handler) {
             handler->onMidiPitchBend(channel, bend);
@@ -158,7 +205,11 @@ void MIDIMonitor::_routePitchBend(Channel channel, int bend) {
     });
 }
 
-void MIDIMonitor::_routeSystemExclusive(byte* data, unsigned size) {
+void RtpMidiConnection::_routeSystemExclusive(byte* data, unsigned size) {
+    _notifyOfSystemExclusive(data, size);
+}
+
+void RtpMidiConnection::_notifyOfSystemExclusive(byte* data, unsigned size) {
     std::for_each(_handlers.begin(), _handlers.end(), [data, size](_Handler* handler) {
         if (handler) {
             handler->onMidiSystemExclusive(data, size);
@@ -166,10 +217,16 @@ void MIDIMonitor::_routeSystemExclusive(byte* data, unsigned size) {
     });
 }
 
-MIDIMonitor::_Session MIDIMonitor::_rtpSession("rtpMIDI-ESP32");
-MIDIMonitor::_MIDI MIDIMonitor::_midi(_rtpSession);
+bool RtpMidiConnection::_isChannelOfInterest(Channel channel) {
+    return (_channel == 0) || (channel == _channel);
+}
 
-MIDIMonitor::_Sessions MIDIMonitor::_sessions;
-MIDIMonitor::_Handlers MIDIMonitor::_handlers;
+RtpMidiConnection::_Session RtpMidiConnection::_rtpSession("rtpMIDI-ESP32");
+RtpMidiConnection::_MIDI RtpMidiConnection::_midi(_rtpSession);
+
+RtpMidiConnection::Channel RtpMidiConnection::_channel(1);
+
+RtpMidiConnection::_Sessions RtpMidiConnection::_sessions;
+RtpMidiConnection::_Handlers RtpMidiConnection::_handlers;
 
 
