@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MIDI/MIDIEventObserver.h"
+#include "MIDI/MidiRouter.h"
 #include <array>
 
 typedef unsigned short uint7_t;

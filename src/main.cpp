@@ -48,7 +48,8 @@ void loop() {
 #include "Environment/EnvironmentMonitor.h"
 #include "Environment/EnvironmentLogger.h"
 
-#include "MIDI/MIDIDevice.h"
+#include "MIDI/RtpMidiDevice.h"
+#include "MIDI/BleMidiDevice.h"
 #include "MIDI/MIDILogger.h"
 
 #include <WiFi.h>
@@ -120,6 +121,9 @@ void wifi_setup()
 
 MIDILogger midiMonitor;
 
+RtpMidiDevice rtpMidi;
+// BleMidiDevice bleMidi;
+
 void setup()
 {
     Serial.begin(115200);
@@ -133,10 +137,10 @@ void setup()
 
     wifi_setup();
 
-    RtpMidiConnection::setup("eRora-0A0B0C");
-    /// RtpMidiConnection::setDeviceChannel(1);   // defaults to 1.
-    RtpMidiConnection::addEventObserver(&midiMonitor);
-
+    rtpMidi.setup("eRora-MIDI-rtp");
+    rtpMidi.addEventHandler(&midiMonitor);
+    // bleMidi.setup("eRora-MIDI-ble");
+    // bleMidi.addEventHandler(&midiMonitor);
 /**
   if (!bme.begin()) {
     Log.errorln("Could not find a valid BME680 sensor, check wiring!");
@@ -251,7 +255,10 @@ envMonitor.loop();
 ***/
 
 midiMonitor.loop();
-RtpMidiConnection::loop();
+//RtpMidiConnection::loop();
+
+rtpMidi.loop();
+// bleMidi.loop();
 
   // delay(2000);
 }
