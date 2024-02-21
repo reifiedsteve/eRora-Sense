@@ -1,5 +1,10 @@
 #pragma once
 
+// Notes: to connect to Windows, one needs the apps "loopMIDI" and "MIDIberry".
+// That's the theory. I can pair with the ESP32, but it shortly after gets 
+// disconnected. Same happens with Android - not sure why.
+// Q. DO we need to run as a BLE client instead of a BLE server?
+
 #include "MIDI/MidiDevice.h"
 
 class BleMidiDevice : public MidiDevice
@@ -40,7 +45,7 @@ private:
 
     static void _onConnect();
     static void _onDisconnect();
-    
+
     static void _onNoteOn(byte channel, byte note, byte velocity, uint16_t timestamp);
     static void _onNoteOff(byte channel, byte note, byte velocity, uint16_t timestamp);
     static void _onControlChange(byte channel, byte type, byte value, uint16_t timestamp);

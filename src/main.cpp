@@ -122,7 +122,7 @@ void wifi_setup()
 MIDILogger midiMonitor;
 
 RtpMidiDevice rtpMidi;
-// BleMidiDevice bleMidi;
+//BleMidiDevice bleMidi;
 
 void setup()
 {
@@ -139,8 +139,8 @@ void setup()
 
     rtpMidi.setup("eRora-MIDI-rtp");
     rtpMidi.addEventHandler(&midiMonitor);
-    // bleMidi.setup("eRora-MIDI-ble");
-    // bleMidi.addEventHandler(&midiMonitor);
+    //bleMidi.setup("eRora-MIDI-ble");
+    //bleMidi.addEventHandler(&midiMonitor);
 /**
   if (!bme.begin()) {
     Log.errorln("Could not find a valid BME680 sensor, check wiring!");
@@ -255,10 +255,9 @@ envMonitor.loop();
 ***/
 
 midiMonitor.loop();
-//RtpMidiConnection::loop();
 
 rtpMidi.loop();
-// bleMidi.loop();
+//bleMidi.loop();
 
   // delay(2000);
 }
