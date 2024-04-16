@@ -1,10 +1,12 @@
 #pragma once
 
-#include "Diagnostics/Logging.h"
+#if 0
 
-#include <Adafruit_BME680.h>
 #include <list>
+#include <Adafruit_BME680.h>
 
+#include "Chronos/TimeSpan.h"
+#include "Diagnostics/Logging.h"
 
 #define BME_SCK 13
 #define BME_MISO 12
@@ -23,16 +25,25 @@ public:
     {
         virtual const char* name() = 0;
 
-        virtual void onTemperature(float tempC) = 0;
-        virtual void onHumidity(float humidityPercent) = 0;
+        virtual void onTemperature(float tempC) {}
+        virtual void onHumidity(float humidityPercent) {}
 
-        virtual void onNoSensor() = 0;
+        virtual uint16_t onPM01() {}
+        virtual uint16_t onPM25() {}
+        virtual uint16_t onPM10() {}
+        
+        virtual void onNoSensor() {}   //  <==-- ????
 
         /* etc */
     };
 
-    explicit SmartSensor(TwoWire& i2cBus = Wire, int i2cAddress = BME68X_DEFAULT_ADDRESS, const TimeSpan& pollingInterval = 1000) {
-      , _sensor(i2cBus, bme68x_i2cAddress)
+    static const TimeSpan DefaultInterval; // = TimeSpan(1, TimeSpan::Units::Seconds);
+
+    explicit SmartSensor(
+        TwoWire& i2cBus = Wire, 
+        int i2cAddress = BME68X_DEFAULT_ADDRESS,
+        const TimeSpan& pollingInterval = DefaultInterval
+    ) , _sensor(i2cBus, bme68x_i2cAddress)
       , _i2cAddress(i2cAddress)
       , _pollingInterval(pollingInterval)
       , _present(false)
@@ -122,3 +133,5 @@ private:
 
     _Observers _observer;
 };
+
+#endif

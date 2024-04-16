@@ -48,10 +48,6 @@ void loop() {
 #include "Environment/EnvironmentMonitor.h"
 #include "Environment/EnvironmentLogger.h"
 
-#include "MIDI/RtpMidiDevice.h"
-#include "MIDI/BleMidiDevice.h"
-#include "MIDI/MIDILogger.h"
-
 #include <WiFi.h>
 
 #define BME_SCK 13
@@ -74,38 +70,6 @@ EnvironmentMonitor envMonitor;
 EnvironmentLogger envLogger;
 
 
-#if 0
-
-#include <functional>
-
-class Foo
-{
-public:
-
-    using NoteOnCallback = void (*)(byte channel, byte note, byte velocity);
-
-    inline void setHandleNoteOn(NoteOnCallback fptr) { mNoteOnCallback = fptr; }
-
-private:
-
-    NoteOnCallback mNoteOnCallback;
-
-};
-
-class SubFoo : public Foo
-{
-public:
-
-    typedef std::function(void(byte channel, byte note, byte velocity)) NoteOnObserver;
-
-    inline void observeNoteOn(NoteOnObserver observer) {
-        setHandleNoteOn(observer);
-    }
-
-};
-
-#endif
-
 void wifi_setup()
 {
     WiFi.begin("133381B", "spongebob2000");
@@ -119,11 +83,6 @@ void wifi_setup()
     Serial.println("connected.");
 }
 
-MIDILogger midiMonitor;
-
-RtpMidiDevice rtpMidi;
-//BleMidiDevice bleMidi;
-
 void setup()
 {
     Serial.begin(115200);
@@ -131,135 +90,32 @@ void setup()
 
     initLogging(LOG_LEVEL_VERBOSE);
 
+    Log.infoln("eRora Sense");
+
     std::ostringstream os;
     os << "Built: " << BUILD_DATE << "@" << BUILD_TIME;
     Log.infoln(os.str().c_str());
 
     wifi_setup();
 
-    rtpMidi.setup("eRora-MIDI-rtp");
-    rtpMidi.addEventHandler(&midiMonitor);
-    //bleMidi.setup("eRora-MIDI-ble");
-    //bleMidi.addEventHandler(&midiMonitor);
-/**
-  if (!bme.begin()) {
-    Log.errorln("Could not find a valid BME680 sensor, check wiring!");
-    while (1);
-  }
-*/
+    envSensor.setup();
+    personSensor.setup();
 
-/*
-  // Set up oversampling and filter initialization
-  bme.setTemperatureOversampling(BME680_OS_8X);
-  bme.setHumidityOversampling(BME680_OS_2X);
-  bme.setPressureOversampling(BME680_OS_4X);
-  bme.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  bme.setGasHeater(320, 150); // 320*C for 150 ms
-*/
+    envMonitor.setup();
+    // envLogger.setup();
 
-/***
- 
-  envSensor.setup();
-  personSensor.setup();
+    envMonitor.addOccupancyObserver(envLogger);
+    envMonitor.addTemperatureObserver(envLogger);
+    envMonitor.addHumidityObserver(envLogger);
 
-  envMonitor.setup();
-  // envLogger.setup();
-
-  envMonitor.attachOccupancySensor(personSensor);
-  envMonitor.attachTemperatureSensor(envSensor);
-  envMonitor.attachHumiditySensor(envSensor);
-  
-  envMonitor.addOccupancyObserver(envLogger);
-  envMonitor.addTemperatureObserver(envLogger);
-  envMonitor.addHumidityObserver(envLogger);
-
-  ***/
+    envMonitor.attachOccupancySensor(personSensor);
+    envMonitor.attachTemperatureSensor(envSensor);
+    envMonitor.attachHumiditySensor(envSensor);    
 }
 
 void loop() 
 {
-# if 0
-
-  if (! bme.performReading()) {
-    Log.errorln("Failed to perform reading :(");
-    return;
-  }
-
-# endif
-
-# if 0
-
-  Serial.print("Temperature = ");
-  Serial.print(bme.temperature);
-  Serial.println(" *C");
-
-  Serial.print("Pressure = ");
-  Serial.print(bme.pressure / 100.0);
-  Serial.println(" hPa");
-
-  Serial.print("Humidity = ");
-  Serial.print(bme.humidity);
-  Serial.println(" %");
-
-  Serial.print("Gas = ");
-  Serial.print(bme.gas_resistance / 1000.0);
-  Serial.println(" KOhms");
-
-  Serial.print("Approx. Altitude = ");
-  Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-  Serial.println(" m");
-
-# endif
-
-# if 0
-
-  std::ostringstream os;
-
-  os << "Temperature: " << std::setprecision(1) << std::fixed << bme.temperature << " *C";
-  os << ", ";
-  os << "Pressure: " << (int) (bme.pressure / 100.0) << " hPa";
-  os << ", ";
-  os << "Humidity " << std::setprecision(1) << std::fixed << bme.humidity << " %";
-  os << ", ";
-  // os << "Gas " << (int)(bme.gas_resistance / 1000.0) << " KOhms";
-  os << "Gas: " << (int)(bme.gas_resistance / 1000.0) << " KOhms";
-  os << ", ";
-  os << "Alt: " << bme.readAltitude(LOCAL_SEALEVELPRESSURE_HPA) << " m";
-  /*
-  os << ", ";
-  os << "Occupied: " << (env.occupied() ? "Yes" : "No");
-  */
-  // os << std::endl;
-
-  // Log.infoln("%s", String(os.str().c_str()));
-  Log.verboseln("%s", os.str().c_str());
-
-  env.loop();
-
-# endif
-
-
-/*
-envMonitor.attachTemperatureSensor(envSensor);
-envMonitor.addTemperatureObserver(envLogger, true);
-*/
-
-
-/***
- 
-envSensor.loop();
-personSensor.loop();
-
-envMonitor.loop();
-
-***/
-
-midiMonitor.loop();
-
-rtpMidi.loop();
-//bleMidi.loop();
-
-  // delay(2000);
+    envMonitor.loop();
 }
 
 #endif
