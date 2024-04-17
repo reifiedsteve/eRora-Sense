@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Environment/OccupancySensor.h"
+#include "Sensors/OccupancySensor.h"
 
 #include <Arduino.h>
 

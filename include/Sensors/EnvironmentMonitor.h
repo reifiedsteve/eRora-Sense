@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Environment/TemperatureSensor.h"
-#include "Environment/HumiditySensor.h"
-#include "Environment/AirPressureSensor.h"
-#include "Environment/GasLevelSensor.h"
-#include "Environment/OccupancySensor.h"
+#include "Sensors/TemperatureSensor.h"
+#include "Sensors/HumiditySensor.h"
+#include "Sensors/AirPressureSensor.h"
+#include "Sensors/GasLevelSensor.h"
+#include "Sensors/OccupancySensor.h"
 
-#include "Environment/TemperatureObserver.h"
-#include "Environment/HumidityObserver.h"
-#include "Environment/AirPressureObserver.h"
-#include "Environment/GasLevelObserver.h"
-#include "Environment/OccupancyObserver.h"
+#include "Sensors/TemperatureObserver.h"
+#include "Sensors/HumidityObserver.h"
+#include "Sensors/AirPressureObserver.h"
+#include "Sensors/GasLevelObserver.h"
+#include "Sensors/OccupancyObserver.h"
 
 #include <list>
 

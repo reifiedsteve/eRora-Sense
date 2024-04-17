@@ -1,4 +1,4 @@
-#include "Environment/BME680Sensor.h"
+#include "Sensors/BME680Sensor.h"
 
 #include "Diagnostics/Logging.h"
 

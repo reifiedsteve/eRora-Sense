@@ -42,11 +42,12 @@ void loop() {
 #include "Diagnostics/Logging.h"
 #include "_Build/Version.h"
 
-#include "Environment/BME680Sensor.h"
-#include "Environment/LD2410Sensor.h"
+#include "Sensors/BME680Sensor.h"
+#include "Sensors/LD2410Sensor.h"
+#include "Sensors/ParticleSensor.h"
 
-#include "Environment/EnvironmentMonitor.h"
-#include "Environment/EnvironmentLogger.h"
+#include "Sensors/EnvironmentMonitor.h"
+#include "Sensors/EnvironmentLogger.h"
 
 #include <WiFi.h>
 
@@ -111,10 +112,10 @@ void setup()
     envMonitor.attachOccupancySensor(personSensor);
     envMonitor.attachTemperatureSensor(envSensor);
     envMonitor.attachHumiditySensor(envSensor);    
+    //envMonitor.attachParticleSensor(pmSensor);
 }
 
-void loop() 
-{
+void loop() {
     envMonitor.loop();
 }
 

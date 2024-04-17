@@ -1,8 +1,8 @@
-#include "Environment/ParticleSensor.h"
+#include "Sensors/ParticleSensor.h"
 
 const TimeSpan DefaultInterval(10, TimeSpan::Units::Minutes);
 
-ParticleSensor::ParticleSensor(uint8_t rxPin, uint8_t txPin, const TimeSpan& interval)
+PMS7003ParticleSensor::PMS7003ParticleSensor(uint8_t rxPin, uint8_t txPin, const TimeSpan& interval)
     : _pms(PMS7003, rxPin, txPin)
     , _state(_State::Init)
     , _available(false)
@@ -10,22 +10,22 @@ ParticleSensor::ParticleSensor(uint8_t rxPin, uint8_t txPin, const TimeSpan& int
     , _timer(interval.millis(), CountdownTimer::State::Running)
 {}
 
-void ParticleSensor::setup() {
+void PMS7003ParticleSensor::setup() {
     _pms.init();
     _pms.sleep();
 }
 
-bool ParticleSensor::available() {
+bool PMS7003ParticleSensor::available() {
     _available = _available || _cycle();
     return _available;
 }
 
-const ParticleSensor::Measurements& ParticleSensor::read() {
+const PMS7003ParticleSensor::Measurements& PMS7003ParticleSensor::read() {
     _available = false;
     return _measurements;
 }
 
-bool ParticleSensor::_cycle()
+bool PMS7003ParticleSensor::_cycle()
 {
     bool sampleAvailable(false);
 
@@ -47,18 +47,18 @@ bool ParticleSensor::_cycle()
     return sampleAvailable;
 }
 
-void ParticleSensor::_cycleInit() {
+void PMS7003ParticleSensor::_cycleInit() {
     _pms.wake();
     _state = _State::Reading;
 }
 
-void ParticleSensor::_cycleSleeping() {
+void PMS7003ParticleSensor::_cycleSleeping() {
     if (_timer.hasExpired()) {
         _state = _State::Reading;
     }
 }
 
-bool ParticleSensor::_cycleReading() {
+bool PMS7003ParticleSensor::_cycleReading() {
     bool available(false);
     if (_pms.has_particulate_matter()) {
         _measurements.pm01 = _pms.pm01;

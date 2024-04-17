@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Environment/TemperatureSensor.h"
-#include "Environment/HumiditySensor.h"
-#include "Environment/AIrPressureSensor.h"
-#include "Environment/GasLevelSensor.h"
+#include "Sensors/TemperatureSensor.h"
+#include "Sensors/HumiditySensor.h"
+#include "Sensors/AIrPressureSensor.h"
+#include "Sensors/GasLevelSensor.h"
 
 #include "Diagnostics/Logging.h"
 

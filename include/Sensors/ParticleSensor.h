@@ -6,11 +6,9 @@
 #include "Chronos/TimeSpan.h"
 #include "Chronos/CountdownTimer.h"
 
-class ParticleSensor
+class PartSensor
 {
 public:
-
-    static const TimeSpan DefaultInterval; // = TimeSpan(10, TimeSpan::Units::Minutes)
 
     struct Measurements {
         Measurements() : pm01(0), pm25(0), pm10(0) {}
@@ -18,6 +16,23 @@ public:
         uint16_t pm25; // PM 2.5
         uint16_t pm10; // PM 10.0
     };
+
+    /// @brief  Inquire on whether or not a new sample is available.
+    /// @return True if available; otherwise false.
+    virtual bool available() = 0;
+
+    /// @brief Read the most recent sample.
+    /// @param pm01 Level of PM 1.0 particulate matter.
+    /// @param pm25 Level of PM 2.5 particulate matter.
+    /// @param pm10 Level of PM 10.0 particulate matter.
+    virtual const Measurements& read() = 0;
+};
+
+class PMS7003ParticleSensor : public PartSensor
+{
+public:
+
+    static const TimeSpan DefaultInterval; // = TimeSpan(10, TimeSpan::Units::Minutes)
 
     /// @brief Construct a particle sensor.
     /// Running the hardware continuously will
@@ -27,7 +42,7 @@ public:
     /// @param rxPin ESP32 RX pin connected to the PMS TX out.
     /// @param txPin ESP32 TX pin connected to the PMS RX in.
     /// @param interval How often to sample PM data
-    explicit ParticleSensor(
+    explicit PMS7003ParticleSensor(
         uint8_t rxPin = 16,
         uint8_t txPin = 17,
         const TimeSpan& interval = DefaultInterval

@@ -1,5 +1,5 @@
 
-#include "Environment/EnvironmentMonitor.h"
+#include "Sensors/EnvironmentMonitor.h"
 
 EnvironmentMonitor::EnvironmentMonitor() 
     : _temperatureSensor(nullptr)
