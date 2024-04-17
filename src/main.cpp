@@ -44,7 +44,7 @@ void loop() {
 
 #include "Sensors/BME680Sensor.h"
 #include "Sensors/LD2410Sensor.h"
-#include "Sensors/ParticleSensor.h"
+#include "Sensors/PMS7003ParticleSensor.h"
 
 #include "Sensors/EnvironmentMonitor.h"
 #include "Sensors/EnvironmentLogger.h"
@@ -66,6 +66,7 @@ void loop() {
 
 BME680Sensor envSensor;
 LD2410Sensor personSensor(27);
+PMS7003ParticleSensor pmSensor(16, 17, TimeSpan::fromSeconds(5)); // TODO: make say 10 minutes (to avoid sensor wearing out). 
 
 EnvironmentMonitor envMonitor;
 EnvironmentLogger envLogger;
@@ -112,7 +113,7 @@ void setup()
     envMonitor.attachOccupancySensor(personSensor);
     envMonitor.attachTemperatureSensor(envSensor);
     envMonitor.attachHumiditySensor(envSensor);    
-    //envMonitor.attachParticleSensor(pmSensor);
+    envMonitor.attachParticleSensor(pmSensor);
 }
 
 void loop() {

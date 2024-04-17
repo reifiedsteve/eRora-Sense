@@ -7,11 +7,21 @@ EnvironmentMonitor::EnvironmentMonitor()
     , _airPressureSensor(nullptr)
     , _gasLevelSensor(nullptr)
     , _occupancySensor(nullptr)
+    , _particleSensor(nullptr)
     , _temperatureObservers()
     , _humidityObservers()
     , _airPressureObservers()
     , _gasLevelObservers()
     , _occupancyObservers()
+    , _particleObservers()
+    , _temperature(0.0)
+    , _humidity(0.0)
+    , _airPressure(0.0)
+    , _gasLevel(0.0)
+    , _occupied(false)
+    , _pm01(0)
+    , _pm25(0)
+    , _pm10(0)
 {}
 
 void EnvironmentMonitor::attachTemperatureSensor(TemperatureSensor& sensor) {
@@ -32,6 +42,10 @@ void EnvironmentMonitor::attachGasLevelSensor(GasLevelSensor& sensor) {
 
 void EnvironmentMonitor::attachOccupancySensor(OccupancySensor& sensor) {
     _occupancySensor = &sensor;
+}
+
+void EnvironmentMonitor::attachParticleSensor(ParticleSensor& sensor) {
+    _particleSensor = &sensor;
 }
 
 void EnvironmentMonitor::addTemperatureObserver(TemperatureObserver& observer, bool reportInitial) {
@@ -59,6 +73,11 @@ void EnvironmentMonitor::addOccupancyObserver(OccupancyObserver& observer, bool 
     if (reportInitial) observer.onOccupancy(_occupied);
 }
 
+void EnvironmentMonitor::addParticleObserver(ParticleObserver& observer, bool reportInitial) {
+    _particleObservers.push_back(&observer);
+    if (reportInitial) observer.onParticleReading(_pm01, _pm25, _pm10);
+}
+
 void EnvironmentMonitor::setup() {
     // ?
 }
@@ -70,6 +89,7 @@ void EnvironmentMonitor::loop()
     _processAirPressure();
     _processGasLevel();
     _processOccupancy();
+    _processParticles();
 
     // TODO: etc.
 }
@@ -124,6 +144,19 @@ void EnvironmentMonitor::_processOccupancy() {
     }
 }
 
+void EnvironmentMonitor::_processParticles() {
+    if (_particleSensor  && _particleSensor->available() ) {
+        uint16_t pm01, pm25, pm10;
+        ParticleSensor::Measurements levels(_particleSensor->read());
+        if ((pm01 != _pm01) || (pm25 != _pm25) || (pm10 != _pm10)) {
+            _pm01 = pm01;
+            _pm25 = pm25;
+            _pm10 = pm10;
+            _notifyOfParticles(pm01, pm25, pm10);
+        }
+    }
+}
+
 void EnvironmentMonitor::_notifyOfTemperature(float temperature) {
     for (TemperatureObserver* observer : _temperatureObservers) {
         observer->onTemperature(temperature);
@@ -151,5 +184,11 @@ void EnvironmentMonitor::_notifyOfGasLevel(float gasLevel) {
 void EnvironmentMonitor::_notifyOfOccupancy(bool occupied) {
     for (OccupancyObserver* observer : _occupancyObservers) {
         observer->onOccupancy(occupied);
+    }
+}
+
+void EnvironmentMonitor::_notifyOfParticles(uint16_t pm01, uint16_t pm25, uint16_t pm10) {
+    for (ParticleObserver* observer : _particleObservers) {
+        observer->onParticleReading(pm01, pm25, pm10);
     }
 }

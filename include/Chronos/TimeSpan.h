@@ -19,6 +19,22 @@ public:
 
     static const TimeSpan Zero;
     
+    inline static TimeSpan fromMicroseconds(Ticks ms) __attribute__((always_inline)) {
+        return TimeSpan(ms, Units::Microseconds);
+    }
+
+    inline static TimeSpan fromMilliseconds(Ticks ms) __attribute__((always_inline)) {
+        return TimeSpan(ms, Units::Milliseconds);
+    }
+
+    inline static TimeSpan fromSeconds(Ticks ms) __attribute__((always_inline)) {
+        return TimeSpan(ms, Units::Seconds);
+    }
+
+    inline static TimeSpan fromMinutess(Ticks ms) __attribute__((always_inline)) {
+        return TimeSpan(ms, Units::Minutes);
+    }
+
     /// @brief Construct the time span. Note that units must be explicitly provided 
     /// in order to eliminate assumptions (and associated bugs).
     /// @param span The time span numerically.

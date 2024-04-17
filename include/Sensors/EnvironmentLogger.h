@@ -5,6 +5,7 @@
 #include "AIrPressureObserver.h"
 #include "GasLevelObserver.h"
 #include "OccupancyObserver.h"
+#include "ParticleObserver.h"
 
 #include "Diagnostics/Logging.h"
 
@@ -16,6 +17,7 @@ class EnvironmentLogger
   , public AirPressureObserver
   , public GasLevelObserver
   , public OccupancyObserver
+  , public ParticleObserver
 {
 public:
 
@@ -37,6 +39,10 @@ public:
 
     void onOccupancy(bool occupied) override {
         Log.infoln("Occupancy: %s", _stringify(occupied).c_str());        
+    }
+
+    void onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {
+        Log.infoln("Particles: PM1.0 %d, PM2.5 %d, PM10.0 %d", pm01, pm25, pm10);
     }
 
 private:
