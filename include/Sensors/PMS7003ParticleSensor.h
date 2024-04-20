@@ -28,6 +28,9 @@ public:
     /// @brief Initialise the sensor.
     void setup();
 
+    /// @brief Perform sensor processing.
+    void loop();
+
     /// @brief  Inquire on whether or not a new sample is available.
     /// @return True if available; otherwise false.
     bool available();
@@ -51,6 +54,9 @@ private:
     void _cycleInit();
     void _cycleSleeping();
     bool _cycleReading();
+
+    void _changeState(_State newState);
+    static std::string _toStr(_State state);
 
     SerialPM _pms;
     _State _state;

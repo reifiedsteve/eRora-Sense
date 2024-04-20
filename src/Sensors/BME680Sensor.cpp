@@ -5,14 +5,17 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
-void BME680Sensor::setup()
-{
-    _initialised = _init();
+BME680Sensor::BME680Sensor()
+    : _sensor()
+    , _initialised([this]{return _init();}, TimeSpan::fromSeconds(5))
+    , _tempC()
+    , _humidity()
+    , _pressure()
+    , _gas()
+    , _measured(false)
+{}
 
-    if (_initialised) {
-        _sensor.beginReading();
-    }
-}
+void BME680Sensor::setup() {}
 
 void BME680Sensor::loop()
 {
@@ -62,6 +65,7 @@ bool BME680Sensor::_init()
 void BME680Sensor::_readMeasurements() {
     if (_sensor.remainingReadingMillis() <= 0) { 
         _sensor.endReading();
+        Log.verboseln("BME680 read.");
         _tempC =_sensor.readTemperature();
         _humidity = _sensor.readHumidity();
         _pressure = _sensor.readPressure();

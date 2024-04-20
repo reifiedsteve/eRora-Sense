@@ -145,15 +145,14 @@ void EnvironmentMonitor::_processOccupancy() {
 }
 
 void EnvironmentMonitor::_processParticles() {
-    if (_particleSensor  && _particleSensor->available() ) {
-        uint16_t pm01, pm25, pm10;
+    if (_particleSensor  /* && _particleSensor->available() */ ) {
         ParticleSensor::Measurements levels(_particleSensor->read());
-        if ((pm01 != _pm01) || (pm25 != _pm25) || (pm10 != _pm10)) {
-            _pm01 = pm01;
-            _pm25 = pm25;
-            _pm10 = pm10;
-            _notifyOfParticles(pm01, pm25, pm10);
-        }
+        //if ((levels.pm01 != _pm01) || (levels.pm25 != _pm25) || (levels.pm10 != _pm10)) {
+            _pm01 = levels.pm01;
+            _pm25 = levels.pm25;
+            _pm10 = levels.pm10;
+            _notifyOfParticles(_pm01, _pm25, _pm10);
+        //}
     }
 }
 

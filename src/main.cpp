@@ -39,6 +39,8 @@ void loop() {
 #include <sstream>
 #include <iomanip>
 
+#include <Arduino.h>
+
 #include "Diagnostics/Logging.h"
 #include "_Build/Version.h"
 
@@ -82,7 +84,7 @@ void wifi_setup()
         delay(500);
     }
 
-    Serial.println("connected.");
+    Serial.println("WiFi connected.");
 }
 
 void setup()
@@ -102,21 +104,46 @@ void setup()
 
     envSensor.setup();
     personSensor.setup();
+    pmSensor.setup();
 
     envMonitor.setup();
     // envLogger.setup();
 
-    envMonitor.addOccupancyObserver(envLogger);
-    envMonitor.addTemperatureObserver(envLogger);
-    envMonitor.addHumidityObserver(envLogger);
+    bool reportInitial(true);
 
-    envMonitor.attachOccupancySensor(personSensor);
+    envMonitor.addTemperatureObserver(envLogger, reportInitial);
+    envMonitor.addHumidityObserver(envLogger, reportInitial);
+    envMonitor.addGasLevelObserver(envLogger, reportInitial);
+    envMonitor.addParticleObserver(envLogger, reportInitial);
+    envMonitor.addOccupancyObserver(envLogger, reportInitial);
+
     envMonitor.attachTemperatureSensor(envSensor);
-    envMonitor.attachHumiditySensor(envSensor);    
+    envMonitor.attachHumiditySensor(envSensor);
+    envMonitor.attachGasLevelSensor(envSensor);
     envMonitor.attachParticleSensor(pmSensor);
+    envMonitor.attachOccupancySensor(personSensor);
 }
 
-void loop() {
+CountdownTimer timer(TimeSpan::fromSeconds(5).millis(), CountdownTimer::State::Running);
+static int loops(0);
+
+void loop()
+{
+    #if 0
+
+    if (timer.hasExpired()) {
+      Log.verboseln("Looped %d times...", loops);
+      timer.restart();
+    }
+
+    ++loops;
+
+    #endif
+
+    envSensor.loop();
+    personSensor.loop();
+    pmSensor.loop();
+
     envMonitor.loop();
 }
 

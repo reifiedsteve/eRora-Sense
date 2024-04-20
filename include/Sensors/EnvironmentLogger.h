@@ -22,19 +22,22 @@ class EnvironmentLogger
 public:
 
     void onTemperature(float temperature) override {
-        Log.infoln("Temperature: %sC", _stringify(temperature).c_str());        
+        Log.infoln("Temperature: %s°C", _stringify(temperature).c_str());        
     }
 
     void onHumidity(float humidity) override {
-        Log.infoln("Humidity: %s%%", _stringify(humidity).c_str());        
+        // Log.infoln("Humidity: %s%%", _stringify(humidity).c_str());        
+        Log.infoln("Humidity: %d%%", (int)(humidity));        
     }
 
     void onAirPressure(float airPressure) override {
-        Log.infoln("Air Pressure: %shPa", _stringify(airPressure).c_str());        
+        // Log.infoln("Air Pressure: %s hPa", _stringify(airPressure).c_str());        
+        Log.infoln("Air Pressure: %d hPa", (int)(airPressure));        
     }
 
     void onGasLevel(float gasLevel) override {
-        Log.infoln("Gas Level: %sKOhms", _stringify(gasLevel).c_str());        
+        // Log.infoln("Gas Level: %sKOhms", _stringify(gasLevel / 1000).c_str());        
+        Log.infoln("Gas Level: %d KOhms", (int)(gasLevel / 1000));        
     }
 
     void onOccupancy(bool occupied) override {
@@ -42,7 +45,7 @@ public:
     }
 
     void onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {
-        Log.infoln("Particles: PM1.0 %d, PM2.5 %d, PM10.0 %d", pm01, pm25, pm10);
+        // Log.infoln("Particles: PM1.0 %d, PM2.5 %d, PM10.0 %d", pm01, pm25, pm10);
     }
 
 private:
