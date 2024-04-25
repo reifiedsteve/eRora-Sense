@@ -2,9 +2,10 @@
 
 #include "TemperatureObserver.h"
 #include "HumidityObserver.h"
-#include "AIrPressureObserver.h"
-#include "GasLevelObserver.h"
-#include "OccupancyObserver.h"
+#include "TVOCObserver.h"
+#include "CO2Observer.h"
+#include "HydrogenObserver.h"
+#include "EthenolObserver.h"
 #include "ParticleObserver.h"
 
 #include "Diagnostics/Logging.h"
@@ -14,9 +15,10 @@
 class EnvironmentLogger
   : public TemperatureObserver
   , public HumidityObserver
-  , public AirPressureObserver
-  , public GasLevelObserver
-  , public OccupancyObserver
+  , public TVOCObserver
+  , public CO2Observer
+  , public HydrogenObserver
+  , public EthenolObserver
   , public ParticleObserver
 {
 public:
@@ -30,18 +32,21 @@ public:
         Log.infoln("Humidity: %d%%", (int)(humidity));        
     }
 
-    void onAirPressure(float airPressure) override {
+    void onTVOC(uint16_t airPressure) override {
         // Log.infoln("Air Pressure: %s hPa", _stringify(airPressure).c_str());        
-        Log.infoln("Air Pressure: %d hPa", (int)(airPressure));        
+        Log.infoln("TVOC: %d ug/m3", (int)(airPressure));        
     }
 
-    void onGasLevel(float gasLevel) override {
-        // Log.infoln("Gas Level: %sKOhms", _stringify(gasLevel / 1000).c_str());        
-        Log.infoln("Gas Level: %d KOhms", (int)(gasLevel / 1000));        
+    void onCO2(uint16_t co2) override {
+        Log.infoln("CO2: %d ug/m3", co2);        
     }
 
-    void onOccupancy(bool occupied) override {
-        Log.infoln("Occupancy: %s", _stringify(occupied).c_str());        
+    void onHydrogen(uint16_t hydrogen) override {
+        Log.infoln("CO2: %d ppm", hydrogen);        
+    }
+
+    void onEthenol(uint16_t ethenol) override {
+        Log.infoln("Ethenol: %d ppm", ethenol);        
     }
 
     void onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {

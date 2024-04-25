@@ -1,17 +1,33 @@
 #pragma once
 
-#if 0
+#if 1
 
 #include <list>
-#include <Adafruit_BME680.h>
+
+#include "Sensors/TemperatureSensor.h"
+#include "Sensors/TemperatureObserver.h"
+
+#include "Sensors/HumiditySensor.h"
+#include "Sensors/HumidityObserver.h"
+
+#include "Sensors/TVOCSensor.h"
+#include "Sensors/TVOCObserver.h"
+
+#include "Sensors/CO2Sensor.h"
+#include "Sensors/CO2Observer.h"
+
+#include "Sensors/ParticleSensor.h"
+#include "Sensors/ParticleObserver.h"
 
 #include "Chronos/TimeSpan.h"
 #include "Diagnostics/Logging.h"
 
+/*
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
 #define BME_CS 10
+*/
 
 #define BME_DEFAULT_I2C_ADDRESS 77
 
@@ -22,37 +38,48 @@ class SmartSensor
 public:
 
     class Observer
+      : public TemperatureObserver
+      , public HumidityObserver
+      , public TVOCObserver
+      , public CO2Observer
+      , public ParticleObserver
     {
         virtual const char* name() = 0;
-
-        virtual void onTemperature(float tempC) {}
-        virtual void onHumidity(float humidityPercent) {}
-
-        virtual uint16_t onPM01() {}
-        virtual uint16_t onPM25() {}
-        virtual uint16_t onPM10() {}
-        
-        virtual void onNoSensor() {}   //  <==-- ????
-
-        /* etc */
     };
 
     static const TimeSpan DefaultInterval; // = TimeSpan(1, TimeSpan::Units::Seconds);
 
     explicit SmartSensor(
-        TwoWire& i2cBus = Wire, 
-        int i2cAddress = BME68X_DEFAULT_ADDRESS,
         const TimeSpan& pollingInterval = DefaultInterval
-    ) , _sensor(i2cBus, bme68x_i2cAddress)
-      , _i2cAddress(i2cAddress)
-      , _pollingInterval(pollingInterval)
-      , _present(false)
+    ) , _pollingInterval(pollingInterval)
       , _timer(pollingInterval)
     {}
+    
+
+    void attachTemperatureSensor(const TemperatureSensor& sensor) {
+
+    }
+
+    void attachHumiditySensor(HumiditySensor& sensor) {
+
+    }
+
+    void attachTVOCSensor(const TVOCSnesor& sensor) {
+
+    }
+
+    void attachCO2Sensor(const CO2Sensor& sensor) {
+
+    }
+
+    void attachParticleSensor(const ParticleSensor& sensor) {
+
+    }
     
     void registerObserver(Observer observer) {
         _observers.push+back(observer);
     }
+
 
     void setup()
     {

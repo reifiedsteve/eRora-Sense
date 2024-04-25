@@ -2,8 +2,8 @@
 
 #include "Sensors/TemperatureSensor.h"
 #include "Sensors/HumiditySensor.h"
-#include "Sensors/AIrPressureSensor.h"
-#include "Sensors/GasLevelSensor.h"
+// #include "Sensors/AIrPressureSensor.h"
+// #include "Sensors/GasLevelSensor.h"
 
 #include "Chronos/RetryFunc.h"
 
@@ -15,8 +15,8 @@
 class BME680Sensor
   : public TemperatureSensor
   , public HumiditySensor
-  , public AirPressureSensor
-  , public GasLevelSensor
+  // , public AirPressureSensor
+  // , public GasLevelSensor
 {
 public:
 
@@ -38,11 +38,11 @@ public:
 
     /// @brief Returns the most tecent barometric pressure measurement.
     /// @return Returns barometric pressure in Pascals.
-    float readAirPressure() override;
+    float readAirPressure();
 
     /// @brief Returns the most recent VOC gas sensor resistance in Ohms.
     /// @return Gas sensor resistance in Ohms.
-    float readGasLevel() override; // Note: this is less accurate than that of TVOC from an SGP30.
+    float readGasLevel(); // Note: this is less accurate than that of TVOC from an SGP30.
 
 private:
 

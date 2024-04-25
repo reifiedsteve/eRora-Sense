@@ -45,7 +45,8 @@ void loop() {
 #include "_Build/Version.h"
 
 #include "Sensors/BME680Sensor.h"
-#include "Sensors/LD2410Sensor.h"
+#include "Sensors/SGP30Sensor.h"
+// #include "Sensors/LD2410Sensor.h"
 #include "Sensors/PMS7003ParticleSensor.h"
 
 #include "Sensors/EnvironmentMonitor.h"
@@ -53,10 +54,12 @@ void loop() {
 
 #include <WiFi.h>
 
+/*
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
 #define BME_CS 10
+*/
 
 #define SEALEVELPRESSURE_HPA (1013.25)
 
@@ -66,8 +69,10 @@ void loop() {
 //Adafruit_BME680 bme(BME_CS); // hardware SPI
 //Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
 
-BME680Sensor envSensor;
-LD2410Sensor personSensor(27);
+BME680Sensor bmeSensor;
+SGP30Sensor sgpSensor;
+
+// LD2410Sensor personSensor(27);
 PMS7003ParticleSensor pmSensor(16, 17, TimeSpan::fromSeconds(5)); // TODO: make say 10 minutes (to avoid sensor wearing out). 
 
 EnvironmentMonitor envMonitor;
@@ -102,8 +107,9 @@ void setup()
 
     wifi_setup();
 
-    envSensor.setup();
-    personSensor.setup();
+    bmeSensor.setup();
+    sgpSensor.setup();
+    // personSensor.setup();
     pmSensor.setup();
 
     envMonitor.setup();
@@ -113,15 +119,19 @@ void setup()
 
     envMonitor.addTemperatureObserver(envLogger, reportInitial);
     envMonitor.addHumidityObserver(envLogger, reportInitial);
-    envMonitor.addGasLevelObserver(envLogger, reportInitial);
+    envMonitor.addTVOCObserver(envLogger, reportInitial);
+    envMonitor.addCO2Observer(envLogger, reportInitial);
+    envMonitor.addHydrogenObserver(envLogger, reportInitial);
+    envMonitor.addEthenolObserver(envLogger, reportInitial);
     envMonitor.addParticleObserver(envLogger, reportInitial);
-    envMonitor.addOccupancyObserver(envLogger, reportInitial);
 
-    envMonitor.attachTemperatureSensor(envSensor);
-    envMonitor.attachHumiditySensor(envSensor);
-    envMonitor.attachGasLevelSensor(envSensor);
+    envMonitor.attachTemperatureSensor(bmeSensor);
+    envMonitor.attachHumiditySensor(bmeSensor);
+    envMonitor.attachTVOCSensor(sgpSensor);
+    envMonitor.attachCO2Sensor(sgpSensor);
+    envMonitor.attachHydrogenSensor(sgpSensor);
+    envMonitor.attachEthenolSensor(sgpSensor);
     envMonitor.attachParticleSensor(pmSensor);
-    envMonitor.attachOccupancySensor(personSensor);
 }
 
 CountdownTimer timer(TimeSpan::fromSeconds(5).millis(), CountdownTimer::State::Running);
@@ -140,9 +150,18 @@ void loop()
 
     #endif
 
-    envSensor.loop();
-    personSensor.loop();
+    bmeSensor.loop();
+
+  // TODO
+  #if 0
+    sgpSensor.setTemperateAndHumidity(
+        bmeSensor.readTemperature(),
+        _calculateAbsoluteHumidity(bmeSensor.readTemperature(), bmeSensor.readHumidity()
+    );
+    #endif
+    sgpSensor.loop();
     pmSensor.loop();
+    // personSensor.loop();
 
     envMonitor.loop();
 }

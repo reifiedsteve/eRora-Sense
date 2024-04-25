@@ -4,21 +4,24 @@
 EnvironmentMonitor::EnvironmentMonitor() 
     : _temperatureSensor(nullptr)
     , _humiditySensor(nullptr)
-    , _airPressureSensor(nullptr)
-    , _gasLevelSensor(nullptr)
-    , _occupancySensor(nullptr)
+    , _tvocSensor(nullptr)
+    , _co2Sensor(nullptr)
+    , _hydrogenSensor(nullptr)
+    , _ethenolSensor(nullptr)
     , _particleSensor(nullptr)
     , _temperatureObservers()
     , _humidityObservers()
-    , _airPressureObservers()
-    , _gasLevelObservers()
-    , _occupancyObservers()
+    , _tvocObservers()
+    , _co2Observers()
+    , _hydrogenObservers()
+    , _ethenolObservers()
     , _particleObservers()
     , _temperature(0.0)
     , _humidity(0.0)
-    , _airPressure(0.0)
-    , _gasLevel(0.0)
-    , _occupied(false)
+    , _tvoc(0)
+    , _co2(0)
+    , _hydrogen(0)
+    , _ethenol(0)
     , _pm01(0)
     , _pm25(0)
     , _pm10(0)
@@ -32,16 +35,20 @@ void EnvironmentMonitor::attachHumiditySensor(HumiditySensor& sensor) {
     _humiditySensor = &sensor;
 }
 
-void EnvironmentMonitor::attachAirPressureSensor(AirPressureSensor& sensor) {
-    _airPressureSensor = &sensor;
+void EnvironmentMonitor::attachTVOCSensor(TVOCSensor& sensor) {
+    _tvocSensor = &sensor;
 }
 
-void EnvironmentMonitor::attachGasLevelSensor(GasLevelSensor& sensor) {
-    _gasLevelSensor = &sensor;
+void EnvironmentMonitor::attachCO2Sensor(CO2Sensor& sensor) {
+    _co2Sensor = &sensor;
 }
 
-void EnvironmentMonitor::attachOccupancySensor(OccupancySensor& sensor) {
-    _occupancySensor = &sensor;
+void EnvironmentMonitor::attachHydrogenSensor(HydrogenSensor& sensor) {
+    _hydrogenSensor = &sensor;
+}
+
+void EnvironmentMonitor::attachEthenolSensor(EthenolSensor& sensor) {
+    _ethenolSensor = &sensor;
 }
 
 void EnvironmentMonitor::attachParticleSensor(ParticleSensor& sensor) {
@@ -58,19 +65,24 @@ void EnvironmentMonitor::addHumidityObserver(HumidityObserver& observer, bool re
     if (reportInitial) observer.onHumidity(_humidity);
 }
 
-void EnvironmentMonitor::addAirPressureObserver(AirPressureObserver& observer, bool reportInitial) {
-    _airPressureObservers.push_back(&observer);
-    if (reportInitial) observer.onAirPressure(_airPressure);
+void EnvironmentMonitor::addTVOCObserver(TVOCObserver& observer, bool reportInitial) {
+    _tvocObservers.push_back(&observer);
+    if (reportInitial) observer.onTVOC(_tvoc);
 }
 
-void EnvironmentMonitor::addGasLevelObserver(GasLevelObserver& observer, bool reportInitial) {
-    _gasLevelObservers.push_back(&observer);
-    if (reportInitial) observer.onGasLevel(_gasLevel);
+void EnvironmentMonitor::addCO2Observer(CO2Observer& observer, bool reportInitial) {
+    _co2Observers.push_back(&observer);
+    if (reportInitial) observer.onCO2(_co2);
 }
 
-void EnvironmentMonitor::addOccupancyObserver(OccupancyObserver& observer, bool reportInitial) {
-    _occupancyObservers.push_back(&observer);
-    if (reportInitial) observer.onOccupancy(_occupied);
+void EnvironmentMonitor::addHydrogenObserver(HydrogenObserver& observer, bool reportInitial) {
+    _hydrogenObservers.push_back(&observer);
+    if (reportInitial) observer.onHydrogen(_hydrogen);
+}
+
+void EnvironmentMonitor::addEthenolObserver(EthenolObserver& observer, bool reportInitial) {
+    _ethenolObservers.push_back(&observer);
+    if (reportInitial) observer.onEthenol(_ethenol);
 }
 
 void EnvironmentMonitor::addParticleObserver(ParticleObserver& observer, bool reportInitial) {
@@ -86,9 +98,10 @@ void EnvironmentMonitor::loop()
 {
     _processTemperature();
     _processHumidity();
-    _processAirPressure();
-    _processGasLevel();
-    _processOccupancy();
+    _processTVOC();
+    _processCO2();
+    _processHydrogen();
+    _processEthenol();
     _processParticles();
 
     // TODO: etc.
@@ -114,32 +127,42 @@ void EnvironmentMonitor::_processHumidity() {
     }
 }
 
-void EnvironmentMonitor::_processAirPressure() {
-    if (_airPressureSensor /* && _airPressureSensor->isAirPressureAvailable() */) {
-        float airPressure(_airPressureSensor->readAirPressure());
-        if (_airPressure != airPressure) { // ??? Or use a defineable tolerance?
-            _airPressure = airPressure;
-            _notifyOfAirPressure(airPressure);
+void EnvironmentMonitor::_processTVOC() {
+    if (_tvocSensor /* && _tvocSensor->isAirPressureAvailable() */) {
+        uint16_t tvoc(_tvocSensor->readTVOC());
+        if (_tvoc != tvoc) { // ??? Or use a defineable tolerance?
+            _tvoc = tvoc;
+            _notifyOfTVOC(tvoc);
         }
     }
 }
 
-void EnvironmentMonitor::_processGasLevel() {
-    if (_gasLevelSensor /* && _gasLevelSensor->isGasLevelAvailable() */) {
-        float gasLevel(_gasLevelSensor->readGasLevel());
-        if (_gasLevel != gasLevel) { // ??? Or use a defineable tolerance?
-            _gasLevel = gasLevel;
-            _notifyOfGasLevel(gasLevel);
+void EnvironmentMonitor::_processCO2() {
+    if (_co2Sensor /* && _co2Sensor->isGasLevelAvailable() */) {
+        float co2(_co2Sensor->readCO2());
+        if (_co2 != co2) { // ??? Or use a defineable tolerance?
+            _co2 = co2;
+            _notifyOfCO2(co2);
         }
     }
 }
 
-void EnvironmentMonitor::_processOccupancy() {
-    if (_occupancySensor /* && _occupancySensor->isOccupancyAvailable() */ ) {
-        bool occupied(_occupancySensor->readOccupancy());
-        if (_occupied != occupied) { // ??? Or use a defineable tolerance?
-            _occupied = occupied;
-            _notifyOfOccupancy(occupied);
+void EnvironmentMonitor::_processHydrogen() {
+    if (_hydrogenSensor /* && _hydrogenSensor->isOccupancyAvailable() */ ) {
+        uint16_t hydrogen(_hydrogenSensor->readHydrogen());
+        if (_hydrogen != hydrogen) { // ??? Or use a defineable tolerance?
+            _hydrogen = hydrogen;
+            _notifyOfHydrogen(hydrogen);
+        }
+    }
+}
+
+void EnvironmentMonitor::_processEthenol() {
+    if (_ethenolSensor /* && _ethenolSensor->isOccupancyAvailable() */ ) {
+        uint16_t ethenol(_ethenolSensor->readEthenol());
+        if (_ethenol != ethenol) { // ??? Or use a defineable tolerance?
+            _ethenol = ethenol;
+            _notifyOfEthenol(ethenol);
         }
     }
 }
@@ -168,21 +191,27 @@ void EnvironmentMonitor::_notifyOfHumidity(float humidity) {
     }
 }
 
-void EnvironmentMonitor::_notifyOfAirPressure(float airPressure) {
-    for (AirPressureObserver* observer : _airPressureObservers) {
-        observer->onAirPressure(airPressure);
+void EnvironmentMonitor::_notifyOfTVOC(uint16_t tvoc) {
+    for (TVOCObserver* observer : _tvocObservers) {
+        observer->onTVOC(tvoc);
     }
 }
 
-void EnvironmentMonitor::_notifyOfGasLevel(float gasLevel) {
-    for (GasLevelObserver* observer : _gasLevelObservers) {
-        observer->onGasLevel(gasLevel);
+void EnvironmentMonitor::_notifyOfCO2(uint16_t co2) {
+    for (CO2Observer* observer : _co2Observers) {
+        observer->onCO2(co2);
     }
 }
 
-void EnvironmentMonitor::_notifyOfOccupancy(bool occupied) {
-    for (OccupancyObserver* observer : _occupancyObservers) {
-        observer->onOccupancy(occupied);
+void EnvironmentMonitor::_notifyOfHydrogen(uint16_t hydrogen) {
+    for (HydrogenObserver* observer : _hydrogenObservers) {
+        observer->onHydrogen(hydrogen);
+    }
+}
+
+void EnvironmentMonitor::_notifyOfEthenol(uint16_t ethenol) {
+    for (EthenolObserver* observer : _ethenolObservers) {
+        observer->onEthenol(ethenol);
     }
 }
 
