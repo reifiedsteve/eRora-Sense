@@ -14,25 +14,30 @@ public:
         Microseconds,
         Milliseconds,
         Seconds,
-        Minutes
+        Minutes,
+        Hours
     };
 
     static const TimeSpan Zero;
     
-    inline static TimeSpan fromMicroseconds(Ticks ms) __attribute__((always_inline)) {
-        return TimeSpan(ms, Units::Microseconds);
+    inline static TimeSpan fromMicroseconds(Ticks us) __attribute__((always_inline)) {
+        return TimeSpan(us, Units::Microseconds);
     }
 
     inline static TimeSpan fromMilliseconds(Ticks ms) __attribute__((always_inline)) {
         return TimeSpan(ms, Units::Milliseconds);
     }
 
-    inline static TimeSpan fromSeconds(Ticks ms) __attribute__((always_inline)) {
-        return TimeSpan(ms, Units::Seconds);
+    inline static TimeSpan fromSeconds(Ticks secs) __attribute__((always_inline)) {
+        return TimeSpan(secs, Units::Seconds);
     }
 
-    inline static TimeSpan fromMinutess(Ticks ms) __attribute__((always_inline)) {
-        return TimeSpan(ms, Units::Minutes);
+    inline static TimeSpan fromMinutes(Ticks mins) __attribute__((always_inline)) {
+        return TimeSpan(mins, Units::Minutes);
+    }
+
+    inline static TimeSpan fromHours(Ticks hours) __attribute__((always_inline)) {
+        return TimeSpan(hours, Units::Hours);
     }
 
     /// @brief Construct the time span. Note that units must be explicitly provided 
@@ -116,6 +121,7 @@ private:
     static const Ticks _ticksPerMillisecond = 1000;
     static const Ticks _ticksPerSecond = 1000000;
     static const Ticks _secondsPerMinute = 60;
+    static const Ticks _minutesPerHour = 60;
 
     Ticks _ticks; // uSecs.
 };
