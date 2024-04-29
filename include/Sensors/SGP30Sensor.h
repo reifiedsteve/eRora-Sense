@@ -19,6 +19,22 @@ class SGP30Sensor
 {
 public:
 
+    /// @brief The returned result of an attempted calibration.
+    enum class CalibrationResult
+    {
+      /// @brief The calibration suceeded.
+      OK, 
+
+      /// @brief The calibration failed as the sensor has not been running a minimum of 12 hours.
+      TooEarly,
+
+      /// @brief The calibration was missing a save function to persist its result.
+      NoSaveFunc,
+
+      /// @brief The saving of calibration data failed.
+      SaveFailed
+    };
+
     /// @brief Initialise the sensor. 
     /// If any currebt calibrated baseline settings have been stored,
     /// then these will be restored and the sensor will be in a calibrated
@@ -50,6 +66,14 @@ public:
     /// @brief Primary processing loop.
     void loop();
 
+    void setAbsoluteHumidity(float tempC, uint32_t absoluteHumidity) {
+      _sensor.setHumidity(absoluteHumidity);
+    }
+
+    void setTemperatureAndRelativeHumidity(float tempC, float relativeHumidityPercent) {
+      _sensor.setHumidity(_calculateAbsoluteHumidity(tempC, relativeHumidityPercent));
+    }
+
     uint16_t readTVOC() override;
     uint16_t readCO2() override; // Actually eCO2 rather than CO2 specifically.
 
@@ -57,11 +81,9 @@ public:
     uint16_t readEthenol() override;
 
     /// @brief Calibrate the sensor. This should be done
-    /// every 7-days. 
-    /// @return True if calibration was performed and persisted
-    /// (Note: will fail if no save function (via setSaveFunc method) was set up).
-    /// (NOte: will also fail if sensor has not been on for at least 12 hour).
-    bool calibrate();
+    /// every 7-days in a "baseline" enviroment (i.e. clean air).
+    /// @return The result of calibration.
+    CalibrationResult calibrate();
 
     /// @brief Determine if the sensor is in a calibrated state.
     /// @return If calibrated then true; otherwise false;
@@ -77,10 +99,11 @@ public:
 
 private:
 
-    bool _saveBaseline();
-    bool _loadBaseline();
+    bool _restoreBaseline();
 
     bool _isSteady() const;
+
+    static uint32_t _calculateAbsoluteHumidity(float temperature, float humidity);
 
     TwoWire& _i2cBus;
 
@@ -92,10 +115,7 @@ private:
 
     Stopwatch _timer;
 
-    uint16_t _tvoc, _eco2;
     Stopwatch::Ticks _timeRead;
-
-    uint16_t _hydrogen, _ethenol;
     Stopwatch::Ticks _timeReadRaw;
 };
 
