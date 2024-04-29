@@ -18,6 +18,9 @@ void TimeSpan::_set(Ticks span, Units units)
         case Units::Minutes:
             _ticks = _ticksPerSecond * _secondsPerMinute * span;
             break;
+        case Units::Hours:
+            _ticks = _ticksPerSecond * _secondsPerMinute * _minutesPerHour * span;
+            break;
         default:
             Log.errorln("TimeSpan: set - unknown units.");
             _ticks = 0;
@@ -40,6 +43,9 @@ void TimeSpan::_setPrecise(double span, Units units)
             break;
         case Units::Minutes:
             _ticks = (Ticks)(_ticksPerSecond * _secondsPerMinute * span);
+            break;
+        case Units::Hours:
+            _ticks = (Ticks)(_ticksPerSecond * _secondsPerMinute * _minutesPerHour * span);
             break;
         default:
             Log.errorln("TimeSpan: set - unknown units.");
@@ -68,6 +74,9 @@ TimeSpan::Ticks TimeSpan::_get(Units units) const
         case Units::Minutes:
             span = _ticks / _ticksPerSecond / _secondsPerMinute;
             break;
+        case Units::Hours:
+            span = _ticks / _ticksPerSecond / _secondsPerMinute / _minutesPerHour;
+            break;
         default:
             Log.errorln("TimeSpan: get - unknown units.");
             break;
@@ -95,6 +104,9 @@ double TimeSpan::_getPrecise(Units units) const
             break;
         case Units::Minutes:
             span = (double) _ticks / _ticksPerSecond / _secondsPerMinute;
+            break;
+        case Units::Hours:
+            span = (double) _ticks / _ticksPerSecond / _secondsPerMinute / _minutesPerHour;
             break;
         default:
             Log.errorln("TimeSpan: get - unknown units.");
