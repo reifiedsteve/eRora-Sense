@@ -15,7 +15,9 @@ BME680Sensor::BME680Sensor()
     , _measured(false)
 {}
 
-void BME680Sensor::setup() {}
+bool BME680Sensor::connected() {
+    return _initialised;
+}
 
 void BME680Sensor::loop()
 {

@@ -1,25 +1,31 @@
 #pragma once
 
-#if 1
+#if 0
 
 #include <list>
 
-#include "Sensors/TemperatureSensor.h"
+//#include "Sensors/TemperatureSensor.h"
 #include "Sensors/TemperatureObserver.h"
 
-#include "Sensors/HumiditySensor.h"
+//#include "Sensors/HumiditySensor.h"
 #include "Sensors/HumidityObserver.h"
 
-#include "Sensors/TVOCSensor.h"
+//#include "Sensors/TVOCSensor.h"
 #include "Sensors/TVOCObserver.h"
 
-#include "Sensors/CO2Sensor.h"
+//#include "Sensors/CO2Sensor.h"
 #include "Sensors/CO2Observer.h"
 
-#include "Sensors/ParticleSensor.h"
+//#include "Sensors/ParticleSensor.h"
 #include "Sensors/ParticleObserver.h"
 
+#include "Sensors/BME680Sensor.h"
+
+#include "PWMFanObserver.h"
+
+#include "Chronos/CountdownTimer.h"
 #include "Chronos/TimeSpan.h"
+
 #include "Diagnostics/Logging.h"
 
 /*
@@ -43,41 +49,18 @@ public:
       , public TVOCObserver
       , public CO2Observer
       , public ParticleObserver
+      , public PWMFanObserver
     {
         virtual const char* name() = 0;
     };
 
     static const TimeSpan DefaultInterval; // = TimeSpan(1, TimeSpan::Units::Seconds);
 
-    explicit SmartSensor(
-        const TimeSpan& pollingInterval = DefaultInterval
-    ) , _pollingInterval(pollingInterval)
-      , _timer(pollingInterval)
-    {}
+    explicit SmartSensor() {}
     
 
-    void attachTemperatureSensor(const TemperatureSensor& sensor) {
-
-    }
-
-    void attachHumiditySensor(HumiditySensor& sensor) {
-
-    }
-
-    void attachTVOCSensor(const TVOCSnesor& sensor) {
-
-    }
-
-    void attachCO2Sensor(const CO2Sensor& sensor) {
-
-    }
-
-    void attachParticleSensor(const ParticleSensor& sensor) {
-
-    }
-    
-    void registerObserver(Observer observer) {
-        _observers.push+back(observer);
+    void registerObserver(Observer* observer) {
+        _observers.push_back(observer);
     }
 
 
@@ -86,13 +69,14 @@ public:
         if (_init()) {
             Log.infoln("BME680 initialised.");
             _sensor.beginReading();
-            _timer.restart();
             _present = true;
         }
 
         else {
             Log.errorln("BME680 failed to initialise - not connected?");
         }
+
+        _timer.restart();
     }
 
     void loop()
@@ -105,7 +89,6 @@ public:
 
                 _processTemperature(_sensor.readTemperature());
                 _processHumidity(_sensor.readHumidity());
-                _sensor.readGas();
 
                 // Read and tell observers.
                 // then...
@@ -148,17 +131,14 @@ private:
         }
     }
 
-    typedef std::list<Observer> _Observers;
+    typedef std::list<Observer*> _Observers;
 
-    Adafruit_BME680 _Sensor;
-    int _i2cAddress;
-
-    TimeSpan _pollingInterval;
+    BME680Sensor _bmeSensor;
     bool _present; 
 
     CountdownTimer _timer;
 
-    _Observers _observer;
+    _Observers _observers;
 };
 
 #endif

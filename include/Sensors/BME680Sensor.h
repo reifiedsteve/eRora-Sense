@@ -22,8 +22,9 @@ public:
 
     BME680Sensor();
 
-    /// @brief Initialise the sensors.
-    void setup();
+    /// @brief Inquire on whether the sensor is connected/operational.
+    /// @return 
+    bool connected();
 
     /// @brief Perform measurements,
     void loop();
