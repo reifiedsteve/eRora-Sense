@@ -50,13 +50,13 @@ public:
 
     /// @brief Provide the function for persisting the calibrated baseline state.
     /// @param func The save function.
-    void setSaveFunc(SaveFunc func) {
+    inline void setSaveFunc(SaveFunc func) __attribute__((always_inline)) {
         _saveFunc = func;
     }
 
     /// @brief Provide the function for restoring the calibarated baseline.
     /// @param func The load function.
-    void setLoadFunc(LoadFunc func) {
+    inline void setLoadFunc(LoadFunc func) __attribute__((always_inline)) {
         _loadFunc = func;
     }
 
@@ -66,11 +66,11 @@ public:
     /// @brief Primary processing loop.
     void loop();
 
-    void setAbsoluteHumidity(float tempC, uint32_t absoluteHumidity) {
+    inline void setAbsoluteHumidity(float tempC, uint32_t absoluteHumidity) __attribute__((always_inline)) {
       _sensor.setHumidity(absoluteHumidity);
     }
 
-    void setTemperatureAndRelativeHumidity(float tempC, float relativeHumidityPercent) {
+    inline void setTemperatureAndRelativeHumidity(float tempC, float relativeHumidityPercent) __attribute__((always_inline)) {
       _sensor.setHumidity(_calculateAbsoluteHumidity(tempC, relativeHumidityPercent));
     }
 
