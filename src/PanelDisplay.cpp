@@ -112,30 +112,37 @@ void PanelDisplay::_showPage(_Page page)
             _display.writeLine(0, "  eRora Sense   ");
             _display.writeLine(1, " TVOC, CO2 & PM  ");
             break;
+
         case _Page::Welcome2:
             _display.writeLine(0, "  eRora Sense   ");
             _display.writeLine(1, "PWM Fan Control ");
             break;
+
         case _Page::TVOC:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
             _display.writeLine(1, _makeTVOCLine());
             break;
+
         case _Page::CO2:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
             _display.writeLine(1, _makeCO2Line());
             break;
+
         case _Page::PM01:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
             _display.writeLine(1, _makePMLine("PM1", _pm01));
             break;
+
         case _Page::PM25:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
             _display.writeLine(1, _makePMLine(std::string("PM2") + _customChar(halfChar), _pm25));
             break;
+
         case _Page::PM10:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
             _display.writeLine(1, _makePMLine("PM10", _pm10));
             break;
+
         default:
             _display.writeLine(0, "     Oops!      ");
             _display.writeLine(1, " I am broken :( ");
