@@ -15,7 +15,13 @@ public:
     {
         typedef ::DayOfWeek DayOfWeek;
 
-        PointInTime() : std::tm() {}
+        PointInTime() 
+          : std::tm()
+        {}
+
+        explicit PointInTime(time_t time) 
+          : std::tm(*(std::localtime(&time)))  // TODO: cater for localtime() returning null.
+        {}
 
         PointInTime(const std::tm& tm) // NOte: deliberately implicit.
           : std::tm(tm)
@@ -51,6 +57,10 @@ public:
 
         inline bool isDaylightSaving() const __attribute__((always_inline)) {
             return tm_isdst;
+        }
+
+        time_t to_time_t() {
+            return mktime(this);
         }
 
         TimeSpan operator-(const PointInTime& rhs) const;
