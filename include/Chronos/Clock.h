@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Chronos/DayOfWeek.h"
+#include "Chronos/TimeSpan.h"
 
 #include <string>
 #include <ctime>
@@ -13,6 +14,12 @@ public:
     struct PointInTime : public std::tm
     {
         typedef ::DayOfWeek DayOfWeek;
+
+        PointInTime() : std::tm() {}
+
+        PointInTime(const std::tm& tm) // NOte: deliberately implicit.
+          : std::tm(tm)
+        {}
 
         inline int day() const __attribute__((always_inline)) {
             return tm_mday;
@@ -45,6 +52,16 @@ public:
         inline bool isDaylightSaving() const __attribute__((always_inline)) {
             return tm_isdst;
         }
+
+        TimeSpan operator-(const PointInTime& rhs) const;
+
+    private:
+
+        // Note: no additional data over-and-above std::tm. By design.
+        // Adding additional data would then require rule-of-five
+        // additions for assignment etc. Though by design this is
+        // semantically and footprint synonymous with std::tm so must
+        // not extend it.
     };
 
     /// @brief Construct a Clock object, optionally providing the name of 
