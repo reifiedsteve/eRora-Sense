@@ -35,5 +35,8 @@ protected:
 
 private:
 
+    static char _mapCharacter(char ch);
+    static bool _inRange(int value, int low, int high);
+
     LiquidCrystal_I2C _lcd;
 };

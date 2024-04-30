@@ -34,7 +34,9 @@ void CharacterMatrix::show()
 
 void CharacterMatrix::_init(size_t width, size_t height) {
     _lines.reserve(height);
-    _lines.resize(height);
+    for (int y = 0; y < height; ++y) {
+        _lines.push_back(std::string(width, ' '));
+    }
 }
 
 void CharacterMatrix::_clear() {
@@ -49,6 +51,7 @@ void CharacterMatrix::_clear() {
 void CharacterMatrix::_setLine(int lineNo, const std::string& text)
 {
     size_t len(text.size());
+    len = ((len < _width) ? len : _width);
 
     for (int x = 0; x < len; ++x) {
         _lines[lineNo][x] = text[x];

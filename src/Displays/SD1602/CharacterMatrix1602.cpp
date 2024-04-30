@@ -27,8 +27,28 @@ void CharacterMatrix1602::off() {
 
 void CharacterMatrix1602::_writeText(int y, int x, const std::string& str) {
     if ((y < height()) && (x < width())) {
+        Log.verboseln("CharacterMatrix1602: at y=%d, x=%d, printing \"%s\"", y, x, str.c_str());
         _lcd.setCursor(x, y);
+        #if 1
+            #if 1
+                size_t len(str.size());
+                Log.verboseln("CharacterMatrix1602: len is %d.", len);
+                for (int i = 0; i < len; ++i) {
+                    char ch(str[i]);
+                    char mapCh(_mapCharacter(ch));
+                    Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
+                    _lcd.print(mapCh);
+                }
+            #else
+                for(char&ch : str) {
+                    char mapCh(_mapCharacter(ch));
+                    Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
+                    _lcd.print(mapCh);
+                }
+            #endif
+        #else
         _lcd.print(str.c_str());
+        #endif
     }
 }
 
@@ -41,6 +61,18 @@ void CharacterMatrix1602::_writeChar(int y, int x, char ch) {
 
 void CharacterMatrix1602::_refresh() {
     // Anything to do here?
+}
+
+char CharacterMatrix1602::_mapCharacter(char ch) {
+    char retCh(ch);
+    if (_inRange(retCh, 128, 135)) {
+        retCh =- 128;
+    }
+    return retCh;
+}
+
+bool CharacterMatrix1602::_inRange(int value, int low, int high) {
+    return ((low <= value) && (value <= high));
 }
 
 const byte CharacterMatrix1602::bitmapAirflow[] = {
