@@ -22,12 +22,15 @@ public:
 
     BME680Sensor();
 
-    /// @brief Inquire on whether the sensor is connected/operational.
-    /// @return 
-    bool connected();
+    /// @brief Perform any post-contruction intiaiisation.
+    void setup();
 
     /// @brief Perform measurements,
     void loop();
+
+    /// @brief Inquire on whether the sensor is connected/operational.
+    /// @return If connected, returns true; otherwise false.
+    bool connected();
 
     /// @brief Returns the most recent ambient temperature measurement. 
     /// @return The temperature in C.
@@ -54,7 +57,8 @@ private:
 
     Adafruit_BME680 _sensor;
 
-    _InitFunc _initialised;
+    // _InitFunc _initialised;
+    bool _initialised;
 
     float _tempC, _humidity, _pressure, _gas;
     bool _measured;

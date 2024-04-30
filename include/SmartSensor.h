@@ -20,8 +20,9 @@
 #include "Sensors/ParticleObserver.h"
 
 #include "Sensors/BME680Sensor.h"
+#include "Sensors/SGP30Sensor.h"
 
-#include "PWMFanObserver.h"
+// #include "PWMFanObserver.h"
 
 #include "Chronos/CountdownTimer.h"
 #include "Chronos/TimeSpan.h"
@@ -48,15 +49,20 @@ public:
       , public HumidityObserver
       , public TVOCObserver
       , public CO2Observer
-      , public ParticleObserver
-      , public PWMFanObserver
+      // , public ParticleObserver
+      // , public PWMFanObserver
     {
         virtual const char* name() = 0;
     };
 
     static const TimeSpan DefaultInterval; // = TimeSpan(1, TimeSpan::Units::Seconds);
 
-    explicit SmartSensor() {}
+    explicit SmartSensor()
+      : _bmeSensor()
+      , _sgpSensor()
+      , _temperature(0)
+      , _relHumidity(0)
+    {}
     
 
     void registerObserver(Observer* observer) {
@@ -67,9 +73,10 @@ public:
     void setup()
     {
         if (_init()) {
+            _bmeSensor.setup();
             Log.infoln("BME680 initialised.");
-            _sensor.beginReading();
-            _present = true;
+            _sgpSensor.setup();
+            Log.infoln("SGP30 initialised.");
         }
 
         else {
@@ -81,21 +88,17 @@ public:
 
     void loop()
     {
-        if (_present)
-        {
-            if (_timer.hasExpired() && _sensor.remainingReadingMillis() == 0) 
-            {
-                _sensor.endReading();
+        float temperature(_bmeSensor.readTemperature());
+        float relHumidity(_bmeSensor.readHumidity());
 
-                _processTemperature(_sensor.readTemperature());
-                _processHumidity(_sensor.readHumidity());
+        if (temperature != _temperature) {  // TODO: add a tolerance.
+            _processTemperature(temperature);
+            _temperature = temperature;
+        }
 
-                // Read and tell observers.
-                // then...
-
-                _sensor.beginReading();
-                _timer.restart();
-            }
+        if (relHumidity != _relHumidity) {  // TODO: add a tolerance.
+            _processHumidity(relHumidity);
+            _relHumidity = relHumidity;
         }
     }
 
@@ -134,7 +137,9 @@ private:
     typedef std::list<Observer*> _Observers;
 
     BME680Sensor _bmeSensor;
-    bool _present; 
+    SGP30Sensor _sgpSensor;
+
+    float _temperature, _relHumidity;
 
     CountdownTimer _timer;
 

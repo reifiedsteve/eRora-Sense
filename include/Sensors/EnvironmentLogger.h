@@ -4,8 +4,6 @@
 #include "HumidityObserver.h"
 #include "TVOCObserver.h"
 #include "CO2Observer.h"
-#include "HydrogenObserver.h"
-#include "EthenolObserver.h"
 #include "ParticleObserver.h"
 
 #include "Diagnostics/Logging.h"
@@ -17,8 +15,6 @@ class EnvironmentLogger
   , public HumidityObserver
   , public TVOCObserver
   , public CO2Observer
-  , public HydrogenObserver
-  , public EthenolObserver
   , public ParticleObserver
 {
 public:
@@ -39,14 +35,6 @@ public:
 
     void onCO2(uint16_t co2) override {
         Log.infoln("CO2: %d ug/m3", co2);        
-    }
-
-    void onHydrogen(uint16_t hydrogen) override {
-        Log.infoln("CO2: %d ppm", hydrogen);        
-    }
-
-    void onEthenol(uint16_t ethenol) override {
-        Log.infoln("Ethenol: %d ppm", ethenol);        
     }
 
     void onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {

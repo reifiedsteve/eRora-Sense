@@ -4,8 +4,6 @@
 
 #include "Sensors/TVOCSensor.h"
 #include "Sensors/CO2Sensor.h"
-#include "Sensors/HydrogenSensor.h"
-#include "Sensors/EthenolSensor.h"
 
 #include "Chronos/Stopwatch.h"
 
@@ -14,8 +12,6 @@
 class SGP30Sensor
   : public TVOCSensor
   , public CO2Sensor
-  , public HydrogenSensor
-  , public EthenolSensor
 {
 public:
 
@@ -66,24 +62,54 @@ public:
     /// @brief Primary processing loop.
     void loop();
 
-    inline void setAbsoluteHumidity(float tempC, uint32_t absoluteHumidity) __attribute__((always_inline)) {
+    /// @brief Provide the sensor with the current absolute humidity (mg/m^3).
+    // While this is not strictly necessary, doing so will yield more accurate sensor readings. 
+    /// (Note: an alternatvie method allows the caller to instead provide temperature
+    /// and *relative* humidity, from which absolute humidity can be approcimated). 
+    /// @param absoluteHumidity The absolute humidity in mg/m^3.
+    inline void setAbsoluteHumidity(uint32_t absoluteHumidity) __attribute__((always_inline)) {
       _sensor.setHumidity(absoluteHumidity);
     }
 
+    /// @brief Provide the sensor with the current temperature and relative humidity.
+    /// Note: this is an alternative to provide absolute humidity (but serves the same purpose).
+    /// @param tempC 
+    /// @param relativeHumidityPercent 
     inline void setTemperatureAndRelativeHumidity(float tempC, float relativeHumidityPercent) __attribute__((always_inline)) {
       _sensor.setHumidity(_calculateAbsoluteHumidity(tempC, relativeHumidityPercent));
     }
 
+    /// @brief Read the current TVOC (as parts-per-billion, ppm).
+    /// @return The TVOC level (in ppb, range 0-60,000).
     uint16_t readTVOC() override;
+
+    /// @brief Read the current eCO2 level (in parts-per-million).
+    /// @return The CO2 level (in ppm, range 400-60,000). 
     uint16_t readCO2() override; // Actually eCO2 rather than CO2 specifically.
 
-    uint16_t readHydrogen() override;
-    uint16_t readEthenol() override;
+
+    /// @brief Read the current H2 (hydrogen molecule) level (raw values).
+    /// These numbers are raw sensor values and meaningless without
+    /// knowing their units or how they relate to actual gas presence
+    /// (e.g. do they even respond linearly w.r.t gas amount?).
+    /// @return H2 level (raw value from sensor).
+    uint16_t readHydrogen();
+
+    /// @brief Read the current ethernol level (raw values).
+    /// These numbers are raw sensor values and meaningless without
+    /// knowing their units or how they relate to actual gas presence
+    /// (e.g. do they even respond linearly w.r.t gas amount?).
+    /// @return H2 level (raw value from sensor).
+    uint16_t readEthenol();
 
     /// @brief Calibrate the sensor. This should be done
     /// every 7-days in a "baseline" enviroment (i.e. clean air).
     /// @return The result of calibration.
     CalibrationResult calibrate();
+
+    /// @brief Determine if the sensor is even connected.
+    /// @return If connected, returns true; otherwise false;
+    bool isConnected() const;
 
     /// @brief Determine if the sensor is in a calibrated state.
     /// @return If calibrated then true; otherwise false;
@@ -106,6 +132,7 @@ private:
     static uint32_t _calculateAbsoluteHumidity(float temperature, float humidity);
 
     TwoWire& _i2cBus;
+    bool _connected;
 
     SaveFunc _saveFunc;
     LoadFunc _loadFunc;

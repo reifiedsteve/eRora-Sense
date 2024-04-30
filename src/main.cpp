@@ -450,54 +450,52 @@ CountdownTimer timer(TimeSpan::fromMilliseconds(15000).millis(), CountdownTimer:
 static int loops(0);
 
 const char* _charMicro() {
-  return "\xE4";
+    return "\xE4";
 }
 
-std::string _makeTopLine()
-{
-  std::stringstream ss;
-  ss << "\x02" << "23.7" << "\x03" << "C " << "\x06" << "43%" << " " << "\x01" "10";
-  return ss.str();
+std::string _makeTopLine() {
+    std::stringstream ss;
+    ss << "\x02" << "23.7" << "\x03" << "C " << "\x06" << "43%" << " " << "\x01" "10";
+    return ss.str();
 }
 
-std::string _makeCO2Line()
-{
-  std::stringstream ss;
-  // ss << "CO\x04" << " " << "3218" << " \07" << "g/m\05 "; // << (char)0; // " \x00";
-  ss << "CO\x04" << " " << "3218" << _charMicro() << "g/m\05  "; // << (char)0; // " \x00";
-  std::string str(ss.str());
-  //str.push_back(0); // Smiley.  :)
-  return str;
+std::string _makeCO2Line() {
+    std::stringstream ss;
+    // ss << "CO\x04" << " " << "3218" << " \07" << "g/m\05 "; // << (char)0; // " \x00";
+    ss << "CO\x04" << " " << "3218" << _charMicro() << "g/m\05  "; // << (char)0; // " \x00";
+    std::string str(ss.str());
+    //str.push_back(0); // Smiley.  :)
+    return str;
 }
 
 std::string _makeH2Line()
 {
-  std::stringstream ss;
-  // ss << "H\x04" << " " << "1305" << " \07" << "g/m\05 "; //  << (char)0;// " \x00";
-  ss << "H\x04" << " " << "1305" << " \07" << "g/m\05 "; //  << (char)0;// " \x00";
-  std::string str(ss.str());
-  //str.push_back(0); // Smiley.  :)
-  return str;
+    std::stringstream ss;
+    // ss << "H\x04" << " " << "1305" << " \07" << "g/m\05 "; //  << (char)0;// " \x00";
+    ss << "H\x04" << " " << "1305" << " \07" << "g/m\05 "; //  << (char)0;// " \x00";
+    std::string str(ss.str());
+   //str.push_back(0); // Smiley.  :)
+    return str;
 }
 
 std::string _makeTVOCLine()
 {
-  std::stringstream ss;
-  // ss << "H\x04" << " " << "1305" << " ppm "; // << (char)0; // " \x00";
-  ss << "TVOC" << " " << "41305" << "ppm  "; // << (char)0; // " \x00";
-  std::string str(ss.str());
-  //str.push_back(0); // Smiley.  :)
-  return str;
+    std::stringstream ss;
+    // ss << "H\x04" << " " << "1305" << " ppm "; // << (char)0; // " \x00";
+    ss << "TVOC" << " " << "41305" << "ppm  "; // << (char)0; // " \x00";
+    std::string str(ss.str());
+    //str.push_back(0); // Smiley.  :)
+    return str;
 }
 
 std::string _makePM1Line()
 {
-  std::stringstream ss;
-  // ss << "H\x04" << " " << "1305" << " ppm "; // << (char)0; // " \x00";
-  ss << "H\x04" << " " << "11305" << "ppm    "; // << (char)0; // " \x00";
-  std::string str(ss.str());
-  //str.push_back(0); // Smiley.  :)
-  return str;
+    std::stringstream ss;
+    // ss << "H\x04" << " " << "1305" << " ppm "; // << (char)0; // " \x00";
+    ss << "H\x04" << " " << "11305" << "ppm    "; // << (char)0; // " \x00";
+    std::string str(ss.str());
+    //str.push_back(0); // Smiley.  :)
+    return str;
 }
 
 uint8_t code = 0;

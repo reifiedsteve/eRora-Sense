@@ -4,6 +4,7 @@
 
 SGP30Sensor::SGP30Sensor(TwoWire& i2cBus)
   : _i2cBus(i2cBus)
+  , _connected(false)
   , _saveFunc()
   , _loadFunc()
   , _sensor()
@@ -14,8 +15,10 @@ SGP30Sensor::SGP30Sensor(TwoWire& i2cBus)
 {}
 
 void SGP30Sensor::setup() {
-    _sensor.begin(&_i2cBus);
-    _restoredCalibration = _restoreBaseline();
+    _connected = _sensor.begin(&_i2cBus);
+    if (_connected) {
+        _restoredCalibration = _restoreBaseline();
+    }
 }
 
 void SGP30Sensor::loop()
@@ -44,7 +47,7 @@ uint16_t SGP30Sensor::readHydrogen() {
 uint16_t SGP30Sensor::readEthenol() {
     return _sensor.rawEthanol;
 }
-    
+
 SGP30Sensor::CalibrationResult SGP30Sensor::calibrate()
 {
     // Sensor needs calibrating...
@@ -76,6 +79,10 @@ SGP30Sensor::CalibrationResult SGP30Sensor::calibrate()
     }
 
     return result;
+}
+
+bool SGP30Sensor::isConnected() const {
+    return _connected;
 }
 
 bool SGP30Sensor::isCalibrated() const {
