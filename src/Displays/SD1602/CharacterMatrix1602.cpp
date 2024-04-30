@@ -27,22 +27,22 @@ void CharacterMatrix1602::off() {
 
 void CharacterMatrix1602::_writeText(int y, int x, const std::string& str) {
     if ((y < height()) && (x < width())) {
-        Log.verboseln("CharacterMatrix1602: at y=%d, x=%d, printing \"%s\"", y, x, str.c_str());
+        //Log.verboseln("CharacterMatrix1602: at y=%d, x=%d, printing \"%s\"", y, x, str.c_str());
         _lcd.setCursor(x, y);
         #if 1
             #if 1
                 size_t len(str.size());
-                Log.verboseln("CharacterMatrix1602: len is %d.", len);
+                //Log.verboseln("CharacterMatrix1602: len is %d.", len);
                 for (int i = 0; i < len; ++i) {
                     char ch(str[i]);
                     char mapCh(_mapCharacter(ch));
-                    Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
+                    //Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
                     _lcd.print(mapCh);
                 }
             #else
                 for(char&ch : str) {
                     char mapCh(_mapCharacter(ch));
-                    Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
+                    //Log.verboseln("CharacterMatrix1602: printing %d (from %d).", (int)mapCh, (int)ch);
                     _lcd.print(mapCh);
                 }
             #endif
@@ -66,7 +66,7 @@ void CharacterMatrix1602::_refresh() {
 char CharacterMatrix1602::_mapCharacter(char ch) {
     char retCh(ch);
     if (_inRange(retCh, 128, 135)) {
-        retCh =- 128;
+        retCh -= 128;
     }
     return retCh;
 }
@@ -139,6 +139,17 @@ const byte CharacterMatrix1602::bitmapWaterDrop[] = {
     0b11111,
     0b01110,
     0b00000
+};
+
+const byte CharacterMatrix1602::bitmapHalf[] = {
+    0b10000,
+    0b10000,
+    0b10110,
+    0b10001,
+    0b00110,
+    0b00100,
+    0b00111,
+    0b00000,
 };
 
 const byte CharacterMatrix1602::bitmapHappy[] = {

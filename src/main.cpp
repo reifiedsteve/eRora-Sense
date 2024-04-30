@@ -58,6 +58,8 @@ void loop() {
 
 #include "Displays/SD1602/CharacterMatrix1602.h"
 
+#include "PanelDisplay.h"
+
 /*
 #define BME_SCK 13
 #define BME_MISO 12
@@ -83,13 +85,14 @@ EnvironmentMonitor envMonitor;
 EnvironmentLogger envLogger;
 
 //#if 0
-CharacterMatrix1602 lcd;
+//CharacterMatrix1602 lcd;
 //#else
 //LiquidCrystal_I2C _lcd(0x27, 16, 2);
 //#endif
 
 /// ScannerI2C scanner;
 
+PanelDisplay display;
 
 void wifi_setup()
 {
@@ -337,7 +340,17 @@ void setup()
     os << "Built: " << BUILD_DATE << " " << BUILD_TIME;
     Log.infoln(os.str().c_str());
 
-# if 1
+#if 1
+    display.setup();
+    display.onTemperature(23.734566);
+    display.onHumidity(34.5837);
+    display.onTVOC(34583);
+    display.onCO2(12345);
+    display.onParticleReading(0, 12, 49);
+    display.onParticleReading(1000, 1000, 1000);
+#endif
+
+# if 0
     lcd.setup();
     lcd.writeLine(0, "Line 1");
     lcd.writeLine(1, "ABCDEFGHIJKLMNOPQSTUVWXYZ");
@@ -443,7 +456,6 @@ void setup()
     envMonitor.attachParticleSensor(pmSensor);
 
     #endif
-
 }
 
 CountdownTimer timer(TimeSpan::fromMilliseconds(15000).millis(), CountdownTimer::State::Running);
@@ -500,6 +512,7 @@ std::string _makePM1Line()
 
 uint8_t code = 0;
 uint8_t page = 0;
+CountdownTimer timer2(500, CountdownTimer::State::Running);
 
 void loop()
 {
@@ -514,6 +527,13 @@ void loop()
         line2 = ss.str();
     }
 
+#if 1
+    if (timer2.hasExpired()) {
+        display.loop();
+        timer2.restart();
+    }
+#endif
+
 #if 0
     if (timer.hasExpired()) {
         Log.verboseln("Loops: %d", loops);
@@ -525,7 +545,7 @@ void loop()
     }
 #endif
 
-    lcd.show();   // DOES THS CRASH IT ????!!!? (Maybe fixed --> ctor() resize!)
+    ////lcd.show();   // DOES THS CRASH IT ????!!!? (Maybe fixed --> ctor() resize!)
 
 #if 0
     if (timer.hasExpired())

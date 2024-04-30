@@ -14,6 +14,7 @@ public:
     static const byte bitmapSubscriptTwo[];
     static const byte bitmapSuperscriptThree[];
     static const byte bitmapWaterDrop[];
+    static const byte bitmapHalf[];
     static const byte bitmapHappy[];
     static const byte bitmapAmbivalent[] ;
     static const byte bitmapSad[] ;
