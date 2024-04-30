@@ -145,7 +145,7 @@ void PanelDisplay::_showPage(_Page page)
 
         default:
             _display.writeLine(0, "     Oops!      ");
-            _display.writeLine(1, " I am broken :( ");
+            _display.writeLine(1, " <Unknown page> ");
             break;
     }
     
