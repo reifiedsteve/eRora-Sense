@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "PlatformIO",
+			"task": "Update",
+			"problemMatcher": [
+				"$platformio"
+			],
+			"label": "PlatformIO: Update",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}

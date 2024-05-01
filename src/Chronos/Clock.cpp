@@ -7,6 +7,15 @@
 
 // Timezones info: https://www.timeanddate.com/time/zones/
 
+TimeSpan Clock::PointInTime::operator-(const Clock::PointInTime& rhs) const {
+    const std::tm& tm1(*this);
+    const std::tm& tm2(rhs);
+    time_t start(std::mktime((const_cast<std::tm*>(&tm1)))); // mktime should take const arg!
+    time_t end(std::mktime(const_cast<std::tm*>(&tm2)));
+    long int interval(difftime(end, start));
+    return TimeSpan::fromSeconds(interval);
+}
+
 Clock::Clock(const std::string& ntpServer, const std::string& tz)
     : _ntpServer(ntpServer)
     , _tz(tz)
@@ -80,10 +89,25 @@ bool Clock::_tryGetPointInTime(PointInTime& when)
     // NOTE: If this times out, then probably not connected to the internet.
     // (Did you remember to do that? You need to for access to an NTP server!)
 
-    if (getLocalTime(&now, _timeout)) {     // Note: getLocalTime *may* not respect timezones/dst etc. use localtime().
+    #if 0
+
+    // TODO: test this then replace getLocalTime() use with it!
+    time_t nowTime(std::time(nullptr));
+    std::tm* nowTm = std::localtime(&nowTime);
+    if (nowTm) {
+        now = *nowTm;
         when = now;
         got = true;
     }
+
+    #else
+
+    if (getLocalTime(&now, _timeout)) {     // TODO: Note: getLocalTime *may* not respect timezones/dst etc. use localtime().
+        when = now;
+        got = true;
+    }
+
+    #endif
 
     return got;
 }

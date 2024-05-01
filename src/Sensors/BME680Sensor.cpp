@@ -5,13 +5,20 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
-void BME680Sensor::setup()
-{
-    _initialised = _init();
+BME680Sensor::BME680Sensor()
+    : _sensor()
+    // , _initialised([this]{return _init();}, TimeSpan::fromSeconds(5))
+    , _initialised(false)
+    , _tempC()
+    , _humidity()
+    , _pressure()
+    , _gas()
+    , _measured(false)
+{}
 
-    if (_initialised) {
-        _sensor.beginReading();
-    }
+void BME680Sensor::setup() {
+    // Nothing to do here!?
+    _initialised = _init();
 }
 
 void BME680Sensor::loop()
@@ -19,6 +26,10 @@ void BME680Sensor::loop()
     if (_initialised) {
         _readMeasurements();
     }
+}
+
+bool BME680Sensor::connected() {
+    return _initialised;
 }
 
 float BME680Sensor::readTemperature() {
@@ -59,14 +70,24 @@ bool BME680Sensor::_init()
     return ok;    
 }
 
-void BME680Sensor::_readMeasurements() {
-    if (_sensor.remainingReadingMillis() <= 0) { 
+void BME680Sensor::_readMeasurements()
+{
+    int millisUntilReady(_sensor.remainingReadingMillis());
+
+    if (millisUntilReady == 0) { 
         _sensor.endReading();
+        Log.verboseln("BME680 read.");
         _tempC =_sensor.readTemperature();
         _humidity = _sensor.readHumidity();
         _pressure = _sensor.readPressure();
         _gas = _sensor.readGas();
         _measured = true;
+        _sensor.beginReading();
+    }
+    
+    // A return of -1 means no read had been instigated.
+
+    else if (millisUntilReady = -1) {
         _sensor.beginReading();
     }
 }

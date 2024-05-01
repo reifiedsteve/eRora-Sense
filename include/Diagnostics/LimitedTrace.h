@@ -6,7 +6,7 @@ class LimitedTrace
 {
 public:
 
-    LimitedTrace(int maxNoOfReports)
+    explicit LimitedTrace(int maxNoOfReports)
       : _maxNoOfReports(maxNoOfReports)
       , _noOfReports(maxNoOfReports)
     {}

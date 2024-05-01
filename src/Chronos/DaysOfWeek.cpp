@@ -58,7 +58,7 @@ void DaysOfWeek::_clrBit(uint8_t& val, int bitNo) {
 }
 
 void DaysOfWeek::_writeBit(uint8_t& val, int bitNo, bool set) {
-    uint8_t oldVal(val);
+    // uint8_t oldVal(val);
     if (set) {
         _setBit(val, bitNo); 
     } else {
