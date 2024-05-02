@@ -350,6 +350,8 @@ void setup()
     display.onParticleReading(1000, 1000, 1000);
 #endif
 
+    bmeSensor.setup();
+
 # if 0
     lcd.setup();
     lcd.writeLine(0, "Line 1");
@@ -512,7 +514,7 @@ std::string _makePM1Line()
 
 uint8_t code = 0;
 uint8_t page = 0;
-CountdownTimer timer2(500, CountdownTimer::State::Running);
+CountdownTimer displayTimer(500, CountdownTimer::State::Running);
 
 void loop()
 {
@@ -527,10 +529,20 @@ void loop()
         line2 = ss.str();
     }
 
+    if (bmeSensor.connected()) {
+        bmeSensor.loop();
+        float tempC = bmeSensor.readTemperature();
+        float relHum = bmeSensor.readHumidity();
+        tempC = tempC - 4.0;
+        relHum = relHum + 6.0;
+        display.onTemperature(tempC);
+        display.onHumidity(relHum);
+    }
+
 #if 1
-    if (timer2.hasExpired()) {
+    if (displayTimer.hasExpired()) {
         display.loop();
-        timer2.restart();
+        displayTimer.restart();
     }
 #endif
 

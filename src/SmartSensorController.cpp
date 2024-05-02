@@ -6,29 +6,35 @@ SmartSensorController::SmartSensorController(SmartSensor& sensor)
 {}
 
 void SmartSensorController::loop() {
-    _executeCommands(commands.size());
+    _executeCommands(_commands.size());
 }
 
-void SmartSensorController::_switchOn(bool on) {
+void SmartSensorController::_switchPower(bool on) {
     _deferCommand([this, on]() {
-        _sensor.switchOn(on);
+        //_sensor.switchPower(on);
     });
 }
 
-void SmartSensorController::_selectNextPage() {
+void SmartSensorController::_togglePower() {
     _deferCommand([this]() {
-        _sensor.selectNextPage();
+        //_sensor.togglePower();
+    });
+}
+
+void SmartSensorController::_selectNextDisplayMode() {
+    _deferCommand([this]() {
+        //_sensor.selectNextMode();
     });
 }
 
 void SmartSensorController::_setFanSpeed(uint8_t speed) {
     _deferCommand([this, speed]() {
-        _sensor.setFanSpeed(speed]);
+        //_sensor.setFanSpeed(speed]);
     });
 }
 
 void SmartSensorController::_deferCommand(_Command command) {
-    _commands.queue(command);
+    _commands.push(command);
 }
 
 void SmartSensorController::_executeCommands(size_t n) {

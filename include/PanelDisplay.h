@@ -52,7 +52,15 @@ public:
     
 private:
 
+    enum class _Mode {
+        Overview,
+        Details,
+        Settings,
+        About
+    };
+
     enum class _Page {
+        Welcome0,
         Welcome1,
         Welcome2,
         TVOC,
@@ -60,6 +68,7 @@ private:
         PM01,
         PM25,
         PM10,
+        CalibrationState,
         Broken
     };
 
@@ -72,6 +81,7 @@ private:
     std::string _makeTVOCLine();
     std::string _makeCO2Line();
     std::string _makePMLine(const std::string& label, const uint16_t pmLevel);
+    std::string _makeCalibrationStateText();
 
     void _makeFaceHappy();
     void _makeFaceAmbivalent();

@@ -23,13 +23,15 @@ void BME680Sensor::setup() {
 
 void BME680Sensor::loop()
 {
-    if (_initialised) {
+    if (!_initialised) {
+        _initialised = _init();
+    } else {
         _readMeasurements();
     }
 }
 
 bool BME680Sensor::connected() {
-    return _initialised;
+    return _initialised || _init();
 }
 
 float BME680Sensor::readTemperature() {
@@ -87,7 +89,7 @@ void BME680Sensor::_readMeasurements()
     
     // A return of -1 means no read had been instigated.
 
-    else if (millisUntilReady = -1) {
+    else if (millisUntilReady == -1) {
         _sensor.beginReading();
     }
 }

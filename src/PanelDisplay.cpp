@@ -5,7 +5,7 @@
 
 PanelDisplay::PanelDisplay() 
     : _display()
-    , _page(_Page::Welcome1)
+    , _page(_Page::Welcome0)
     , _tempC(0)
     , _relHumidity(0)
     , _tvoc(0)
@@ -76,6 +76,9 @@ PanelDisplay::_Page PanelDisplay::_pageAfter(_Page page)
     _Page nextPage(_Page::Welcome1);
 
     switch (page) {
+        case _Page::Welcome0:
+            nextPage = _Page::Welcome1;
+            break;
         case _Page::Welcome1:
             nextPage = _Page::Welcome2;
             break;
@@ -108,6 +111,11 @@ void PanelDisplay::_showPage(_Page page)
 {
     switch (page)
     {
+        case _Page::Welcome0:
+            _display.writeLine(0, "   Air Quality   ");
+            _display.writeLine(1, "   Measurement   ");
+            break;
+
         case _Page::Welcome1:
             _display.writeLine(0, "  eRora Sense   ");
             _display.writeLine(1, " TVOC, CO2 & PM  ");
@@ -143,6 +151,10 @@ void PanelDisplay::_showPage(_Page page)
             _display.writeLine(1, _makePMLine("PM10", _pm10));
             break;
 
+        case _Page::CalibrationState:
+            _display.writeLine(0, "  Calibration   ");
+            _display.writeLine(1, _makeCalibrationStateText());
+
         default:
             _display.writeLine(0, "     Oops!      ");
             _display.writeLine(1, " <Unknown page> ");
@@ -156,7 +168,7 @@ void PanelDisplay::_showPage(_Page page)
 
 std::string PanelDisplay::_makeTemperatureHumidityFanSpeedText() {
     std::ostringstream ss;
-    ss << _customChar(thermometerChar) << std::setprecision(3) << std::setw(4) << _tempC << _customChar(degreesChar) << "C";
+    ss << _customChar(thermometerChar) << std::setw(4) << std::fixed << std::setprecision(1) << _tempC << _customChar(degreesChar) << "C";
     ss << " ";
     ss << _customChar(waterDropChar) << std::setw(2) << (int)_relHumidity << "%";
     ss << " ";
@@ -192,6 +204,11 @@ std::string PanelDisplay::_makePMLine(const std::string& label, const uint16_t p
     _makeFaceAmbivalent();
     ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
+}
+
+std::string PanelDisplay::_makeCalibrationStateText() {
+    // TODO: impl properly.
+    return " OK for 138:22  ";
 }
 
 std::string PanelDisplay::_fixTo(const std::string& str, size_t fixedLen) {

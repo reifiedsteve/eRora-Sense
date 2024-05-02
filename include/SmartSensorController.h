@@ -15,10 +15,14 @@ public:
 
 protected:
 
-    void _switchOn(bool on);
-    void _selectNextPage();
+    void _switchPower(bool on);
+    void _togglePower();
+
+    void _selectNextDisplayMode();
+
     /// Set the fan to speed 0-10, 0 being fully off, 10 being full speed.
     void _setFanSpeed(uint8_t speed);
+    bool _adjustFanSpeed(int delta);
 
 private:
 

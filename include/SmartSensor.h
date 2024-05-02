@@ -1,6 +1,6 @@
 #pragma once
 
-#if 0
+#if 1
 
 #include <list>
 
@@ -72,24 +72,25 @@ public:
 
     void setup()
     {
-        if (_init()) {
-            _bmeSensor.setup();
-            Log.infoln("BME680 initialised.");
-            _sgpSensor.setup();
-            Log.infoln("SGP30 initialised.");
-        }
+        _bmeSensor.setup();
+        Log.infoln("BME680 initialised.");
 
-        else {
-            Log.errorln("BME680 failed to initialise - not connected?");
-        }
+        _sgpSensor.setup();
+        Log.infoln("SGP30 initialised.");
 
         _timer.restart();
     }
 
     void loop()
     {
+        _bmeSensor.loop();
+
         float temperature(_bmeSensor.readTemperature());
         float relHumidity(_bmeSensor.readHumidity());
+
+        // Apply calibration offsets.
+        temperature = temperature - 4.0;
+        relHumidity = relHumidity + 6.0;
 
         if (temperature != _temperature) {  // TODO: add a tolerance.
             _processTemperature(temperature);
@@ -104,33 +105,17 @@ public:
 
 private:
 
-    bool _init()
-    {
-        bool ok(_sensor.begin(_i2cAddress));
-
-        if (ok) {
-            // Set up oversampling and filter initialization
-            _sensor.setTemperatureOversampling(BME680_OS_8X);
-            _sensor.setHumidityOversampling(BME680_OS_2X);
-            _sensor.setPressureOversampling(BME680_OS_4X);
-            _sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
-            _sensor.setGasHeater(320, 150); // 320*C for 150 ms        
-        }
-
-        return ok;    
-    }
-
-    void _processTemperature(float tempC) {
-        if (_tempC != tempC) {
-            _tempC = tempC;
-            _informOfTemperature(_tempC);
+    void _processTemperature(float temperature) {
+        if (_temperature != temperature) {
+            _temperature = temperature;
+            //_informOfTemperature(_temperature);
         }
     }
 
-    void _processHumidity(float humidity) {        
-        if (_humidity != humidity) {
-            _humidity = humidity;
-            _informOfHumidity(_sensor.readHumidity());
+    void _processHumidity(float relHumidity) {        
+        if (_relHumidity != relHumidity) {
+            _relHumidity = relHumidity;
+            //_informOfHumidity(_sensor.readHumidity());
         }
     }
 
