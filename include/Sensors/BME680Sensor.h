@@ -7,6 +7,9 @@
 
 #include "Chronos/RetryFunc.h"
 
+#include "Chronos/CountdownTimer.h"
+#include "Chronos/TimeSpan.h"
+
 #include "Diagnostics/Logging.h"
 
 #include <Adafruit_Sensor.h>
@@ -20,7 +23,7 @@ class BME680Sensor
 {
 public:
 
-    BME680Sensor();
+    explicit BME680Sensor(const TimeSpan& sampleInterval = TimeSpan::fromSeconds(5));
 
     /// @brief Perform any post-contruction intiaiisation.
     void setup();
@@ -59,6 +62,7 @@ private:
 
     // _InitFunc _initialised;
     bool _initialised;
+    CountdownTimer _timer;
 
     float _tempC, _humidity, _pressure, _gas;
     bool _measured;

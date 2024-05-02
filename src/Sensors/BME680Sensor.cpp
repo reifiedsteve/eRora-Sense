@@ -5,10 +5,14 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
-BME680Sensor::BME680Sensor()
+// Useful info: technical datasheet for the Bodch BME680:
+// https://www.bosch-sensortec.com/media/boschsensortec/downloads/handling_soldering_mounting_instructions/bst-bme680-hs000.pdf
+
+BME680Sensor::BME680Sensor(const TimeSpan& sampleInterval)
     : _sensor()
     // , _initialised([this]{return _init();}, TimeSpan::fromSeconds(5))
     , _initialised(false)
+    , _timer(sampleInterval.millis())
     , _tempC()
     , _humidity()
     , _pressure()
@@ -19,11 +23,18 @@ BME680Sensor::BME680Sensor()
 void BME680Sensor::setup() {
     // Nothing to do here!?
     _initialised = _init();
+    if (_initialised) {
+        _timer.start();
+    }
 }
 
 void BME680Sensor::loop()
 {
-    if (_initialised) {
+    // Performing samples frequently reduces the lifetime of the sensor,
+    // hence why we only sample periodically rather than flat-out.
+
+    if (_initialised && _timer.hasExpired()) {
+        _timer.restart();
         _readMeasurements();
     }
 }
