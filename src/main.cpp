@@ -533,8 +533,8 @@ void loop()
         bmeSensor.loop();
         float tempC = bmeSensor.readTemperature();
         float relHum = bmeSensor.readHumidity();
-        tempC = tempC - 4.0;
-        relHum = relHum + 6.0;
+        tempC = tempC - 5.5;
+        relHum = relHum + 8.0;
         display.onTemperature(tempC);
         display.onHumidity(relHum);
     }
