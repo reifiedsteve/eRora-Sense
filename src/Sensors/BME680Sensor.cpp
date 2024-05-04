@@ -33,11 +33,10 @@ void BME680Sensor::loop()
     // Performing samples frequently reduces the lifetime of the sensor,
     // hence why we only sample periodically rather than flat-out.
 
-    if (!_initialised && _timer.hasExpired()) {
-        _timer.restart();
-        _initialised = _init();
-    } else {
-        _readMeasurements();
+    if (_timer.hasExpired()) {
+        if (_readMeasurements()) {
+            _timer.restart();
+        }
     }
 }
 
@@ -66,7 +65,7 @@ bool BME680Sensor::_init()
     bool ok(_sensor.begin());
 
     if (ok) {
-        // Set up oversampling and filter initialization
+        // Set up oversampling and filter initialization.
         _sensor.setTemperatureOversampling(BME680_OS_8X);
         _sensor.setHumidityOversampling(BME680_OS_2X);
         _sensor.setPressureOversampling(BME680_OS_4X);
@@ -83,8 +82,10 @@ bool BME680Sensor::_init()
     return ok;    
 }
 
-void BME680Sensor::_readMeasurements()
+bool BME680Sensor::_readMeasurements()
 {
+    bool gotNewSample(false);
+
     int millisUntilReady(_sensor.remainingReadingMillis());
 
     if (millisUntilReady == 0) { 
@@ -103,4 +104,6 @@ void BME680Sensor::_readMeasurements()
     else if (millisUntilReady == -1) {
         _sensor.beginReading();
     }
+
+    return gotNewSample;
 }

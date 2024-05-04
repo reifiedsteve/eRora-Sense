@@ -56,7 +56,7 @@ private:
     typedef RetryFunc _InitFunc;
 
     bool _init();
-    void _readMeasurements();
+    bool _readMeasurements();
 
     Adafruit_BME680 _sensor;
 
