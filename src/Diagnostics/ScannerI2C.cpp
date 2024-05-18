@@ -64,7 +64,19 @@ void ScannerI2C::_scan(TwoWire& wire)
                 Serial.print("0");
             }
             Serial.println(address, HEX);
-        }    
+        }   
+
+        /***
+        else {
+            Serial.print("##### Error ");
+            Serial.print(error);
+            Serial.print(" at address 0x");
+            if (address < 16) {
+                Serial.print("0");
+            }
+            Serial.println(address, HEX);
+        } 
+        ***/
     }
 
     if (nDevices == 0) {

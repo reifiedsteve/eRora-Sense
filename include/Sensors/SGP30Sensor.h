@@ -81,11 +81,11 @@ public:
 
     /// @brief Read the current TVOC (as parts-per-billion, ppm).
     /// @return The TVOC level (in ppb, range 0-60,000).
-    uint16_t readTVOC() override;
+    float readTVOC() override;
 
     /// @brief Read the current eCO2 level (in parts-per-million).
     /// @return The CO2 level (in ppm, range 400-60,000). 
-    uint16_t readCO2() override; // Actually eCO2 rather than CO2 specifically.
+    float readCO2() override; // Actually eCO2 rather than CO2 specifically.
 
 
     /// @brief Read the current H2 (hydrogen molecule) level (raw values).

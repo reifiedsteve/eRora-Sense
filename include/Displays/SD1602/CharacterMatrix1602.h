@@ -15,9 +15,12 @@ public:
     static const byte bitmapSuperscriptThree[];
     static const byte bitmapWaterDrop[];
     static const byte bitmapHalf[];
+    static const byte bitmapVeryHappy[];
     static const byte bitmapHappy[];
-    static const byte bitmapAmbivalent[] ;
-    static const byte bitmapSad[] ;
+    static const byte bitmapAmbivalent[];
+    static const byte bitmapSad[];
+    static const byte bitmapVerySad[];
+    static const byte bitmapScared[];
 
     explicit CharacterMatrix1602(uint8_t i2cAddr = 0x27, uint8_t cols = 16, uint8_t rows = 2);
 

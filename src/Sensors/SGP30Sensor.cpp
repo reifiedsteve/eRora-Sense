@@ -32,11 +32,11 @@ void SGP30Sensor::loop()
     }
 }
 
-uint16_t SGP30Sensor::readTVOC() {
+float SGP30Sensor::readTVOC() {
     return _sensor.TVOC;
 }
 
-uint16_t SGP30Sensor::readCO2() { // Actuallu eCO2 rather than CO2 specifically.
+float SGP30Sensor::readCO2() { // Actuallu eCO2 rather than CO2 specifically.
     return _sensor.eCO2;
 }
 

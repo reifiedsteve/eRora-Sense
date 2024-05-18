@@ -63,7 +63,7 @@ void CharacterMatrix::_setLine(int lineNo, const std::string& text)
 
     _dirty = true;
 
-    Log.verboseln("Line %d, setting text to \"%s\"", lineNo, _lines[lineNo].c_str());
+    // Log.verboseln("Line %d, setting text to \"%s\"", lineNo, _lines[lineNo].c_str());
 }
 
 void CharacterMatrix::_writeLine(int lineNo, const std::string& text) {

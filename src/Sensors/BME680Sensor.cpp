@@ -2,11 +2,24 @@
 
 #include "Diagnostics/Logging.h"
 
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BME680.h>
-
 // Useful info: technical datasheet for the Bodch BME680:
 // https://www.bosch-sensortec.com/media/boschsensortec/downloads/handling_soldering_mounting_instructions/bst-bme680-hs000.pdf
+
+static bsec_virtual_sensor_t sensorList[13] = {
+    BSEC_OUTPUT_IAQ,
+    BSEC_OUTPUT_STATIC_IAQ,
+    BSEC_OUTPUT_CO2_EQUIVALENT,
+    BSEC_OUTPUT_BREATH_VOC_EQUIVALENT,
+    BSEC_OUTPUT_RAW_TEMPERATURE,
+    BSEC_OUTPUT_RAW_PRESSURE,
+    BSEC_OUTPUT_RAW_HUMIDITY,
+    BSEC_OUTPUT_RAW_GAS,
+    BSEC_OUTPUT_STABILIZATION_STATUS,
+    BSEC_OUTPUT_RUN_IN_STATUS,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_TEMPERATURE,
+    BSEC_OUTPUT_SENSOR_HEAT_COMPENSATED_HUMIDITY,
+    BSEC_OUTPUT_GAS_PERCENTAGE
+};
 
 BME680Sensor::BME680Sensor(const TimeSpan& sampleInterval)
     : _sensor()
@@ -16,16 +29,22 @@ BME680Sensor::BME680Sensor(const TimeSpan& sampleInterval)
     , _tempC()
     , _humidity()
     , _pressure()
-    , _gas()
+    , _tvoc(0)
+    , _eCO2(0)
+    , _iaq(0)
     , _measured(false)
+    , _tempOffset(0.0)
+    , _humidityOffset(0.0)
 {}
 
 void BME680Sensor::setup() {
-    // Nothing to do here!?
     _initialised = _init();
+    _timer.start();
+    /*
     if (_initialised) {
         _timer.start();
     }
+    */
 }
 
 void BME680Sensor::loop()
@@ -33,77 +52,171 @@ void BME680Sensor::loop()
     // Performing samples frequently reduces the lifetime of the sensor,
     // hence why we only sample periodically rather than flat-out.
 
-    if (_timer.hasExpired()) {
+    //if (_timer.hasExpired()) {     // <==-- No! Need to keep calling _readMeasurements() to keep sensor working.
+        //Log.verboseln("Trying to read measurements...");
         if (_readMeasurements()) {
-            _timer.restart();
+            _measured = true;
+            //_timer.restart();
         }
-    }
+    //}
 }
 
 bool BME680Sensor::connected() {
     return _initialised || _init();
 }
 
+/*
+bool BME680Sensor::isTemperatureSensorReady() {
+    return true;
+}
+*/
+
+bool BME680Sensor::isTemperatureAvailable() {
+    return _measured;
+}
+
 float BME680Sensor::readTemperature() {
-    return _tempC;
+    return _measured ? (_tempC + _tempOffset) : 0.0;
+}
+
+/*
+bool BME680Sensor::isHumiditySensorReady() {
+    return true;
+}
+*/
+
+bool BME680Sensor::isHumidityAvailable() {
+    return _measured;
 }
 
 float BME680Sensor::readHumidity() {
-    return _humidity;
+    return _measured ? (_humidity + _humidityOffset) : 0.0;
+}
+
+/*
+bool BME680Sensor::isAirPressureSensorReady() {
+    return true; // TODO: check this is appropriate.
+}
+*/
+
+bool BME680Sensor::isAirPressureAvailable() {
+    return _measured;
 }
 
 float BME680Sensor::readAirPressure() {
-    return _pressure;
+    return _pressure / 100.0; // Return hPa, not Pa.
 }
 
-float BME680Sensor::readGasLevel() {
-    return _gas;
+/*
+bool BME680Sensor::isTVOCSensorReady() {
+    return _sensor.runInStatus > 0.0;
+}
+*/
+
+bool BME680Sensor::isTVOCAvailable() {
+    return (_sensor.runInStatus > 0.0) && _measured;
+}
+
+float BME680Sensor::readTVOC() {
+    return _tvoc;
+}
+
+/*
+bool BME680Sensor::isCO2SensorReady() {
+    return _sensor.runInStatus > 0.0;
+}
+*/
+
+bool BME680Sensor::isCO2Available() {
+    return (_sensor.runInStatus > 0.0) && _measured;
+}
+
+float BME680Sensor::readCO2() {
+    return _eCO2;
+}
+
+/***
+bool BME680Sensor::isIAQSensorReady() {
+    return _sensor.runInStatus > 0.0;
+}
+***/
+
+bool BME680Sensor::isIAQAvailable() {
+    return (_sensor.runInStatus > 0.0) && _measured;
+}
+
+float BME680Sensor::readIAQ() {
+    return _iaq;
 }
 
 bool BME680Sensor::_init()
 {
-    bool ok(_sensor.begin());
+    _sensor.begin(BME68X_I2C_ADDR_LOW, Wire);
+    _sensor.updateSubscription(sensorList, 13, BSEC_SAMPLE_RATE_LP);
 
-    if (ok) {
-        // Set up oversampling and filter initialization.
-        _sensor.setTemperatureOversampling(BME680_OS_8X);
-        _sensor.setHumidityOversampling(BME680_OS_2X);
-        _sensor.setPressureOversampling(BME680_OS_4X);
-        _sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
-        _sensor.setGasHeater(320, 150); // 320*C for 150 ms        
-        Log.infoln("BME680 connected.");
-        _sensor.beginReading();
-    }
+    Log.infoln("BME6800: Version %d.%d.%d.%d", _sensor.version.major, _sensor.version.minor, _sensor.version.major_bugfix, _sensor.version.minor_bugfix);
 
-    else {
-        Log.errorln("BME680 not connected!");
-    }
-
-    return ok;    
+    return true;
 }
 
 bool BME680Sensor::_readMeasurements()
 {
-    bool gotNewSample(false);
+    bool gotNewReadings(_sensor.run());
 
-    int millisUntilReady(_sensor.remainingReadingMillis());
+    // Log.verboseln("BME680 stable: %s.", String(_sensor.stabStatus));
+    // Log.verboseln("BME680 run-in: %s.", String(_sensor.runInStatus));
 
-    if (millisUntilReady == 0) { 
-        _sensor.endReading();
-        Log.verboseln("BME680 read.");
-        _tempC =_sensor.readTemperature();
-        _humidity = _sensor.readHumidity();
-        _pressure = _sensor.readPressure();
-        _gas = _sensor.readGas();
-        _measured = true;
-        _sensor.beginReading();
+    if (gotNewReadings)
+    {
+        /*
+        Bsec& iaqSensor(_sensor);
+        String output("BME680: ");
+        output += ", " + String(iaqSensor.iaq);
+        output += ", " + String(iaqSensor.iaqAccuracy);
+        output += ", " + String(iaqSensor.staticIaq);
+        output += ", " + String(iaqSensor.co2Equivalent);
+        output += ", " + String(iaqSensor.breathVocEquivalent);
+        output += ", " + String(iaqSensor.rawTemperature);
+        output += ", " + String(iaqSensor.pressure);
+        output += ", " + String(iaqSensor.rawHumidity);
+        output += ", " + String(iaqSensor.gasResistance);
+        output += ", " + String(iaqSensor.stabStatus);
+        output += ", " + String(iaqSensor.runInStatus);
+        output += ", " + String(iaqSensor.temperature);
+        output += ", " + String(iaqSensor.humidity);
+        output += ", " + String(iaqSensor.gasPercentage);
+        Log.verboseln("%s", output.c_str());
+        */
+
+        _tempC = _sensor.temperature;
+        _humidity = _sensor.humidity;
+        _pressure = _sensor.pressure;
+
+        Log.verboseln("BSEC status: %d", (int)_sensor.bsecStatus);
+        Log.verboseln("BME68x status: %d", (int)_sensor.bme68xStatus);
+
+        Log.verboseln("Temperature: %d degC", (int)_tempC);
+        Log.verboseln("Humidity: %d pc", (int)_humidity);
+        Log.verboseln("Pressure: %d Pa", (int)_pressure);
+
+        bool gasSensorReady(_sensor.runInStatus > 0.0); // 0.0 is not ready, 1.0 is ready.
+        Log.verboseln("Gas sensor ready: %s", gasSensorReady ? "Yes" : "No");
+
+        if (gasSensorReady) 
+        {
+            _eCO2 = _sensor.co2Equivalent;
+            _tvoc = _sensor.breathVocEquivalent;
+            _iaq = _sensor.iaq;
+
+            Log.verboseln("eCO2: %d ppm", (int)_eCO2);
+            Log.verboseln("TVOC (ppb): %d", (int)_tvoc);
+            Log.verboseln("IAQ: %d", (int)_iaq);
+        }
     }
-    
-    // A return of -1 means no read had been instigated.
 
-    else if (millisUntilReady == -1) {
-        _sensor.beginReading();
+    else {
+        // Log.verboseln("BME680,run returns false");
     }
 
-    return gotNewSample;
+    return gotNewReadings;
 }

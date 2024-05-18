@@ -1,15 +1,21 @@
 #include <sstream>
 #include <iomanip>
 
+#include <cmath>
+
 #include "PanelDisplay.h"
 
 PanelDisplay::PanelDisplay() 
-    : _display()
+    : SmartSensorObserver("panel-display")
+    , _display()
     , _page(_Page::Welcome0)
     , _tempC(0)
     , _relHumidity(0)
     , _tvoc(0)
     , _co2(0)
+    , _airPressure(0)
+    , _iaqAvailable(false)
+    , _iaq(0)
     , _pm01(0)
     , _pm25(0)
     , _pm10(0)
@@ -31,10 +37,27 @@ void PanelDisplay::loop()
 {
     if (_timer.hasExpired()) {
         _page = _pageAfter(_page);
+        _showPage(_page);
         _timer.restart();
     }
 
-    _showPage(_page);
+    // _showPage(_page); //  Doing this here is useful for real-time updates - e.g. for fan speed.
+}
+
+void PanelDisplay::onSwitchOnOff(bool on) {
+
+}
+
+void PanelDisplay::onFanSpeed(int speed) {
+    _fanSpeed = speed;
+}
+
+void PanelDisplay::onBacklightBrightness(uint8_t brightness) {
+
+}
+
+void PanelDisplay::onBacklightColour(uint8_t hue, uint8_t sat) {
+    
 }
 
 void PanelDisplay::onTemperature(float temperature) {
@@ -45,12 +68,24 @@ void PanelDisplay::onHumidity(float humidity){
     _relHumidity = humidity;
 }
 
-void PanelDisplay::onTVOC(uint16_t tvoc) {
+void PanelDisplay::onTVOC(float tvoc) {
     _tvoc = tvoc;
 }
 
-void PanelDisplay::onCO2(uint16_t co2) {
+void PanelDisplay::onCO2(float co2) {
     _co2 = co2;
+}
+
+void PanelDisplay::onAirPressure(float hPa) {
+    _airPressure = hPa;
+}
+
+void PanelDisplay::onIAQAvailability(bool available) {
+    _iaqAvailable = available;
+}
+
+void PanelDisplay::onIAQ(float iaq) {
+    _iaq = iaq;
 }
 
 void PanelDisplay::onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {
@@ -75,31 +110,41 @@ PanelDisplay::_Page PanelDisplay::_pageAfter(_Page page)
 {
     _Page nextPage(_Page::Welcome1);
 
-    switch (page) {
+    switch (page) 
+    {
         case _Page::Welcome0:
             nextPage = _Page::Welcome1;
             break;
+
         case _Page::Welcome1:
-            nextPage = _Page::Welcome2;
+            nextPage = _Page::IAQ;
             break;
-        case _Page::Welcome2:
+
+        case _Page::IAQ:
             nextPage = _Page::TVOC;
             break;
+
         case _Page::TVOC:
             nextPage = _Page::CO2;
             break;
+
         case _Page::CO2:
-            nextPage = _Page::PM01;
+            // nextPage = _Page::PM01;
+            nextPage = _Page::IAQ;
             break;
+
         case _Page::PM01:
             nextPage = _Page::PM25;
             break;
+
         case _Page::PM25:
             nextPage = _Page::PM10;
             break;
+
         case _Page::PM10:
-            nextPage = _Page::TVOC;
+            nextPage = _Page::IAQ;
             break;
+
         default:
             break;
     }
@@ -112,18 +157,18 @@ void PanelDisplay::_showPage(_Page page)
     switch (page)
     {
         case _Page::Welcome0:
-            _display.writeLine(0, "   Air Quality   ");
-            _display.writeLine(1, "   Measurement   ");
+            _display.writeLine(0, "  eRora Sense   ");
+            _display.writeLine(1, "  Air Quality   ");
             break;
 
         case _Page::Welcome1:
             _display.writeLine(0, "  eRora Sense   ");
-            _display.writeLine(1, " TVOC, CO2 & PM  ");
+            _display.writeLine(1, "PWM Fan Control ");
             break;
 
-        case _Page::Welcome2:
-            _display.writeLine(0, "  eRora Sense   ");
-            _display.writeLine(1, "PWM Fan Control ");
+        case _Page::IAQ:
+            _display.writeLine(0, "  Air Quality   ");
+            _display.writeLine(1, _makeIAQLine());
             break;
 
         case _Page::TVOC:
@@ -178,31 +223,45 @@ std::string PanelDisplay::_makeTemperatureHumidityFanSpeedText() {
 
 std::string PanelDisplay::_makeTVOCLine() {
     std::ostringstream ss;
-    ss << "TVOC " << _tvoc << "ppb";
-    std::string str(_fixTo(ss.str(), _display.width() - 1));
-    Log.verboseln("### TVOC: '%s' len %d", str.c_str(), str.size());
+    ss << "TVOC " << (int)_tvoc << "ppm";
+    std::string str(_fixLeft(ss.str(), _display.width() - 1));
+    // Log.verboseln("### TVOC: '%s' len %d", str.c_str(), str.size());
     std::ostringstream ss2;
+    _selectFaceIcon(_determineTVOCCategory(_tvoc));
     ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
 }
 
 std::string PanelDisplay::_makeCO2Line() {
     std::ostringstream ss;
-    ss << "CO" << _customChar(subscriptTwoChar) << " " << _co2 << "ppm";
-    std::string str(_fixTo(ss.str(), _display.width() - 1));
+    ss << "eCO" << _customChar(subscriptTwoChar) << " " << (int)_co2 << "ppm";
+    std::string str(_fixLeft(ss.str(), _display.width() - 1));
     std::stringstream ss2;
-    _makeFaceHappy();
+    _selectFaceIcon(_determineCO2Category(_co2));
     ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
+}
+
+std::string PanelDisplay::_makeIAQLine() {
+    std::ostringstream ss;
+    if (_iaqAvailable) {
+        ss <<  (int)_iaq << ": " << _makeIAQDescription((int)_iaq);
+    } else {
+        ss << "(measuring...)";
+    }
+    std::string str(ss.str());
+    // TODO: Room for an emotion face on RHS!
+    // return _fixLeft(str, _width);
+    return _fixCentre(str, _width);
 }
 
 std::string PanelDisplay::_makePMLine(const std::string& label, const uint16_t pmLevel) {
     std::ostringstream ss;
     ss << label << " " << pmLevel << microChar << "g/m" << _customChar(superscriptThreeChar);
-    std::string str(_fixTo(ss.str(), _display.width() - 1));
+    std::string str(_fixLeft(ss.str(), _display.width() - 1));
     std::stringstream ss2;
-    _makeFaceAmbivalent();
-    ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
+    // _makeFaceAmbivalent();
+    // ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
 }
 
@@ -211,13 +270,184 @@ std::string PanelDisplay::_makeCalibrationStateText() {
     return " OK for 138:22  ";
 }
 
-std::string PanelDisplay::_fixTo(const std::string& str, size_t fixedLen) {
-    size_t len(str.size());
-    std::string fixedStr = (len < fixedLen) ? (str + std::string(fixedLen - len, ' ')) : str.substr(0, fixedLen);
-    Log.verboseln("#### Fixed '%s' to len %d -> '%s'", str.c_str(), fixedLen, fixedStr.c_str());
-    return fixedStr;
+std::string PanelDisplay::_makeIAQDescription(int iaq) {
+    return _makeIAQDescription(_determineIAQCategory(iaq));
 }
 
+std::string PanelDisplay::_makeIAQDescription(_Category cat)
+{
+    std::string desc("?");
+
+    switch (cat)
+    {
+        case _Category::Good:
+            desc = "Good";
+            break;
+
+        case _Category::Moderate:
+            desc = "Moderate";
+            break;
+
+        case _Category::Sensitive:
+            desc = "Sensitive";
+            break;
+
+        case _Category::Unhealthy:
+            desc = "Unhealthy";
+            break;
+
+        case _Category::VeryUnhealthy:
+            desc = "Very Bad"; // limited in characters!
+            break;
+
+        case _Category::Hazardous:
+            desc = "Hazardous";
+            break;
+
+        default:
+            desc = "???";
+            break;
+    }
+
+    return desc;
+}
+
+PanelDisplay::_Category PanelDisplay::_determineIAQCategory(int iaq)
+{
+    _Category cat(_Category::Good);
+
+    if (iaq <=50) {
+        cat = _Category::Good;
+    } 
+    
+    else if (iaq <= 100) {
+        cat = _Category::Moderate;
+    } 
+    
+    else if (iaq <= 150) {
+        cat = _Category::Sensitive;
+    } 
+    
+    else if (iaq <= 200) {
+        cat = _Category::Unhealthy;
+    } 
+    
+    else if (iaq <= 300) {
+        cat = _Category::VeryUnhealthy;
+    } 
+    
+    else {
+        cat = _Category::Hazardous;
+    }
+
+    return cat;
+}
+
+PanelDisplay::_Category PanelDisplay::_determineCO2Category(int co2)
+{
+    _Category cat(_Category::Good);
+
+    if (co2 <=650) {
+        cat = _Category::Good;
+    } 
+    
+    else if (co2 <= 1500) {
+        cat = _Category::Moderate;
+    } 
+    
+    else if (co2 <= 2000) {
+        cat = _Category::Sensitive;
+    } 
+    
+    else if (co2 <= 2500) {
+        cat = _Category::Unhealthy;
+    } 
+    
+    else if (co2 <= 5000) {
+        cat = _Category::VeryUnhealthy;
+    } 
+    
+    else {
+        cat = _Category::Hazardous;
+    }
+
+    return cat;
+}
+
+PanelDisplay::_Category PanelDisplay::_determineTVOCCategory(int tvoc)
+{
+    _Category cat(_Category::Good);
+
+    if (tvoc <= 15) {
+        cat = _Category::Good;
+    } 
+    
+    else if (tvoc <= 25) {
+        cat = _Category::Moderate;
+    } 
+    
+    else if (tvoc <= 50) {
+        cat = _Category::Sensitive;
+    } 
+    
+    else if (tvoc <= 75) {
+        cat = _Category::Unhealthy;
+    } 
+    
+    else if (tvoc <= 100) {
+        cat = _Category::VeryUnhealthy;
+    } 
+    
+    else {
+        cat = _Category::Hazardous;
+    }
+
+    return cat;
+}
+
+void PanelDisplay::_selectFaceIcon(_Category cat)  {
+    _display.defineCustomChar(faceChar, const_cast<byte*>(_getFaceIconBitmap(cat)));
+}
+
+const byte* PanelDisplay::_getFaceIconBitmap(_Category cat) 
+{
+    const byte* bitmap;
+
+    switch (cat)
+    {
+        case _Category::Good:
+            bitmap = Display::bitmapVeryHappy;
+            break;
+
+        case _Category::Moderate:
+            bitmap = Display::bitmapHappy;
+            break;
+
+        case _Category::Sensitive:
+            bitmap = Display::bitmapAmbivalent;
+            break;
+
+        case _Category::Unhealthy:
+            bitmap = Display::bitmapSad;
+            break;
+
+        case _Category::VeryUnhealthy:
+            bitmap = Display::bitmapVerySad;
+            break;
+
+        case _Category::Hazardous:
+            bitmap = Display::bitmapScared;
+            break;
+
+        default:
+            bitmap = Display::bitmapAmbivalent;
+            break;
+    }
+
+    return bitmap;
+}
+
+/*
 void PanelDisplay::_makeFaceHappy() {
     _display.defineCustomChar(faceChar, const_cast<byte*>(Display::bitmapHappy));
 }
@@ -228,6 +458,22 @@ void PanelDisplay::_makeFaceAmbivalent() {
 
 void PanelDisplay::_makeFaceSad() {
     _display.defineCustomChar(faceChar, const_cast<byte*>(Display::bitmapSad));
+}
+*/
+
+std::string PanelDisplay::_fixLeft(const std::string& str, size_t fixedLen) {
+    size_t len(std::min(str.size(),  fixedLen));
+    size_t padRight = fixedLen - len;
+    std::string fixedStr = str.substr(0, len) + std::string(padRight, ' ');
+    return fixedStr;
+}
+
+std::string PanelDisplay::_fixCentre(const std::string& str, size_t fixedLen) {
+    size_t len(std::min(str.size(),  fixedLen));
+    size_t pdLeft = (fixedLen - len) / 2;
+    size_t padRight = fixedLen - len - pdLeft;
+    std::string fixedStr = std::string(pdLeft, ' ') + str.substr(0, len) + std::string(padRight, ' ');
+    return fixedStr;
 }
 
 char PanelDisplay::_customChar(char ch) {

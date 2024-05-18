@@ -1,50 +1,81 @@
 #include "SmartSensorController.h"
 
-SmartSensorController::SmartSensorController(SmartSensor& sensor)
-    : _sensor(sensor)
-    , _commands()
-{}
+SmartSensorController::SmartSensorController(SmartSensor& sensor, const char* controllerName, const TimeSpan& executionInterval) 
+  : _sensor(sensor)
+  , _controllerTimer(executionInterval.millis())
+  , _operations()
+{}    
 
-void SmartSensorController::loop() {
-    _executeCommands(_commands.size());
+
+void SmartSensorController::setup() {
+    _initInputs();
 }
 
-void SmartSensorController::_switchPower(bool on) {
-    _deferCommand([this, on]() {
+void SmartSensorController::loop() {
+    _serviceInputs();
+    _executeDeferredOperations(_operations.size());
+}
+
+void SmartSensorController::_switchOnOff(bool on) {
+    _scheduleOperation([this, on]() {
         //_sensor.switchPower(on);
     });
 }
 
-void SmartSensorController::_togglePower() {
-    _deferCommand([this]() {
+void SmartSensorController::_toggleOnOff() {
+    _scheduleOperation([this]() {
         //_sensor.togglePower();
     });
 }
 
 void SmartSensorController::_selectNextDisplayMode() {
-    _deferCommand([this]() {
+    _scheduleOperation([this]() {
         //_sensor.selectNextMode();
     });
 }
 
 void SmartSensorController::_setFanSpeed(uint8_t speed) {
-    _deferCommand([this, speed]() {
+    _scheduleOperation([this, speed]() {
         //_sensor.setFanSpeed(speed]);
     });
 }
 
-void SmartSensorController::_deferCommand(_Command command) {
-    _commands.push(command);
+void SmartSensorController::_scheduleOperation(_Operation command) {
+    _operations.push(command);
 }
 
-void SmartSensorController::_executeCommands(size_t n) {
-    for (int i = 0; i < n; ++i) {
-        _executeNextCommand();
+size_t SmartSensorController::_executeDeferredOperations(size_t n)
+{
+    bool executing(true);
+    int i(0);
+
+    do {
+        executing = executing && _executeDeferredOperation();
+    } while (executing && (i++ <= n));
+
+    return i;
+}
+
+bool SmartSensorController::_executeDeferredOperation() {
+    bool executed(false);
+    if (_operations.size() > 0) {
+        _Operation command(_operations.front());
+        _operations.pop();
+        command();
+        executed = true;
     }
+    return executed;
 }
 
-void SmartSensorController::_executeNextCommand() {
-    _Command command(_commands.front());
-    _commands.pop();
-    command();
+bool SmartSensorController::_allDigits(const std::string& str) {
+    return str.find_first_not_of("0123456789") == std::string::npos;
 }
+
+bool SmartSensorController::_meansTrue(const std::string& str) {
+    return (str == "true") || (str == "on") || (str == "enable") || (str == "enabled") || (str == "1");
+}
+
+bool SmartSensorController::_meansFalse(const std::string& str) {
+    return (str == "false") || (str == "off") || (str == "disable")|| (str == "disabled") || (str == "0");
+}
+
