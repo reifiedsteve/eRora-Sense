@@ -1,3 +1,5 @@
+#if 1
+
 #include <SPIFFS.h>
 
 #include "MyEroraSensor.h"
@@ -88,6 +90,21 @@ unsigned getRestartReasonBlinkCode()
     return blinks;
 }
 
+void scanWiFiNetworks() {
+    Serial.println("Scanning WiFi networks...");
+
+    int n = WiFi.scanNetworks();
+    for (int i = 0; i < n; i++) {
+        Serial.print("Network ");
+        Serial.print(i + 1);
+        Serial.print(": ");
+        Serial.print(WiFi.SSID(i));
+        Serial.print(" - RSSI: ");
+        Serial.println(WiFi.RSSI(i));
+    }
+    Serial.println("Scan completed.");
+}
+
 void setup() 
 {
     Serial.begin(115200);
@@ -108,7 +125,8 @@ void setup()
     #endif
 
     initFileSystem();
-
+    scanWiFiNetworks();
+    
     myErora = new MyEroraSensor(blinker);
     myErora->setup();
 
@@ -127,3 +145,5 @@ void loop() {
         blinker.loop();
     #endif
 }
+
+#endif
