@@ -4,8 +4,8 @@
 #include "SmartSensorStateObserver.h"
 
 class SmartSensorObserver
-  : public SmartSensorStateObserver
-  , public SmartSensorMeasurementObserver
+  : public SmartSensorMeasurementObserver
+  , public SmartSensorStateObserver
 {
 public:
 
