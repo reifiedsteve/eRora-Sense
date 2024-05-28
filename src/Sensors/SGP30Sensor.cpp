@@ -1,3 +1,5 @@
+#if 0
+
 #include "Sensors/SGP30Sensor.h"
 #include "Chronos/TimeSpan.h"
 #include "Diagnostics/Logging.h"
@@ -130,3 +132,5 @@ uint32_t SGP30Sensor::_calculateAbsoluteHumidity(float temperature, float humidi
     const uint32_t absoluteHumidityScaled = static_cast<uint32_t>(1000.0f * absoluteHumidity); // [mg/m^3]
     return absoluteHumidityScaled;
 }
+
+#endif
