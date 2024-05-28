@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <vector>
 
@@ -24,15 +25,22 @@ public:
     typedef MQTTConnection::Topic Topic;
     typedef MQTTConnection::WildcardMatches WildcardMatches;
     
+    enum class Format {
+        Plain,
+        JSON
+    };
+
     MQTTSensorController(
         SmartSensor& smartSensor,
         // UserSettings& userSettings,
         const TimeSpan& loopInterval,
-        MQTTConnection& mqtt
+        MQTTConnection& mqtt,
+        Format format = Format::Plain
     ) : SmartSensorController(smartSensor, "mqtt-controller", loopInterval)
       , SmartSensorObserver("mqtt-controller") 
       , _sensorTopicPrefix("")
       , _mqtt(mqtt)
+      , _format(format)
       , _retainState(true)
     {}
 
@@ -63,11 +71,11 @@ public:
     }
 
     void onTemperature(float temperature) override {
-        _publishEntity("temperature", (int)temperature);
+        _publishEntity("temperature", _toPayload(temperature, 1));
     }
 
     void onHumidity(float humidity) override {
-        _publishEntity("humidity", (int)humidity);
+        _publishEntity("humidity", _toPayload(humidity, 1));
     }
 
     void onAirPressure(float hPa) override {
@@ -96,12 +104,16 @@ private:
     {
         _mqtt.setup();
 
-        _mqtt.subscribe(_sensorTopicPrefix + _Topic("power"), [this](const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) -> bool {
+        _mqtt.subscribe(_sensorTopicPrefix + _Topic("power/set"), [this](const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) -> bool {
             return _handlePowerOnOffMessage(topic, wildcardMatches, payload);
         });
 
-        _mqtt.subscribe(_sensorTopicPrefix + _Topic("fan"), [this](const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) -> bool {
+        _mqtt.subscribe(_sensorTopicPrefix + _Topic("fan/set"), [this](const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) -> bool {
             return _handleSetFanSpeedMessage(topic, wildcardMatches, payload);
+        });
+
+        _mqtt.subscribe(_sensorTopicPrefix + _Topic("fan-mode/set"), [this](const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) -> bool {
+            return _handleSetFanModeMessage(topic, wildcardMatches, payload);
         });
     }
 
@@ -110,7 +122,7 @@ private:
     }
 
     void _publishEntity(const char* entityName, bool state) {
-        _publishEntity(entityName, std::string(state ? "on" : "off"));
+        _publishEntity(entityName, _toPayload(state));
     }
 
     void _publishEntity(const char* entityName, int value) {
@@ -118,7 +130,7 @@ private:
     }
 
     void _publishEntity(const char* entityName, const std::string& payload) {
-        _mqtt.publish(_sensorTopicPrefix + _Topic(entityName), payload, _retainState);
+        _mqtt.publish(_sensorTopicPrefix + _Topic(entityName), _terminate(payload), _retainState);
     }
 
     typedef MQTTConnection::Topic _Topic;
@@ -178,18 +190,67 @@ private:
         return false;
     }
 
+    bool _handleSetFanModeMessage(const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload)
+    {
+        return false;
+    }
+
     bool _handleDisplayModeMessage(const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload)
     {
         return false;
     }
 
-    static std::string _toPayload(bool state) {
-        return state ? "on" : "off";
+    std::string _toPayload(float value, int precision = 1) {
+        return (_format == Format::JSON) ? _toJsonPayload(value, precision) : _toPlainPayload(value, precision);
     }
-    
-    static std::string _toPayload(int value) {
+
+    std::string _toPayload(int value) {
+        return (_format == Format::JSON) ? _toJsonPayload(value) : _toPlainPayload(value);
+    }
+
+    std::string _toPayload(bool state) {
+        return (_format == Format::JSON) ? _toJsonPayload(state) : _toPlainPayload(state);
+    }
+
+    std::string _toPlainPayload(float value, int precision = 1) {
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(precision) << value;
+        return ss.str();
+    }
+
+    std::string _toPlainPayload(int value) {
         std::stringstream ss;
         ss << value;
+        return ss.str();
+    }
+
+    std::string _toPlainPayload(bool state) {
+        std::stringstream ss;
+        ss << (state ? "true" : "false");
+        return ss.str();
+    }
+    
+    std::string _toJsonPayload(float value, int precision = 1) {
+        std::stringstream ss;
+        ss << "{ \"value\": "<< std::fixed << std::setprecision(precision) << value << ")";
+        return ss.str();
+    }
+
+    std::string _toJsonPayload(int value) {
+        std::stringstream ss;
+        ss << "{ \"value\": " << value << "}";
+        return ss.str();
+    }
+
+    std::string _toJsonPayload(bool state) {
+        std::stringstream ss;
+        ss << "{ \"state\": " << (state ? "true" : "false") << "}";
+        return ss.str();
+    }
+    
+    std::string _terminate(const std::string& payload) {
+        std::stringstream ss;
+        ss << payload << std::endl;
         return ss.str();
     }
 
@@ -199,6 +260,7 @@ private:
 
     Topic _sensorTopicPrefix;
     MQTTConnection& _mqtt;
+    Format _format;
     bool _retainState;
 };
 
