@@ -12,7 +12,7 @@
 
 #include "Chronos/Stopwatch.h"
 
-// #include "Discovery/DeviceExplorer.h"
+#include "Discovery/DeviceExplorer.h"
 #include "Diagnostics/OnboardLEDBlinker.h"
 #include "ActivityLight.h"
 
@@ -39,7 +39,7 @@ private:
 
     void _initMQTTController();
     std::string _getMQTTTopicPrefix();
-    std::string _getDefaultMQTTLightTopicPrefix();
+    std::string _getDefaultMQTTSensorTopicPrefix();
     void _registerObservers();
 
     OnboardLEDBlinker& _blinker;
@@ -57,7 +57,9 @@ private:
 
     PanelDisplay _display;
 
-    MQTTSensorController _mqttController;    
+    MQTTSensorController _mqttController;   
+
+    DeviceExplorer* _discoveryService; 
 };
 
 #endif

@@ -21,16 +21,20 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
     , _display()
     , _mqttController(
         _smartSensor, 
-        TimeSpan::fromMilliseconds(100),
+        TimeSpan::fromMilliseconds(500),
         _mqttClient
     )
 {}
 
 void MyEroraSensor::setup()
 {
+    delay(500);
     _display.setup();
+    delay(1000);
 
+    Log.verboseln("About to initialise WiFi...");
     _initWiFi();
+    Log.verboseln("Initialised WiFi");
     delay(500);
 
     Log.infoln("MAC is %s.", MACAddress::local().str(":").c_str());
@@ -38,21 +42,22 @@ void MyEroraSensor::setup()
     Log.infoln("Hostname is %s", _systemSettings.getDeviceName().c_str());
 
     _smartSensor.bindObserver(_display);
-    delay(1000);
+    delay(2000);
 
     _initMQTTController();
+    delay(500);
 
     _registerObservers();
     delay(500);
 
     _smartSensor.setup();
 
-    #if 0
+    #if 1
 
         _discoveryService = new DeviceExplorer(
-            DeviceCategory::Lightstrip,
+            DeviceCategory::MultiSensor,
             _systemSettings.getDeviceDescriptiveName(), 
-            _systemSettings.getNumberOfLEDs(),
+            0, // #LEDS !!!! TODO: fix this!
             5000, 60000
         );
 
@@ -64,14 +69,14 @@ void MyEroraSensor::setup()
             [this](const DeviceInformation& deviceDetails, DeviceExplorer::DeviceEvent event) {
                 switch (event) {
                     case DeviceExplorer::DeviceEvent::ComeOnline:
-                        _webController.addDevice(deviceDetails);
+                        //_webController.addDevice(deviceDetails);
                         break;
                     case DeviceExplorer::DeviceEvent::NameChange:
-                        _webController.removeDevice(deviceDetails);
-                        _webController.addDevice(deviceDetails);
+                        //_webController.removeDevice(deviceDetails);
+                        //_webController.addDevice(deviceDetails);
                         break;
                     case DeviceExplorer::DeviceEvent::GoneOffline:
-                        _webController.removeDevice(deviceDetails);
+                        //_webController.removeDevice(deviceDetails);
                         break;
                     default:
                         break;
@@ -84,8 +89,6 @@ void MyEroraSensor::setup()
         _discoveryService->setup();
 
     #endif
-
-
 }
 
 void MyEroraSensor::loop()
@@ -93,8 +96,9 @@ void MyEroraSensor::loop()
     _display.loop();
 
     _smartSensor.loop();
+    _mqttController.loop();
 
-    // _discoveryService->loop();
+    _discoveryService->loop();
 }
 
 void MyEroraSensor::_initWiFi()
@@ -129,7 +133,6 @@ void MyEroraSensor::_initWiFi()
     Log.infoln("MyEroraLight: device host name is \"%s\".", _deviceHostName.c_str());
 
     WiFi.setHostname(_deviceHostName.c_str());
-    // WiFi.setAutoReconnect(true);
 
     std::string wifiSsid(_systemSettings.getWifiSSID());
     std::string wifiPsk(_systemSettings.getWifiPSK());
@@ -157,26 +160,29 @@ void MyEroraSensor::_initWiFi()
 
 bool MyEroraSensor::_wifiConnect()
 {
-    CountdownTimer::Ticks connectionTimeout(15000); // 15 secs.
+    CountdownTimer::Ticks connectionTimeout(30000); // 15 secs.
     CountdownTimer wifiConnectTimer(connectionTimeout);
 
     wifiConnectTimer.start();
 
-    Log.infoln("MyEroraLight: connecting to wifi...");
+    Log.infoln("MyEroraSensor: connecting to wifi...");
 
     WiFi.setAutoConnect(true);
+    
+    wl_status_t status(WiFi.status());
 
-    while ((WiFi.status() != WL_CONNECTED) && !wifiConnectTimer.hasExpired()) {
-        Log.infoln("MyEroraLight: still connecting to wifi...");
+    while ((status != WL_CONNECTED) && !wifiConnectTimer.hasExpired()) {
+        Log.infoln("MyEroraSensor: still connecting to wifi (status %d)...", (int)status);
         delay(1000);
+        status = WiFi.status();
     }
-  
+
     bool connected(WiFi.status() == WL_CONNECTED);
 
     if (connected) {
-        Log.infoln("MyEroraLight: Wifi connected (SSID: \"%s\")", WiFi.SSID().c_str());
+        Log.infoln("MyEroraSensor: Wifi connected (SSID: \"%s\")", WiFi.SSID().c_str());
     } else {
-        Log.errorln("MyEroraLight: Wifi not connected");
+        Log.errorln("MyEroraSensor: Wifi not connected");
     }
 
     return connected;
@@ -259,12 +265,12 @@ void MyEroraSensor::_initMQTTController() {
 
 std::string MyEroraSensor::_getMQTTTopicPrefix() {
     std::string prefix(_systemSettings.getMQTTTopicPrefix());
-    if (prefix == "") prefix = _getDefaultMQTTLightTopicPrefix();
+    if (prefix == "") prefix = _getDefaultMQTTSensorTopicPrefix();
     return prefix;
 }
 
-std::string MyEroraSensor::_getDefaultMQTTLightTopicPrefix() {
-    std::string prefix("eRora/sense/");
+std::string MyEroraSensor::_getDefaultMQTTSensorTopicPrefix() {
+    std::string prefix("eRora/sensors/");
     prefix += MACAddress::local().str().substr(6) + "/"; // Just use hex chars from last 3 MAC bytes.
     return prefix;
 }
