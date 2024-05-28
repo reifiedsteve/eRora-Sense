@@ -1,5 +1,88 @@
 #if 0
 
+#include <WiFI.h>
+#include <WiFiClient.h>
+#include "MQTTConnection.h"
+#include "Diagnostics/Logging.h"
+
+WiFiClient _wiFiClient;
+MQTTConnection* _mqtt;
+
+typedef MQTTConnection::Topic Topic;
+
+#include "Chronos/CountdownTimer.h"
+CountdownTimer _timer(5000);
+int n = 0;
+
+//const char* ssid = "133381";
+//const char* password = "Spongebob2000";
+const char* ssid = "133381B";
+const char* password = "spongebob2000";
+
+void setup()
+{
+    Serial.begin(115200);
+    delay(1000);
+    Serial.println();
+    Serial.println();
+    Serial.print("Connecting to ");
+    Serial.println(ssid);
+    //Log.verboseln("At (0).");
+    //WiFi.begin(ssid, password);
+
+    //while (WiFi.status() != WL_CONNECTED) {
+    //    delay(500);
+    //    Serial.print(".");
+    //}
+
+    //Log.setLevel(LOG_LEVEL_VERBOSE);
+    //Log.setShowLevel(LOG_LEVEL_VERBOSE);
+
+    //Log.verboseln("At (A).");
+    Serial.print("Flash size: ");
+    Serial.println(ESP.getFlashChipSize());
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());    
+
+    //Log.verboseln("At (B).");
+    
+    //_mqtt = new MQTTConnection(_wiFiClient, "192.168.1.186", 1883);
+
+    //Log.verboseln("At (C).");
+
+    //_mqtt->setTopicPrefix(Topic("eRora/test"));
+    //_mqtt->setup();
+    //_mqtt->publish(Topic("counter"), (long)n);
+
+    _timer.start();
+
+    //Log.verboseln("Setup complete.");
+
+}
+
+void loop(void)
+{
+    if (_timer.hasExpired()) {
+        ++n;
+        Log.verboseln("Publishing: %d", n);
+        Serial.println("Count: ");
+        Serial.println(n);    
+        //_mqtt->publish(Topic("counter"), (long)n);
+        _timer.restart();
+    }
+
+    else {
+        //Log.verboseln("Hi");
+    }
+}
+
+#endif
+
+#if 0
+
 #include "bsec.h"
 
 #define LED_BUILTIN 2
