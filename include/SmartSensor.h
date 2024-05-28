@@ -46,9 +46,10 @@ private:
     // SGP30Sensor _sgpSensor;
 
     float _temperature, _relHumidity;
-    float _co2, _tvoc, _iaq;
-
+    float _co2, _tvoc;
+    
     bool _iaqAvailable;
+    float _iaq;
 
     CountdownTimer _timer;
 
