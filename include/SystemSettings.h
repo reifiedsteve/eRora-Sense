@@ -28,7 +28,7 @@ public:
     }
 
     inline std::string getDeviceDescriptiveName() const {
-        return _getSetting("dev-desc", "LED strip");
+        return _getSetting("dev-desc", "Multi-sensor");
     }
 
     inline void useManualNetworkConfig(bool useStatic) {
@@ -103,7 +103,7 @@ public:
 
     inline std::string getWifiPSK() const {
         // return PersistentSettings::get("wifi", "psk", ""); // TODO: use this.
-        return _getSetting("wifi-psk", "Spongebob2000"/*"spongebob2000"*/);    //  TODO: remove this specific default value in final release.
+        return _getSetting("wifi-psk", "spongebob2000");    //  TODO: remove this specific default value in final release.
     }
 
     #if 0
@@ -171,7 +171,7 @@ public:
     }
 
     inline std::string getMQTTTopicPrefix() const {
-        return _getSetting("mqtt-prefix", "");
+        return _getSetting("mqtt-prefix", "eRora/sensors/office");
     }
 
     #if 0
