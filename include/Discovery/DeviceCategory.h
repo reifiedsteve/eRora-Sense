@@ -50,7 +50,7 @@ enum class DeviceCategory : uint8_t
     HumiditySensor = 0x61,
 
     /// @brief A temperature/humidity sensor.
-    TemperaturHumiditySensor = 0x62,
+    TemperatureHumiditySensor = 0x62,
 
     /// @brief An occupancy sensor.
     OccupancySensor = 0x63,
