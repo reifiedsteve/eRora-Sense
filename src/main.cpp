@@ -137,8 +137,6 @@ void setup()
     myErora = new MyEroraSensor(blinker);
     myErora->setup();
 
-  // unsigned numBlinks = (unsigned)esp_reset_reason();
-
     #ifdef DIAGNOSE_RESTART_REASON
         int restartReasonCode(getRestartReasonBlinkCode());
         Log.infoln("main: restart reason code is %d.", restartReasonCode);
