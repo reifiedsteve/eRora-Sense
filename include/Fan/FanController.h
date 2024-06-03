@@ -5,6 +5,8 @@
 #include <esp_system.h>
 #include <driver/ledc.h>
 
+#include "Diagnostics/Logging.h"
+
 class FanController
 {
 public:
@@ -23,7 +25,9 @@ public:
     }
 
     void setDutyCycle(float percentage) {
-        ledcWrite(_channelNo,  (uint32_t)((1 << _resolution)-1) * (percentage / 100.0));
+        uint32_t dutyCycleVal(((1 << _resolution)-1) * (percentage / 100.0));
+        Log.verboseln("FanController: duty cycle of %d (value of %d).", (int)percentage, dutyCycleVal);
+        ledcWrite(_channelNo,  dutyCycleVal);
     }
 
 private:
