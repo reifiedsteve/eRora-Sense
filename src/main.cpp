@@ -15,7 +15,6 @@
 
 #define DIAGNOSE_RESTART_REASON
 #define DO_I2C_SCAN
-#define SUPPORT_FAN_CONTROL
 
 #ifdef DO_I2C_SCAN
 #include "Diagnostics/ScannerI2C.h"
@@ -23,11 +22,6 @@ ScannerI2C scanner;
 #endif
 
 #include "MyEroraSensor.h"
-
-#ifdef SUPPORT_FAN_CONTROL
-#include "Fan/FanController.h"
-FanController fan(36);
-#endif
 
 // Initialize library
 MyEroraSensor* myErora;
@@ -142,15 +136,12 @@ void setup()
         Log.infoln("main: restart reason code is %d.", restartReasonCode);
         blinker.start(restartReasonCode, 500, 500);
     #endif
-
-    #ifdef SUPPORT_FAN_CONTROL
-    fan.begin();
-    fan.setDutyCycle(80.0);
-    #endif
 }
 
-void loop() {
+void loop()
+{
     myErora->loop();
+
     #ifdef DIAGNOSE_RESTART_REASON
         blinker.loop();
     #endif

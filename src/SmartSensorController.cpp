@@ -13,32 +13,43 @@ void SmartSensorController::setup() {
 
 void SmartSensorController::loop() {
     _serviceInputs();
-    _executeDeferredOperations(_operations.size());
+    size_t n(_operations.size());
+    if (n > 0) {
+        _executeDeferredOperations(n);
+    }
 }
 
 void SmartSensorController::_switchOnOff(bool on) {
     _scheduleOperation([this, on]() {
-        //_sensor.switchPower(on);
+        _sensor.switchPower(on);
     });
 }
 
 void SmartSensorController::_toggleOnOff() {
     _scheduleOperation([this]() {
-        //_sensor.togglePower();
+        _sensor.togglePower();
     });
 }
 
 void SmartSensorController::_selectNextDisplayMode() {
     _scheduleOperation([this]() {
-        //_sensor.selectNextMode();
+        _sensor.selectNextMode();
     });
 }
 
 void SmartSensorController::_setFanSpeed(uint8_t speed) {
+    Log.verboseln("SmartSensorController: queuing setFanSpeed(%d).", speed);
     _scheduleOperation([this, speed]() {
-        //_sensor.setFanSpeed(speed]);
+        _sensor.setFanSpeed(speed);
     });
 }
+
+ bool SmartSensorController::_adjustFanSpeed(int8_t delta) {
+    Log.verboseln("SmartSensorController: queuing adjustFanSpeed(%d).", delta);
+    _scheduleOperation([this, delta]() {
+        _sensor.adjustFanSpeed(delta);
+    });
+ }
 
 void SmartSensorController::_scheduleOperation(_Operation command) {
     _operations.push(command);
@@ -46,6 +57,8 @@ void SmartSensorController::_scheduleOperation(_Operation command) {
 
 size_t SmartSensorController::_executeDeferredOperations(size_t n)
 {
+    Log.verboseln("SmartSensorController: executing %d operations.", n);
+
     bool executing(true);
     int i(0);
 

@@ -20,6 +20,9 @@ PanelDisplay::PanelDisplay()
     , _pm25(0)
     , _pm10(0)
     , _timer(5000)
+    , _message()
+    , _notifyTimer(5000)
+    , _state(_State::Normal)
 {}
 
 void PanelDisplay::selectNextPage() {
@@ -35,10 +38,23 @@ void PanelDisplay::setup() {
 
 void PanelDisplay::loop()
 {
-    if (_timer.hasExpired()) {
-        _page = _pageAfter(_page);
-        _showPage(_page);
-        _timer.restart();
+    switch (_state)
+    {
+        case _State::Normal:
+            _execStateNormal();
+            break;
+
+        case _State::StartNotification:
+            _execStateStartNotification();
+            break;
+
+        case _State::Notification:
+            _execStateNotification();
+            break;
+
+        default:
+            _state = _State::Normal;
+            break;
     }
 
     // _showPage(_page); //  Doing this here is useful for real-time updates - e.g. for fan speed.
@@ -50,6 +66,7 @@ void PanelDisplay::onSwitchOnOff(bool on) {
 
 void PanelDisplay::onFanSpeed(int speed) {
     _fanSpeed = speed;
+    _notify(_makeFanSpeedNotificationMessage(_fanSpeed));
 }
 
 void PanelDisplay::onBacklightBrightness(uint8_t brightness) {
@@ -104,6 +121,41 @@ void PanelDisplay::_defineCustomChars() {
     _display.defineCustomChar(halfChar, const_cast<byte*>(Display::bitmapHalf)); 
     _display.defineCustomChar(faceChar, const_cast<byte*>(Display::bitmapAmbivalent)); 
     // _display.defineCustomChar(superscriptThreeChar, const_cast<byte*>(Display::bitmapSuperscriptThree));   
+}
+
+void PanelDisplay::_execStateNormal()
+{
+    bool refresh(false);
+
+    if (_timer.hasExpired()) {
+        _page = _pageAfter(_page);
+        refresh = true;
+        _timer.restart();
+    }
+    
+    if (refresh) {
+        _showPage(_page);
+    }
+}
+
+void PanelDisplay::_execStateStartNotification()
+{
+    _display.writeLine(0, _fixCentre(_message, _width));
+    _display.writeLine(1, _fixCentre("", _width));
+    _display.show();
+    
+    _notifyTimer.restart();
+    _state = _State::Notification;
+}
+
+void PanelDisplay::_execStateNotification()
+{
+    if (_notifyTimer.hasExpired()) {
+        _page = _pageAfter(_page);
+        _showPage(_page);
+        _timer.restart();
+        _state = _State::Normal;
+    }
 }
 
 PanelDisplay::_Page PanelDisplay::_pageAfter(_Page page)
@@ -211,13 +263,19 @@ void PanelDisplay::_showPage(_Page page)
     _display.show();
 }
 
+void PanelDisplay::_notify(const std::string& message) {
+    _message = message;
+    _state = _State::StartNotification;
+}
+
 std::string PanelDisplay::_makeTemperatureHumidityFanSpeedText() {
     std::ostringstream ss;
     ss << _customChar(thermometerChar) << std::setw(4) << std::fixed << std::setprecision(1) << _tempC << _customChar(degreesChar) << "C";
     ss << " ";
     ss << _customChar(waterDropChar) << std::setw(2) << (int)_relHumidity << "%";
     ss << " ";
-    ss << _customChar(airflowChar) << "10";
+    if (_fanSpeed < 10) ss << " ";
+    ss << _customChar(airflowChar) << _fanSpeed;
     return ss.str();
 }
 
@@ -263,6 +321,12 @@ std::string PanelDisplay::_makePMLine(const std::string& label, const uint16_t p
     // _makeFaceAmbivalent();
     // ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
+}
+
+std::string PanelDisplay::_makeFanSpeedNotificationMessage(int fanSpeed) {
+    std::stringstream ss;
+    ss << "Fan Speed: " << _fanSpeed;
+    return _fixCentre(ss.str(), _width);
 }
 
 std::string PanelDisplay::_makeCalibrationStateText() {

@@ -192,15 +192,15 @@ bool BME680Sensor::_readMeasurements()
         _humidity = _sensor.humidity;
         _pressure = _sensor.pressure;
 
-        Log.verboseln("BSEC status: %d", (int)_sensor.bsecStatus);
-        Log.verboseln("BME68x status: %d", (int)_sensor.bme68xStatus);
+        // Log.verboseln("BSEC status: %d", (int)_sensor.bsecStatus);
+        // Log.verboseln("BME68x status: %d", (int)_sensor.bme68xStatus);
 
-        Log.verboseln("Temperature: %d degC", (int)_tempC);
-        Log.verboseln("Humidity: %d pc", (int)_humidity);
-        Log.verboseln("Pressure: %d Pa", (int)_pressure);
+        // Log.verboseln("Temperature: %d degC", (int)_tempC);
+        // Log.verboseln("Humidity: %d pc", (int)_humidity);
+        // Log.verboseln("Pressure: %d Pa", (int)_pressure);
 
         bool gasSensorReady(_sensor.runInStatus > 0.0); // 0.0 is not ready, 1.0 is ready.
-        Log.verboseln("Gas sensor ready: %s", gasSensorReady ? "Yes" : "No");
+        // Log.verboseln("Gas sensor ready: %s", gasSensorReady ? "Yes" : "No");
 
         if (gasSensorReady) 
         {
@@ -208,9 +208,9 @@ bool BME680Sensor::_readMeasurements()
             _tvoc = _sensor.breathVocEquivalent;
             _iaq = _sensor.iaq;
 
-            Log.verboseln("eCO2: %d ppm", (int)_eCO2);
-            Log.verboseln("TVOC (ppb): %d", (int)_tvoc);
-            Log.verboseln("IAQ: %d", (int)_iaq);
+            // Log.verboseln("eCO2: %d ppm", (int)_eCO2);
+            // Log.verboseln("TVOC (ppb): %d", (int)_tvoc);
+            // Log.verboseln("IAQ: %d", (int)_iaq);
         }
     }
 

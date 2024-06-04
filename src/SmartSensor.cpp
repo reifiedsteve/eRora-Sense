@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "SmartSensor.h"
 
 #include "Diagnostics/Logging.h"
@@ -24,11 +26,44 @@ SmartSensor::SmartSensor()
     , _iaq(0)
     , _timer(5000)
     , _observers()
+    , _fanController(nullptr)
+    , _fanSpeed(5)
 {}
 
 
 void SmartSensor::bindObserver(Observer& observer) {
     _observers.push_back(&observer);
+}
+
+void SmartSensor::bindFanController(FanController& controller) {
+    _fanController = &controller;
+    Log.verboseln("At (A)");
+    _fanController->setFanSpeed(10 * _fanSpeed);
+    Log.verboseln("At (B)");
+}
+
+void SmartSensor::switchPower(bool on) {
+
+}
+
+void SmartSensor::togglePower() {
+
+}
+
+void SmartSensor::selectNextMode() {
+
+}
+
+void SmartSensor::setFanSpeed(uint8_t speedSetting) {
+    Log.infoln("SmartSensor: setting fan speed to %d.", speedSetting);
+    _setFanSpeed(speedSetting);
+    Log.infoln("SmartSensor: fan speed is now %d.", _fanSpeed);
+}
+
+void SmartSensor::adjustFanSpeed(int8_t delta) {
+    Log.infoln("SmartSensor: adjusting fan speed by %d.", delta);
+    _setFanSpeed(_fanSpeed + delta);
+    Log.infoln("SmartSensor: fan speed is now %d.", _fanSpeed);
 }
 
 void SmartSensor::setup()
@@ -91,6 +126,18 @@ void SmartSensor::loop()
             Log.verboseln("No readiings available.");
         }
     }
+}
+
+bool SmartSensor::_setFanSpeed(uint8_t speedSetting) {
+    uint8_t newFanSpeed = std::max((uint8_t)0, std::min(speedSetting, (uint8_t)10));
+    bool changed(_fanSpeed != newFanSpeed);
+    if (changed && _fanController) {
+        Log.verboseln("SmartSensor: fan speed changed from %d to %d.", _fanSpeed, newFanSpeed);
+        _fanController->setFanSpeed(10 * newFanSpeed);
+        _fanSpeed = newFanSpeed;
+        _informOfFanSpeed(_fanSpeed);
+    }    
+    return changed;
 }
 
 void SmartSensor::_processTemperature(float temperature) {
@@ -173,6 +220,13 @@ void SmartSensor::_informOfIAQAvailability(bool available) {
     for (Observer* observer: _observers) {
         Log.verboseln("Informing \"%s\" about IAQ availability of %s.", observer->observerName(), available ? "yes" : "no");
         observer->onIAQAvailability(available);
+    }
+}
+
+void SmartSensor::_informOfFanSpeed(uint8_t fanSpeed) {
+    for (Observer* observer: _observers) {
+        Log.verboseln("Informing \"%s\" about fan speed of %d.", observer->observerName(), fanSpeed);
+        observer->onFanSpeed(fanSpeed);
     }
 }
 

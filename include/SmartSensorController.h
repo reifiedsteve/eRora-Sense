@@ -29,9 +29,14 @@ protected:
     void _switchOnOff(bool on); // on/off of backlight and fan.
     void _toggleOnOff();
 
-    /// Set the fan to speed 1-10, 1 being minimum, 10 being full speed.
+    /// @brief Set the fan to speed 0-10.
+    /// @param speed teh fan speed, 0 being still, 1 being minimum, 10 being full speed
     void _setFanSpeed(uint8_t speed);
-    bool _adjustFanSpeed(int delta);
+
+    /// @brief Adjust the fan speed.
+    /// @param delta The amount by which to change the fan speed.
+    /// @return Returns true if the speed was adjusted; otherwise false.
+    bool _adjustFanSpeed(int8_t delta);
 
     // Set the cabinet backlight brightness, 0 being minimum,
     // 255 being full brightness.

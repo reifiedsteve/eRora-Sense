@@ -9,6 +9,8 @@
 #include "Chronos/CountdownTimer.h"
 #include "Chronos/TimeSpan.h"
 
+#include "Fan/FanController.h"
+
 class SmartSensor
 {
 public:
@@ -20,11 +22,32 @@ public:
     SmartSensor();
     
     void bindObserver(Observer& observer);
+    void bindFanController(FanController& controller);
+    // void bindFanSpeedObserver();
+
+    void switchPower(bool on);
+    void togglePower();
+
+    void selectNextMode();
+
+    /// @brief Set the fan speed (for when fan is in manual mode).
+    /// @param speedSetting Setting of 0-10 (off to maximum).
+    void setFanSpeed(uint8_t speedSetting);
+
+    void adjustFanSpeed(int8_t delta);
+
+    /// @brief Increase fan speed (for when fan is in manual mode).
+    void increaseFanSpeed();
+
+    /// @brief Decrease fan speed (for when fan is in manual mode).
+    void decreaseFanSpeed();
 
     void setup();
     void loop();
 
 private:
+
+    bool _setFanSpeed(uint8_t speedSetting);
 
     void _processTemperature(float temperature);
     void _processHumidity(float relHumidity);
@@ -40,6 +63,8 @@ private:
 
     void _informOfIAQAvailability(bool available);
 
+    void _informOfFanSpeed(uint8_t fanSpeed);
+
     typedef std::list<Observer*> _Observers;
 
     BME680Sensor _bmeSensor;
@@ -52,7 +77,9 @@ private:
     float _iaq;
 
     CountdownTimer _timer;
-
     _Observers _observers;
+
+    FanController* _fanController;
+    int _fanSpeed;
 };
 

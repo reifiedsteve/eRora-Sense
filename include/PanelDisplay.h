@@ -84,16 +84,29 @@ private:
         Hazardous
     };
 
+    enum class _State {
+        Normal,
+        StartNotification,
+        Notification
+    };
+    
     void _defineCustomChars();
+
+    void _execStateNormal();
+    void _execStateStartNotification();
+    void _execStateNotification();
 
     _Page _pageAfter(_Page page);
     void _showPage(_Page page);
 
+    void _notify(const std::string& message);
+    
     std::string _makeTemperatureHumidityFanSpeedText();
     std::string _makeTVOCLine();
     std::string _makeCO2Line();
     std::string _makeIAQLine();
     std::string _makePMLine(const std::string& label, const uint16_t pmLevel);
+    std::string _makeFanSpeedNotificationMessage(int fanSpeed);
     std::string _makeCalibrationStateText();
 
     static std::string _makeFaceIcon(_Category cat);
@@ -133,4 +146,9 @@ private:
     int _fanSpeed;
     
     CountdownTimer _timer;
+
+    std::string _message;
+    CountdownTimer _notifyTimer;
+
+    _State _state;
 };

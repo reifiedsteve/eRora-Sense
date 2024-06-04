@@ -19,6 +19,11 @@
 #include "SystemSettings.h"
 #include "UserSettings.h"
 
+#include "Fan/PWMFanController.h"
+
+#include "Controllers/ButtonController.h"
+#include "Controls/MomentaryButton.h"
+
 class MyEroraSensor
 {
 public:
@@ -29,6 +34,8 @@ public:
     void loop();
 
 private:
+
+    typedef MomentaryButton _Button;
 
     void _initWiFi();
     bool _wifiConnect();
@@ -57,7 +64,13 @@ private:
 
     PanelDisplay _display;
 
-    MQTTSensorController _mqttController;   
+    MQTTSensorController _mqttController;
+
+    _Button _button1, _button2, _button3, _button4;
+    ButtonController _buttonController;
+
+    uint8_t _fanPWMPinNo;
+    PWMFanController _fanController;
 
     DeviceExplorer* _discoveryService; 
 };

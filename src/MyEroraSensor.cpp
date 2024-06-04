@@ -2,6 +2,7 @@
 
 #include "MyEroraSensor.h"
 #include "MACAddress.h"
+#include "PinAssignments.h"
 
 MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
     : _blinker(blinker)
@@ -24,6 +25,20 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         TimeSpan::fromMilliseconds(500),
         _mqttClient
     )
+    , _button1(PinAssignments::Button1)
+    , _button2(PinAssignments::Button2)
+    , _button3(PinAssignments::Button3)
+    , _button4(PinAssignments::Button4)
+    , _buttonController(
+        _smartSensor,
+        TimeSpan::fromMilliseconds(10),
+        _button1,
+        _button2,
+        _button3,
+        _button4
+    )
+    , _fanPWMPinNo(36)
+    , _fanController(_fanPWMPinNo)
 {}
 
 void MyEroraSensor::setup()
@@ -41,7 +56,9 @@ void MyEroraSensor::setup()
     // Log.infoln("Hostname is %s", _getDefaultDeviceHostName().c_str());
     Log.infoln("Hostname is %s", _systemSettings.getDeviceName().c_str());
 
-    _smartSensor.bindObserver(_display);
+    _fanController.setup();
+    _buttonController.setup();
+
     delay(2000);
 
     _initMQTTController();
@@ -51,49 +68,49 @@ void MyEroraSensor::setup()
     delay(500);
 
     _smartSensor.setup();
+    _smartSensor.bindFanController(_fanController);
 
-    #if 1
 
-        _discoveryService = new DeviceExplorer(
-            DeviceCategory::MultiSensor,
-            _systemSettings.getDeviceDescriptiveName(), 
-            0, // #LEDS !!!! TODO: fix this!
-            5000, 60000
-        );
+    _discoveryService = new DeviceExplorer(
+        DeviceCategory::MultiSensor,
+        _systemSettings.getDeviceDescriptiveName(), 
+        0, // #LEDS !!!! TODO: fix this!
+        5000, 60000
+    );
 
-        _discoveryService->registerForChanges(
-            // Maybe the smart light core logic should be told about these events, but
-            // for now can't think of a good reason why. So (at least for now) 
-            // let's keep it out of the picture as only the web controller
-            // currently needs to know.
-            [this](const DeviceInformation& deviceDetails, DeviceExplorer::DeviceEvent event) {
-                switch (event) {
-                    case DeviceExplorer::DeviceEvent::ComeOnline:
-                        //_webController.addDevice(deviceDetails);
-                        break;
-                    case DeviceExplorer::DeviceEvent::NameChange:
-                        //_webController.removeDevice(deviceDetails);
-                        //_webController.addDevice(deviceDetails);
-                        break;
-                    case DeviceExplorer::DeviceEvent::GoneOffline:
-                        //_webController.removeDevice(deviceDetails);
-                        break;
-                    default:
-                        break;
+    _discoveryService->registerForChanges(
+        // Maybe the smart light core logic should be told about these events, but
+        // for now can't think of a good reason why. So (at least for now) 
+        // let's keep it out of the picture as only the web controller
+        // currently needs to know.
+        [this](const DeviceInformation& deviceDetails, DeviceExplorer::DeviceEvent event) {
+            switch (event) {
+                case DeviceExplorer::DeviceEvent::ComeOnline:
+                    //_webController.addDevice(deviceDetails);
+                    break;
+                case DeviceExplorer::DeviceEvent::NameChange:
+                    //_webController.removeDevice(deviceDetails);
+                    //_webController.addDevice(deviceDetails);
+                    break;
+                case DeviceExplorer::DeviceEvent::GoneOffline:
+                    //_webController.removeDevice(deviceDetails);
+                    break;
+                default:
+                    break;
 
-                }
-            },
-            false // No point in telling us all it knows immediately - as it's not setup() yet (see below).
-        );
+            }
+        },
+        false // No point in telling us all it knows immediately - as it's not setup() yet (see below).
+    );
 
-        _discoveryService->setup();
-
-    #endif
+    _discoveryService->setup();
 }
 
 void MyEroraSensor::loop()
 {
     _display.loop();
+
+    _buttonController.loop();
 
     _smartSensor.loop();
     _mqttController.loop();
@@ -277,6 +294,7 @@ std::string MyEroraSensor::_getDefaultMQTTSensorTopicPrefix() {
 
 void MyEroraSensor::_registerObservers()
 {
+    _smartSensor.bindObserver(_display);
     _smartSensor.bindObserver(_mqttController);
     // _smartSensor.bindStateObserver(_webController);
 
