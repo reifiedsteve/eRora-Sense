@@ -47,6 +47,7 @@ public:
 
 private:
 
+    // bool _setFanPower(bool on);
     bool _setFanSpeed(uint8_t speedSetting);
 
     void _processTemperature(float temperature);
@@ -65,6 +66,8 @@ private:
 
     void _informOfFanSpeed(uint8_t fanSpeed);
 
+    static uint8_t _constrainFanSpeed(uint8_t speed);
+
     typedef std::list<Observer*> _Observers;
 
     BME680Sensor _bmeSensor;
@@ -80,6 +83,8 @@ private:
     _Observers _observers;
 
     FanController* _fanController;
+
+    bool _fanIsOn;
     int _fanSpeed;
 };
 

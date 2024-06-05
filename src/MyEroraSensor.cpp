@@ -37,7 +37,7 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         _button3,
         _button4
     )
-    , _fanPWMPinNo(36)
+    , _fanPWMPinNo(PinAssignments::FanPWM)
     , _fanController(_fanPWMPinNo)
 {}
 
@@ -56,7 +56,15 @@ void MyEroraSensor::setup()
     // Log.infoln("Hostname is %s", _getDefaultDeviceHostName().c_str());
     Log.infoln("Hostname is %s", _systemSettings.getDeviceName().c_str());
 
-    _fanController.setup();
+    {
+        // _fanController.configSeparatePowerControlPin(xxx);
+        _fanController.limitPhysicalSpeedRange(10, 100);
+        _fanController.begin();
+    }
+
+    _fanController.setFanSpeed(100);
+    _fanController.setPower(true);
+
     _buttonController.setup();
 
     delay(2000);

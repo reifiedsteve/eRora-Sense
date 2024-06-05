@@ -5,13 +5,18 @@
 #include "Fan/PWMFanController.h"
 #include "Chronos/CountdownTimer.h"
 #include "Diagnostics/Logging.h"
+#include "PinAssignments.h"
 
-PWMFanController fan(36);
 bool fast(false);
 int fastSpeed(100);
-int slowSpeed(20);
+int slowSpeed(25);
+uint32_t freq(25000);
+uint8_t resolution(8);
+uint8_t channelNo(1);
 
-CountdownTimer timer(10000);
+PWMFanController fan(PinAssignments::FanPWM, freq, resolution, channelNo);
+
+CountdownTimer timer(20000);
 
 void setup()
 {
@@ -21,7 +26,10 @@ void setup()
 
     initLogging(LOG_LEVEL_VERBOSE);
 
-    fan.setup();
+    // fan.configSeparatePowerControlPin(xxx);
+    fan.limitPhysicalSpeedRange(50, 100);
+    fan.begin();
+    fan.setPower(true);
     fan.setFanSpeed(slowSpeed);
     timer.restart();
 }
@@ -31,10 +39,17 @@ void loop()
 {
     if (timer.hasExpired()) {
         fast = !fast;
-        fan.setFanSpeed(fast ? fastSpeed : slowSpeed);
-        Serial.print("Fan speed changed to ");
-        Serial.print(fast ? "fast" : "slow");
-        Serial.println();
+        #if 1
+            Serial.print("Fan switched ");
+            Serial.print(fast ? "on" : "off");
+            Serial.println();
+            fan.setPower(fast);
+        #else
+            Serial.print("Fan speed changed to ");
+            Serial.print(fast ? "fast" : "slow");
+            Serial.println();
+            fan.setFanSpeed(fast ? fastSpeed : slowSpeed);
+        #endif
         timer.restart();
     }
 }

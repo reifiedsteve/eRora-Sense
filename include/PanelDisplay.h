@@ -99,7 +99,7 @@ private:
     _Page _pageAfter(_Page page);
     void _showPage(_Page page);
 
-    void _notify(const std::string& message);
+    void _notify(const std::string& title, const std::string& message);
     
     std::string _makeTemperatureHumidityFanSpeedText();
     std::string _makeTVOCLine();
@@ -147,7 +147,7 @@ private:
     
     CountdownTimer _timer;
 
-    std::string _message;
+    std::string _title, _message;
     CountdownTimer _notifyTimer;
 
     _State _state;

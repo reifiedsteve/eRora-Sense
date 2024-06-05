@@ -27,9 +27,9 @@ SmartSensor::SmartSensor()
     , _timer(5000)
     , _observers()
     , _fanController(nullptr)
+    , _fanIsOn(false)
     , _fanSpeed(5)
 {}
-
 
 void SmartSensor::bindObserver(Observer& observer) {
     _observers.push_back(&observer);
@@ -37,17 +37,16 @@ void SmartSensor::bindObserver(Observer& observer) {
 
 void SmartSensor::bindFanController(FanController& controller) {
     _fanController = &controller;
-    Log.verboseln("At (A)");
+    _fanController->setPower(_fanIsOn);
     _fanController->setFanSpeed(10 * _fanSpeed);
-    Log.verboseln("At (B)");
 }
 
 void SmartSensor::switchPower(bool on) {
-
+    // _setFanPower(on);
 }
 
 void SmartSensor::togglePower() {
-
+    // _setFanPower(!_fanIsOn);
 }
 
 void SmartSensor::selectNextMode() {
@@ -128,15 +127,39 @@ void SmartSensor::loop()
     }
 }
 
-bool SmartSensor::_setFanSpeed(uint8_t speedSetting) {
-    uint8_t newFanSpeed = std::max((uint8_t)0, std::min(speedSetting, (uint8_t)10));
-    bool changed(_fanSpeed != newFanSpeed);
+#if 0
+bool SmartSensor::_setFanPower(bool on) {
+    bool changed(on != _fanIsOn);
     if (changed && _fanController) {
+        Log.verboseln("SmartSensor: fan power now .", on ? "on" : "off");
+        _fanController->setPower(on);
+        _fanIsOn = on;
+        _informOfFanSpeed(on ? _fanSpeed : 0);
+    }
+}
+#endif
+
+bool SmartSensor::_setFanSpeed(uint8_t speedSetting)
+{
+    uint8_t newFanSpeed = _constrainFanSpeed(speedSetting);
+    bool changed(_fanSpeed != newFanSpeed);
+
+    if (changed && _fanController)
+    {
         Log.verboseln("SmartSensor: fan speed changed from %d to %d.", _fanSpeed, newFanSpeed);
-        _fanController->setFanSpeed(10 * newFanSpeed);
+
+        if (newFanSpeed == 0) {
+            _fanController->setPower(false);
+        }
+
+        else {
+            _fanController->setFanSpeed(10 * newFanSpeed);
+            _fanController->setPower(true);
+        }
         _fanSpeed = newFanSpeed;
         _informOfFanSpeed(_fanSpeed);
-    }    
+    }
+
     return changed;
 }
 
@@ -228,6 +251,10 @@ void SmartSensor::_informOfFanSpeed(uint8_t fanSpeed) {
         Log.verboseln("Informing \"%s\" about fan speed of %d.", observer->observerName(), fanSpeed);
         observer->onFanSpeed(fanSpeed);
     }
+}
+
+uint8_t SmartSensor::_constrainFanSpeed(uint8_t speed) {
+    return std::max((uint8_t)0, std::min(speed, (uint8_t)10));
 }
 
 const TimeSpan SmartSensor::DefaultInterval(5, TimeSpan::Units::Seconds);

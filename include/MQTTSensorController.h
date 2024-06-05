@@ -14,7 +14,7 @@
 //#include "UserSettings.h"
 
 #include "Diagnostics/Logging.h"
-
+#include "Utils/Parser.h"
 
 #include "MQTTConnection.h"
 
@@ -185,9 +185,11 @@ private:
         return parsed;
     }
 
-    bool _handleSetFanSpeedMessage(const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload)
-    {
-        return false;
+    bool _handleSetFanSpeedMessage(const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload) {
+        int speed;
+        bool parsed(Parser::tryParse(payload, speed));
+        if (parsed) _setFanSpeed(speed);
+        return parsed;
     }
 
     bool _handleSetFanModeMessage(const _Topic& topic, const WildcardMatches& wildcardMatches, const std::string& payload)

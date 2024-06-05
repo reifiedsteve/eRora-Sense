@@ -12,9 +12,11 @@ struct PinAssignments
     
     static const int Button1 = 5;
     static const int Button2 = 17;
-    static const int Button3 = 16;
-    static const int Button4 = 4;
+    static const int Button3 = 4;
+    static const int Button4 = 16;
     
+    static const int FanPWM = 14;
+
     // Al I2C devices use Arduino TwoWire abstraction, using the
     // default SDA,SCL pins i.e. SDA is GPIO-21, SCL is GPIO-22
 };
