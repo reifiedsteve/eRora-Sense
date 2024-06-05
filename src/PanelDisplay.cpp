@@ -20,6 +20,7 @@ PanelDisplay::PanelDisplay()
     , _pm25(0)
     , _pm10(0)
     , _timer(5000)
+    , _title()
     , _message()
     , _notifyTimer(5000)
     , _state(_State::Normal)
@@ -66,7 +67,7 @@ void PanelDisplay::onSwitchOnOff(bool on) {
 
 void PanelDisplay::onFanSpeed(int speed) {
     _fanSpeed = speed;
-    _notify(_makeFanSpeedNotificationMessage(_fanSpeed));
+    _notify("Fan Speed", _makeFanSpeedNotificationMessage(_fanSpeed));
 }
 
 void PanelDisplay::onBacklightBrightness(uint8_t brightness) {
@@ -140,8 +141,8 @@ void PanelDisplay::_execStateNormal()
 
 void PanelDisplay::_execStateStartNotification()
 {
-    _display.writeLine(0, _fixCentre(_message, _width));
-    _display.writeLine(1, _fixCentre("", _width));
+    _display.writeLine(0, _fixCentre(_title, _width));
+    _display.writeLine(1, _fixCentre(_message, _width));
     _display.show();
     
     _notifyTimer.restart();
@@ -263,7 +264,8 @@ void PanelDisplay::_showPage(_Page page)
     _display.show();
 }
 
-void PanelDisplay::_notify(const std::string& message) {
+void PanelDisplay::_notify(const std::string& title, const std::string& message) {
+    _title = title;
     _message = message;
     _state = _State::StartNotification;
 }
@@ -325,7 +327,8 @@ std::string PanelDisplay::_makePMLine(const std::string& label, const uint16_t p
 
 std::string PanelDisplay::_makeFanSpeedNotificationMessage(int fanSpeed) {
     std::stringstream ss;
-    ss << "Fan Speed: " << _fanSpeed;
+    int percent(10 * _fanSpeed);
+    ss << percent << "%";
     return _fixCentre(ss.str(), _width);
 }
 
@@ -395,7 +398,7 @@ PanelDisplay::_Category PanelDisplay::_determineIAQCategory(int iaq)
     else if (iaq <= 200) {
         cat = _Category::Unhealthy;
     } 
-    
+     
     else if (iaq <= 300) {
         cat = _Category::VeryUnhealthy;
     } 
@@ -513,7 +516,7 @@ const byte* PanelDisplay::_getFaceIconBitmap(_Category cat)
 
 /*
 void PanelDisplay::_makeFaceHappy() {
-    _display.defineCustomChar(faceChar, const_cast<byte*>(Display::bitmapHappy));
+                                                                                                                                                                                                                                                                                                                                          _display.defineCustomChar(faceChar, const_cast<byte*>(Display::bitmapHappy));
 }
 
 void PanelDisplay::_makeFaceAmbivalent() {  
