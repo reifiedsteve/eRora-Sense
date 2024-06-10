@@ -136,7 +136,7 @@ void DeviceExplorer::_handleDiscoveryMessage(const DeviceInformation& deviceDeta
             Log.verboseln("DeviceExplorer: informing observers of online device name \"%s\".", deviceDetails.name().c_str());
             _notifyOfOnlineDevice(deviceDetails);
             break;
-        case DeviceEvent::NameChange:
+        case DeviceEvent::Modified:
             Log.verboseln("DeviceExplorer: informing observers of device name change \"%s\".", deviceDetails.name().c_str());
             _notifyOfModifyDevice(deviceDetails);
             break;
@@ -188,9 +188,11 @@ DeviceExplorer::DeviceEvent DeviceExplorer::_processDeviceMessage(const DeviceIn
     
     else {
 
-        if (deviceDetails.name() != iter->deviceDetails.name()) {
+        if ((deviceDetails.name() != iter->deviceDetails.name()) || (deviceDetails.category() != iter->deviceDetails.category())) {
             // Then the device changed name.
-            state = DeviceEvent::NameChange;
+            state = DeviceEvent::Modified;
+            iter->deviceDetails.setName(deviceDetails.name());
+            iter->deviceDetails.setCategory(deviceDetails.category());
         }
 
         iter->lastSeenTime = _elapsedTimer.elapsed();
@@ -252,7 +254,7 @@ void DeviceExplorer::_notifyOfOnlineDevice(const DeviceInformation& deviceDetail
 }
 
 void DeviceExplorer::_notifyOfModifyDevice(const DeviceInformation& deviceDetails) {
-    _notifyOfDeviceState(deviceDetails, DeviceEvent::NameChange);
+    _notifyOfDeviceState(deviceDetails, DeviceEvent::Modified);
 }
 
 void DeviceExplorer::_notifyOfOfflineDevice(const DeviceInformation& deviceDetails) {

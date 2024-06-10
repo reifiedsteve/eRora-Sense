@@ -48,10 +48,22 @@ public:
         return _name;
     }
     
+    /// @brief Assign the device name (i.e. descriptive text).
+    /// @param name The new name.
+    inline void setName(const std::string& name) __attribute__((always_inline)) {
+        _name = name;
+    }
+
     /// @brief Obtain the device category.
     /// @return The device category.
     inline DeviceCategory category() const __attribute__((always_inline)) {
         return _category;
+    }
+
+    /// @brief Assign the device category.
+    /// @param category The device category.
+    inline void setCategory(DeviceCategory category) __attribute__((always_inline)) {
+        _category = category;
     }
 
     /// @brief Render the device iformation as a string.

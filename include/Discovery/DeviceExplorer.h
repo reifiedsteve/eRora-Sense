@@ -51,8 +51,8 @@ public:
         /// @brief An eRora device is deemed to have gone from the LAN.
         GoneOffline = 0x02,
 
-        /// @brief An online device changed name.
-        NameChange = 0x03
+        /// @brief An online device changed name or category.
+        Modified = 0x03
     };
 
     /// @brief Ticks of time (milliseconds).
