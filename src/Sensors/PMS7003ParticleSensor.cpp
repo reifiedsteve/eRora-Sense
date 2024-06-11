@@ -12,7 +12,7 @@ PMS7003ParticleSensor::PMS7003ParticleSensor(uint8_t rxPin, uint8_t txPin, const
 
 void PMS7003ParticleSensor::setup() {
     _pms.init();
-    _pms.wake();
+    // _pms.wake();
     //_pms.sleep();
 }
 
@@ -21,7 +21,8 @@ void PMS7003ParticleSensor::loop() {
 }
 
 bool PMS7003ParticleSensor::available() {
-    return _available;
+    return true;
+    // return _available;
 }
 
 const PMS7003ParticleSensor::Measurements& PMS7003ParticleSensor::read() {
@@ -52,7 +53,7 @@ bool PMS7003ParticleSensor::_cycle()
 }
 
 void PMS7003ParticleSensor::_cycleInit() {
-    _pms.wake();
+    // _pms.wake();
     _changeState(_State::Reading);
 }
 
@@ -63,8 +64,11 @@ void PMS7003ParticleSensor::_cycleSleeping() {
     }
 }
 
-bool PMS7003ParticleSensor::_cycleReading() {
+bool PMS7003ParticleSensor::_cycleReading()
+{
     bool available(false);
+    _pms.read();
+
     if (_pms)
     {
         if (_pms.has_particulate_matter()) {
@@ -78,13 +82,56 @@ bool PMS7003ParticleSensor::_cycleReading() {
             //_pms.sleep();
             available = true;
         }
+        
+        else {
+            Log.errorln("PMS7003 returnd status of %d.", _pms.status);
+        }
+
         // TODO: should we only change back to Sleeping upon a successful read?
         //_timer.restart();
         //_changeState(_State::Sleeping);
     }
 
-    else {
-        Log.errorln("PMS7003 returnd status of %d.", _pms.status);
+    else
+    { // something went wrong
+        switch (_pms.status)
+        {
+            case _pms.OK: // should never come here
+                Serial.println("PMS statis is OK");
+                break;     // included to compile without warnings
+
+            case _pms.ERROR_TIMEOUT:
+                Serial.println(F(PMS_ERROR_TIMEOUT));
+                break;
+
+            case _pms.ERROR_MSG_UNKNOWN:
+                Serial.println(F(PMS_ERROR_MSG_UNKNOWN));
+                break; 
+
+            case _pms.ERROR_MSG_HEADER:
+                Serial.println(F(PMS_ERROR_MSG_HEADER));
+                break;
+
+            case _pms.ERROR_MSG_BODY:
+                Serial.println(F(PMS_ERROR_MSG_BODY));
+                break;
+
+            case _pms.ERROR_MSG_START:
+                Serial.println(F(PMS_ERROR_MSG_START));
+                break;
+
+            case _pms.ERROR_MSG_LENGTH:
+                Serial.println(F(PMS_ERROR_MSG_LENGTH));
+                break;
+
+            case _pms.ERROR_MSG_CKSUM:
+                Serial.println(F(PMS_ERROR_MSG_CKSUM));
+                break;
+
+            case _pms.ERROR_PMS_TYPE:
+                Serial.println(F(PMS_ERROR_PMS_TYPE));
+                break;
+        }
     }
 
     return available;

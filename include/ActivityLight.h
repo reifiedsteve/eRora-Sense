@@ -15,9 +15,9 @@ public:
     // has received some command event.
     
     virtual void onSwitchOnOff(bool on) override;
-    virtual void onFanSpeed(int speed) override;
-    virtual void onBacklightBrightness(uint8_t brightness) override;
-    virtual void onBacklightColour(uint8_t hue, uint8_t sat) override;
+    virtual void onFanSpeed(int speed) override; 
+    virtual void onCabinetBrightness(uint8_t brightness) override;
+    virtual void onCabinetColour(uint8_t hue, uint8_t sat) override;
     // virtual void onDisplayMode(DisplayMode mode) override;
 
     void onTemperature(float temperature) override;
@@ -27,6 +27,12 @@ public:
     void onCO2(float co2) override;
     void onIAQAvailability(bool available) override;
     void onIAQ(float iaq) override;
+
+    void onPM01(uint16_t pm01) override;
+    void onPM25(uint16_t pm25) override;
+    void onPM10(uint16_t pm10) override;
+
+    void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) override;
 
 private:
 

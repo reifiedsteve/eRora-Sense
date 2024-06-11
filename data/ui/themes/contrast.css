@@ -1,0 +1,39 @@
+
+:root 
+{
+    --primary-color: #2181cf;
+    --secondary-color: #fff;
+
+    --primary-background: #181818;
+    --secondary-background: #252525;
+
+    --emphasised-background: #0b025f;
+    --on-emphasised-background: white;
+
+    --audioHistogramBackground: #202020;
+    --volumeUnlitRGB: #440044;
+    --volumeLitRGB: #AA00AA;
+    --frequenciesUnlitRGB: #004400;
+    --frequenciesLitRGB: #00CC00;
+
+    --dropdownRGB: #a8dcfc;
+    --dropdownBackgroundRGB: #1A1A1A;
+
+    --soft-corner: 5px;
+}
+
+/*
+
+Conversion tool at: https://codepen.io/sosuke/pen/Pjoqqp
+
+white is --> 
+filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(311deg) brightness(105%) contrast(101%);
+
+black is --> 
+filter: invert(0%) sepia(18%) saturate(1670%) hue-rotate(230deg) brightness(109%) contrast(107%);
+
+*/
+
+.svg-icon {
+    filter: invert(100%) sepia(0%) saturate(0%) hue-rotate(311deg) brightness(105%) contrast(101%);
+}

@@ -182,7 +182,7 @@ void MQTTConnection::_publish(const Topic& relTopic, const String& message, bool
 
 void MQTTConnection::_publish(const Topic& relTopic, const char* message, bool retained) {
     const std::string topic((_prefix + relTopic).str());
-    Log.verboseln("MQTT: publish %s %s", topic.c_str(), message);
+    // Log.verboseln("MQTT: publish %s %s", topic.c_str(), message);
     _mqtt.publish(topic.c_str(), message, retained);
 }
 

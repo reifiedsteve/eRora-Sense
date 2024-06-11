@@ -6,6 +6,7 @@
 #include "Sensors/TVOCObserver.h"
 #include "Sensors/CO2Observer.h"
 #include "Sensors/IAQObserver.h"
+#include "Sensors/PMObserver.h"
 
 class SmartSensorMeasurementObserver
     : public TemperatureObserver
@@ -14,6 +15,7 @@ class SmartSensorMeasurementObserver
     , public TVOCObserver
     , public CO2Observer
     , public IAQObserver
+    , public PMObserver
     // , public ParticleObserver
 {
 public:

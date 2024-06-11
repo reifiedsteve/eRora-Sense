@@ -40,15 +40,13 @@ public:
     /// @return If connected, returns true; otherwise false.
     bool connected();
 
-
-
-
-/*
+    /*
     /// @brief Is the temperature sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isTemperatureSensorReady() override;
-*/
+    */
+
     /// @brief Check whether a temperature measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isTemperatureAvailable() override;
@@ -57,13 +55,13 @@ public:
     /// @return The temperature in C.
     float readTemperature() override;
 
-
-/*
+    /*
     /// @brief Is the humidity sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isHumiditySensorReady() override;
-*/
+    */
+
     /// @brief Check whether a relative humidity measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isHumidityAvailable() override;
@@ -72,13 +70,13 @@ public:
     /// @return Relative humidity as a percentage.
     float readHumidity() override;
 
-
-/*
+    /*
     /// @brief Is the airr-pressure sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isAirPressureSensorReady() override;
-*/
+    */
+
     /// @brief Check whether an air pressure measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isAirPressureAvailable() override;
@@ -87,13 +85,13 @@ public:
     /// @return Returns barometric pressure in Pascals.
     float readAirPressure() override;
 
-
-/*
+    /*
     /// @brief Is the TVOC sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isTVOCSensorReady() override;
-*/
+    */
+
     /// @brief Check whether a TVOC measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isTVOCAvailable() override;
@@ -102,13 +100,13 @@ public:
     /// @return TVOC in parts-per-million (ppm).
     float readTVOC() override;
 
-
-/*
+    /*
     /// @brief Is the CO2 sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isCO2SensorReady() override;
-*/
+    */
+
     /// @brief Check whether a TVOC measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isCO2Available() override;
@@ -117,16 +115,17 @@ public:
     /// @return CO2 level in ppm.
     float readCO2() override;
 
-
-/*
+    /*
     /// @brief Is the IAQ sensor in a steady-state and able to provide
     /// measurements?
     /// @return Returns true if in the steady-state; otherwise false;
     bool isIAQSensorReady() override;
-*/
+    */
+
     /// @brief Check whether a humidity measurement is available.
     /// @return Return true if available. Otherwise false. 
     bool isIAQAvailable() override;
+
 
     /// @brief Returns the currwntly measured Indoor Air quality Index.
     /// @return The air quality index (see https://en.wikipedia.org/wiki/Air_quality_index).

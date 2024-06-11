@@ -62,7 +62,8 @@ void PanelDisplay::loop()
 }
 
 void PanelDisplay::onSwitchOnOff(bool on) {
-
+    _notify("Power", on ? "on" : "off");
+    if (on) _display.on(); else _display.off();
 }
 
 void PanelDisplay::onFanSpeed(int speed) {
@@ -70,11 +71,11 @@ void PanelDisplay::onFanSpeed(int speed) {
     _notify("Fan Speed", _makeFanSpeedNotificationMessage(_fanSpeed));
 }
 
-void PanelDisplay::onBacklightBrightness(uint8_t brightness) {
+void PanelDisplay::onCabinetBrightness(uint8_t brightness) {
 
 }
 
-void PanelDisplay::onBacklightColour(uint8_t hue, uint8_t sat) {
+void PanelDisplay::onCabinetColour(uint8_t hue, uint8_t sat) {
     
 }
 
@@ -106,10 +107,20 @@ void PanelDisplay::onIAQ(float iaq) {
     _iaq = iaq;
 }
 
-void PanelDisplay::onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10) {
+void PanelDisplay::onPM01(uint16_t pm01) {
     _pm01 = pm01;
+}
+
+void PanelDisplay::onPM25(uint16_t pm25) {
     _pm25 = pm25;
+}
+
+void PanelDisplay::onPM10(uint16_t pm10) {
     _pm10 = pm10;
+}
+
+void PanelDisplay::onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
+    // Probably not of interest in regard to showing on the LCD panel.
 }
 
 void PanelDisplay::_defineCustomChars() {

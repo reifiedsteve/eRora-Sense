@@ -36,7 +36,7 @@ public:
         const TimeSpan& loopInterval,
         MQTTConnection& mqtt,
         Format format = Format::Plain
-    ) : SmartSensorController(smartSensor, "mqtt-controller", loopInterval)
+    ) : SmartSensorController(smartSensor, "mqtt-controller", loopInterval, Responsiveness::Always)
       , SmartSensorObserver("mqtt-controller") 
       , _sensorTopicPrefix("")
       , _mqtt(mqtt)
@@ -62,11 +62,11 @@ public:
         _publishEntity("fan", speed);
     }
 
-    void onBacklightBrightness(uint8_t brightness) override {
+    void onCabinetBrightness(uint8_t brightness) override {
 
     }
 
-    void onBacklightColour(uint8_t hue, uint8_t sat) override {
+    void onCabinetColour(uint8_t hue, uint8_t sat) override {
 
     }
 
@@ -96,6 +96,22 @@ public:
 
     void onIAQ(float iaq) override {
         _publishEntity("IAQ", (int)iaq);
+    }
+
+    void onPM01(uint16_t pm01) override {
+        _publishEntity("PM1", (int)pm01);
+    }
+
+    void onPM25(uint16_t pm25) override {
+        _publishEntity("PM25", (int)pm25);
+    }
+
+    void onPM10(uint16_t pm10) override{
+        _publishEntity("PM10", (int)pm10);
+    }
+
+    void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) override {
+        // Publish this?
     }
 
 private:

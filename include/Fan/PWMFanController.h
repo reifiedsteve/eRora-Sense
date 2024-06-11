@@ -33,23 +33,23 @@ public:
     /// @param on Turn on if true; otherwise turn off.
     void setPower(bool on) override;
 
-    /// @brief Set the fan speed as a perventage. 0 -100. 
+    /// @brief Set the fan speed as a percentage. 0 -100. 
     /// 0 means minimum (in motion) speed. 100 means maximum allowed speed.
     /// @param speedPercentage 0 (minimum) - 100 (maximum).
-    void setFanSpeed(uint8_t speedPercentage) override;
+    void setSpeed(uint8_t speedPercentage) override;
 
 private:
 
     void _init();
 
     void _setPower(bool on);
-    void _setSpeed(uint8_t speedPercentage);
-    void _setDutyCycle(uint32_t dutyCycleVal);
+    void _setDutyCyclePercent(uint8_t speedPercentage);
+    void _setDutyCycleValue(uint32_t dutyCycleVal);
 
     static uint32_t _maxValueForResolution(uint32_t resolution);
 
     bool _isOn;
-    uint8_t _speedPercent;
+    uint8_t _dutyCyclePercentage;
 
     uint8_t _pwmPin;
     uint32_t _pwmFrequency;

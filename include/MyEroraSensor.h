@@ -10,6 +10,7 @@
 #include "MQTTConnection.h"
 #include "MQTTSensorController.h"
 
+#include "Controllers/WebServerSensorController.h"
 #include "Chronos/Stopwatch.h"
 
 #include "Discovery/DeviceExplorer.h"
@@ -22,7 +23,7 @@
 #include "Fan/PWMFanController.h"
 
 #include "Controllers/ButtonController.h"
-#include "Controls/MomentaryButton.h"
+#include "Drivers/MomentaryButton.h"
 
 class MyEroraSensor
 {
@@ -36,6 +37,10 @@ public:
 private:
 
     typedef MomentaryButton _Button;
+
+    const int _buttonPollingInterval = 10; // milliseconds.
+    const int _mqttPollingInterval = 100; // milliseconds.
+    const int _webControllerPollingInterval = 10; // milliseconds.  // interval for propagating from (async) web client to our light state.
 
     void _initWiFi();
     bool _wifiConnect();
@@ -64,13 +69,14 @@ private:
 
     PanelDisplay _display;
 
+    WebServerSensorController _webController;
     MQTTSensorController _mqttController;
 
     _Button _button1, _button2, _button3, _button4;
     ButtonController _buttonController;
 
     uint8_t _fanPWMPinNo;
-    PWMFanController _fanController;
+    PWMFanController _fan;
 
     DeviceExplorer* _discoveryService; 
 };

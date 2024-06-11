@@ -9,6 +9,6 @@ public:
     virtual void onIAQAvailability(bool available) = 0;
 
     /// @brief Inform of a change in IAQ level.
-    /// @param present IAQ level.. 
+    /// @param present IAQ level. AQI 0-500.
     virtual void onIAQ(float iaq) = 0;
 };

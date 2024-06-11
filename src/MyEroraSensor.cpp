@@ -20,9 +20,16 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
     )
     , _smartSensor()
     , _display()
+    , _webController(
+        _smartSensor, 
+        _systemSettings,
+        _userSettings,
+        TimeSpan::fromMilliseconds(_webControllerPollingInterval),
+        80
+    )
     , _mqttController(
         _smartSensor, 
-        TimeSpan::fromMilliseconds(500),
+        TimeSpan::fromMilliseconds(_mqttPollingInterval),
         _mqttClient
     )
     , _button1(PinAssignments::Button1)
@@ -38,7 +45,7 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         _button4
     )
     , _fanPWMPinNo(PinAssignments::FanPWM)
-    , _fanController(_fanPWMPinNo)
+    , _fan(_fanPWMPinNo)
 {}
 
 void MyEroraSensor::setup()
@@ -57,27 +64,25 @@ void MyEroraSensor::setup()
     Log.infoln("Hostname is %s", _systemSettings.getDeviceName().c_str());
 
     {
-        // _fanController.configSeparatePowerControlPin(xxx);
-        _fanController.limitPhysicalSpeedRange(10, 100);
-        _fanController.begin();
+        _fan.configSeparatePowerControlPin(PinAssignments::FanPowerControl);
+        // _fanController.limitPhysicalSpeedRange(0, 100);
+        _fan.begin();
     }
 
-    _fanController.setFanSpeed(100);
-    _fanController.setPower(true);
-
-    _buttonController.setup();
-
-    delay(2000);
+    _fan.setSpeed(100);
+    _fan.setPower(true);
+    _smartSensor.bindFanController(_fan);
 
     _initMQTTController();
+    _buttonController.setup();
+    _webController.setup();
+    delay(500);
+
+    _smartSensor.setup();
     delay(500);
 
     _registerObservers();
     delay(500);
-
-    _smartSensor.setup();
-    _smartSensor.bindFanController(_fanController);
-
 
     _discoveryService = new DeviceExplorer(
         DeviceCategory::MultiSensor,
@@ -94,14 +99,14 @@ void MyEroraSensor::setup()
         [this](const DeviceInformation& deviceDetails, DeviceExplorer::DeviceEvent event) {
             switch (event) {
                 case DeviceExplorer::DeviceEvent::ComeOnline:
-                    //_webController.addDevice(deviceDetails);
+                    _webController.addDevice(deviceDetails);
                     break;
-                case DeviceExplorer::DeviceEvent::NameChange:
-                    //_webController.removeDevice(deviceDetails);
-                    //_webController.addDevice(deviceDetails);
+                case DeviceExplorer::DeviceEvent::Modified:
+                    _webController.removeDevice(deviceDetails);
+                    _webController.addDevice(deviceDetails);
                     break;
                 case DeviceExplorer::DeviceEvent::GoneOffline:
-                    //_webController.removeDevice(deviceDetails);
+                    _webController.removeDevice(deviceDetails);
                     break;
                 default:
                     break;
@@ -116,12 +121,13 @@ void MyEroraSensor::setup()
 
 void MyEroraSensor::loop()
 {
-    _display.loop();
-
     _buttonController.loop();
+    _webController.loop();
+    _mqttController.loop();
 
     _smartSensor.loop();
-    _mqttController.loop();
+
+    _display.loop();
 
     _discoveryService->loop();
 }
@@ -303,6 +309,7 @@ std::string MyEroraSensor::_getDefaultMQTTSensorTopicPrefix() {
 void MyEroraSensor::_registerObservers()
 {
     _smartSensor.bindObserver(_display);
+    _smartSensor.bindObserver(_webController);
     _smartSensor.bindObserver(_mqttController);
     // _smartSensor.bindStateObserver(_webController);
 

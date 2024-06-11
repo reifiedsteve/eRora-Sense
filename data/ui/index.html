@@ -1,0 +1,589 @@
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <title>eRora Multisensor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link id="theme" rel="stylesheet" type="text/css" href="themes/dark.css">
+    <link id="theme" rel="stylesheet" type="text/css" href="index.css">
+</head>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta charset="utf-8">
+
+<script type='text/javascript' charset='utf-8'>
+    // Hides mobile browser's address bar when page is done loading. 
+    // Supposedly. Doesn't seem to work on the browsers I've tried.
+    window.addEventListener('load', 
+        function(e) {
+            setTimeout(function() { window.scrollTo(0, 1); }, 1);
+        }, 
+        false
+    );
+</script>
+
+<script src="raphael-2.1.4.min.js"></script>
+<script src="justgage.js"></script>
+<script src="index.js"></script>
+
+<script>
+
+var effectNamesStrFromCode = "%EFFECTNAMES%";
+var maxPresetsStr = "%MAXUSERPRESETS%";
+var presetsBaseStr = "%USERPRESETSBASE%";
+var numNotificationsStr = "%MAXNOTIFICATIONS%";
+var notificationsBaseStr = "%NOTIFICATIONSBASE%";
+
+/*
+Detect if the template parameters have been substituted.
+If not, then we're being invokes from VSCode, so let's
+provide some dummy substitutions so that the web page
+is still functional for initial testing purposes.
+*/
+
+function isTemplateVar(str, varName) {
+    /* Note: cannot do a simple comparison for the template var as may get substituted. */
+    var len = str.length;
+    var name = str.substring(1, len-1);
+    var percentSymbol = String.fromCharCode(37);
+    var match = ((len == (varName.length + 2)) && (str[0] == percentSymbol) && (name == varName) && (str[len-1] == percentSymbol));
+    return match;
+}
+
+function initTestMode()
+{
+    if (isTemplateVar(effectNamesStrFromCode, "EFFECTNAMES")) {
+        effectNamesStrFromCode = "42:Effect 1;99:Test Effect";
+    }
+
+    if (isTemplateVar(maxPresetsStr, "MAXUSERPRESETS")) {
+        maxPresetsStr = "20";
+    }
+
+    if (isTemplateVar(presetsBaseStr, "USERPRESETSBASE")) {
+        presetsBaseStr = "1";
+    }
+
+    if (isTemplateVar(numNotificationsStr, "MAXNOTIFICATIONS")) {
+        numNotificationsStr = "3";
+    }
+
+    if (isTemplateVar(notificationsBaseStr, "NOTIFICATIONSBASE")) {
+        notificationsBaseStr = "1";
+    }
+
+    console.info("EFFECTNAMES is '" +effectNamesStrFromCode+ "'");
+}
+
+initTestMode();
+
+</script>
+
+<!--
+Note: not using this: there are better color pickers.
+See https://jscolor.com/configure/
+<script src="jscolor.js"></script>
+-->
+
+<!--script>
+// These options apply to all color pickers on the page
+jscolor.presets.default = {
+    format:'hex', hideOnPaletteClick:false, borderRadius:3, padding:6, 
+    width:180, height:160, crossSize:6,
+    previewSize:128,
+    palette: [
+        '#000000', '#ff0000', '#ff5400', '#ffaa00', '#ffff00', '#aaff00', '#54ff00', '#00ff00', '#00ff55', '#00ffa9',  // White. Then hue 0 - 160 in 20 steps.
+        '#ffffff', '#00ffff', '#00a9ff', '#0055ff', '#0000ff', '#5400ff', '#aa00ff', '#ff00ff', '#ff00aa', '#ff0054',  // Black. Then hue 180 - 340 in 20 steps.
+    ],
+};
+</script-->
+
+<!-- A better color picker. ->-->
+<!--script src="iro.js"></script-->
+
+<!-- A better time selector -->
+<!--link href="time-pick.css" rel="stylesheet"-->
+<!--script src="time-pick.js"></script-->
+
+<noscript>
+    Sorry, your browser does not support JavaScript (or it is disabled)!
+</noscript>
+
+<!-- The Modal colour picker popup -->
+
+<!--div id="color-picker-popup" class="color-popup">
+    <div class="color-popup-content">
+        <span id="color-popup-close" class="color-popup-close">&times;</span>
+        <div class="color-popup-label"> 
+            <p>
+                &nbsp;
+            </p>
+        </div>
+        <div id="color-picker">
+        </div>
+    </div>
+</div-->
+
+<!-- The modal help dialogue box -->
+
+<div id="help-popup" class="modal">
+    <div class="modal-content">
+        <span id="help-popup-close" class="modal-close">&times;</span>
+        <div>
+            <p id="help-popup-text"></p>
+        </div>
+    </div>
+</div>
+
+<!-- Icons to be used later but not immediately -->
+
+<div class="hidden">
+    <image id="offline-icon" class="connection-icon" src="icons/offline.png"></image>
+    <image id="online-icon" class="connection-icon" src="icons/online.png"></image>
+</div>
+
+<!-- MAIN -->
+
+<body class="body">
+
+<div id="loading-screen">
+    <div class = "title-banner">
+    eRora Sensor
+    </div>
+    %DEVICENAME%
+    <p>
+    <br>
+    Loading...
+</div>
+
+<div id="content" class="hidden hide-cursor">
+
+    <div class="content-fixed-header">
+
+        <div class="topnav">
+            <div class="banner-grid-container">
+                <div class="banner-grid-icon-item header-outer header-left" id="banner-icon-container-left">
+                    <input id="powerSwitch" type="checkbox" class="power-switch" class="param_switch power-control" onchange="setPower(this.checked);">
+                    <label for="powerSwitch"></label>
+                </div>
+                <div class="banner-grid-title-item">
+                    <h1 class="title-banner" onclick="refreshPage();">
+                        eRora Sensor
+                    </h1>
+                    <div class="device-name-header">
+                        %DEVICENAME%
+                    </div>
+                </div>
+                <div class="banner-grid-icon-item header-outer header-right" id = "banner-icon-container-right">
+                    <img src="icons/offline.svg"  onclick="refreshPage();"/> <!-- Dynamically replaced image (offline/online) -->
+                </div>
+            </div>
+        </div>
+
+        <div class="top-banner ">
+        </div>
+
+        <div class="tab-link-container">
+            <div id="gauges-tab">
+                <button class="tab-link" onclick="onTabClick(event, 0, 'all-gauges-tab-container')">
+                    <img class="svg-icon" src="icons/gauge.svg"/>
+                </button>
+            </div>
+            <!--div id="controls-tab">
+                <button class="tab-link" onclick="onTabClick(event, ???, 'controls-tab-container')">
+                    <img class="svg-icon" src="icons/tune-2.svg"/>
+                </button>
+            </div-->
+            <div id="settings-tab">
+                <button class="tab-link" onclick="onTabClick(event, 1, 'settings-tab-container')">
+                    <img class="svg-icon" src="icons/cogs.svg"/>
+                </button>
+            </div>
+            <div id="info-tab">
+                <button class="tab-link" onclick="onTabClick(event, 2, 'info-tab-container')">
+                    <img class="svg-icon" src="icons/book.svg"/>
+                </button>
+            </div>
+            <div id="devices-tab" class="invisible">
+                <button class="tab-link" onclick="onTabClick(event, 3, 'devices-tab-container')">
+                    <img class="svg-icon" src="icons/lan.svg"/>
+                </button>
+            </div>
+        </div>
+
+        <!--div class="tab-link-container">
+            <div id="hazard-tab">
+                <button class="tab-link" onclick="onTabClick(event, 0, 'hazard-tab-container')">
+                    <img class="svg-icon" src="icons/skull-crossbones.svg"/>
+                </button>
+            </div>
+            <div id="gauges-tab">
+                <button class="tab-link" onclick="onTabClick(event, 1, 'gauges-tab-container')">
+                    <img class="svg-icon" src="icons/thermometer-water.svg"/>
+                </button>
+            </div>
+            <div id="controls-tab">
+                <button class="tab-link" onclick="onTabClick(event, 2, 'controls-tab-container')">
+                    <img class="svg-icon" src="icons/tune-2.svg"/>
+                </button>
+            </div>
+            <div id="settings-tab">
+                <button class="tab-link" onclick="onTabClick(event, 3, 'settings-tab-container')">
+                    <img class="svg-icon" src="icons/cogs.svg"/>
+                </button>
+            </div>
+            <div id="info-tab">
+                <button class="tab-link" onclick="onTabClick(event, 4, 'info-tab-container')">
+                    <img class="svg-icon" src="icons/book.svg"/>
+                </button>
+            </div>
+            <div id="devices-tab" class="invisible">
+                <button class="tab-link" onclick="onTabClick(event, 5, 'devices-tab-container')">
+                    <img class="svg-icon" src="icons/lan.svg"/>
+                </button>
+            </div>
+        </div-->
+
+    </div>
+
+    <div class="content-main">
+
+        <div class="tabs-container">
+
+            <div id="all-gauges-tab-container" class="tab-container">
+
+                <div class="card">
+
+                    <div class="gauge-controls-grid-container">
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="iaq-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="iaq-summary-box">
+                                <div class="iaq-info-title">
+                                    Air Quality
+                                </div>
+                                <p>
+                                <div id="iaq-summary-text-box" class="iaq-info-category iaq-info-category-unavailable">
+                                    <div id = "iaq-summary-text">
+                                        Unavailable
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="tvoc-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="eco2-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="temperature-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="humidity-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="air-pressure-gauge" class="gauge"></div>
+                        </div>
+                    </div>
+        
+                </div>
+
+                <div class ="card">
+
+                    <div class="fan-controls-grid-container">
+                        <div class="fan-controls-grid-item basic-controls-grid-item grid-col-span-3">
+                            <img id="spinning-fan" src="icons/fan.svg" class="basic-controls-grid-icon svg-icon"/>
+                            <div class="basic-controls-grid-control fan-controls-grid-item grid-col-span-3">
+                                <input id="fan-speed-slider" class="fan-speed-slider" type="range" min="1" max="10" value="1" onchange="changeFanSpeed(this.value)">
+                            </div>
+                        </div>
+                    </div>
+        
+                </div>
+                
+            </div>
+
+            <!--div id="hazard-tab-container" class="tab-container">
+
+                <div class="card">
+
+                    <div class="gauge-controls-grid-container">
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="iaq-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="iaq-summary-box">
+                                <div class="iaq-info-title">
+                                    Air Quality
+                                </div>
+                                <p>
+                                <div id="iaq-summary-text-box" class="iaq-info-category iaq-info-category-unavailable">
+                                    <div id = "iaq-summary-text">
+                                        Unavailable
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="tvoc-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="eco2-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="pm10-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="pm25-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item" disabled>
+                            <div id="pm1-gauge" class="gauge"></div>
+                        </div>
+                    </div>
+        
+                </div>
+
+
+            </div-->
+
+            <!--div id="gauges-tab-container" class="tab-container" disabled>
+
+                <div class="card">
+
+                    <div class="gauge-controls-grid-container">
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="temperature-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="humidity-gauge" class="gauge"></div>
+                        </div>
+                        <div class="gauge-box gauge-controls-grid-item">
+                            <div id="air-pressure-gauge" class="gauge"></div>
+                        </div>
+                    </div>
+
+                </div>    
+    
+            </div-->
+
+            <!--div id="controls-tab-container" class="tab-container" disabled>
+
+            </div-->
+
+            <div id="settings-tab-container" class="tab-container" disabled>
+
+                <div class="settings-section">
+
+                    <button type="button" id="interfaceOptionsButton" class="collapsible">
+                        <div class="settings-section-banner-container">
+                            <div style="display:inline-block" class="closedIndicator">
+                            &#9655;
+                            </div> 
+                            <div style="display:inline-block" class="openIndicator">
+                            &#9661;
+                            </div> 
+                            <div style="display:inline-block" class="settings-section-banner">
+                                <label>User Interface</label>
+                                <img src="icons/help-circle.svg" class="settings-section-banner-right help-icon svg-icon" onclick="showHelp('settings-user-interface-help')"></img>
+                            </div>
+                        </div>
+                    </button>
+
+                    <div class="collapsibleContent">
+                        <div>
+                            <table id="settings-table">
+
+                                <tr>
+                                    <div id="settings-user-interface-help" class="settings-descriptive help-popup">
+                                        <h3>User Interface</h3>
+                                        <b>Theme</b>
+                                        <p>
+                                        The user interface theme may be cosmetically changed to
+                                        a different set of colours, look and feel.
+                                        </p>
+                                    </div>
+                                </tr>
+                    
+                                <tr>
+                                    <td>
+                                        <div class="settings-grid-container">
+                            
+                                            <div class="settings-grid-item settings-label">
+                                            Theme:
+                                            </div>
+                            
+                                            <div class="settings-grid-item settings-control">
+                                                <select id="settings-theme" class="settings-control dropdown settings-dropdown" onchange="selectTheme(this.value);">
+                                                    <option value="dark">Dark</option>
+                                                    <option value="light">Light</option>
+                                                    <!--option value="contrast">Contrast</option>
+                                                    <option value="neumorphic">Neumorphic</option-->
+                                                </select>
+                                            </div>
+
+                                            <div id="setting-theme-changed" class="settings-grid-item settings-change-indicator">
+                                            <!--  Change indicator to go here -->
+                                            </div>
+                            
+                                        </div>
+                                    </td>
+                                </tr>        
+
+                            </table>
+                        </div>
+                        </div>
+                </div>
+            
+            </div>
+
+            <div id="info-tab-container" class="tab-container" disabled>
+
+                <div class="card info-text">
+                    <b><u>Hardware</u></b>
+                    <p>
+                        LED Type: ws2812b
+                    <br>
+                        LED Count: %LEDCOUNT%
+                    <!--
+                    <br>
+                        Reversed: %LEDREVERSE% 
+                    -->
+                    <br>
+                        Gamma Correct: %GAMMACORRECT%
+                    <br>
+                    <p>
+                        PSU Voltage: 5 V
+                        <br>
+                        PSU Current: %PSUMILLIAMPS% mA
+                        <br>
+                        Power Management: %PSUMANAGE%
+                    </p>
+                </div>
+
+                <div class="card info-text">
+                    <b><u>Software</u></b>
+                    <p>
+                        eRora Version: %VERSION%
+                        <br>
+                        Built: %BUILDDATE% %BUILDTIME%
+                        <br>
+                        <p>
+                        Heap Used:&nbsp;<span id="heap-used-value">0</span>K / <span id="heap-total-value">0</span>K
+                    </p>
+                </div>
+
+                <div class="card info-text">
+                    <b><u>Network</u></b>
+                    <p>
+                        MAC: %MACADDR%
+                        <br>
+                        IP Address: %IPADDR%
+                    <p>
+                        MQTT Broker: %MQTTADDR%
+                        <br>
+                        MQTT Port: %MQTTPORT%
+                        <br>
+                        MQTT Topic Prefix: %MQTTTOPICPREFIX%
+                    </p>
+                </div>
+
+                <div class="card info-text">
+                    <b><u>Timekeeping</u></b>
+                    <p>
+                        NTP Domain: %NTPDOMAIN%
+                    <p>
+                        Timezone: %TIMEZONENAME%
+                        <br>
+                        TZ: %TIMEZONESPEC%
+                    <p>
+                    </p>
+                </div>
+
+                <div class="card info-text">
+                    <b><u>Configuration</u></b>
+                    <p>
+                    To invoke set-up mode, do the following:
+                    <br>
+                    * Click the physical power button five times.
+                    <br>
+                    * Connect to WiFi hotspot with SSID %APSSID%.
+                    <br>
+                    * In a browser, go to <a class="web-link" href="http://192.168.4.1">http://192.168.4.1</a>
+                    </p>
+                </div>
+
+                <!--div class="card info-text">
+                <b><u>Documentation</u></b>
+                <p>
+                    Users: <a class="web-link" href="http://www.reified.co.uk/eRora/LED/User-Guide.html">Click here for the user guide.</a>
+                    <br>
+                    Makers: <a class="web-link" href="http://www.reified.co.uk/eRora/LED/Maker-Guide.html">Click here for build instructions.</a>
+                    <br>
+                </p>
+                </div-->
+
+                <!--div class="card info-text">
+                <b><u>Contact</u></b>
+                <p>
+                    w: <a class="web-link" href="http://www.reified.co.uk">www.reified.co.uk</a>
+                    <br>
+                    e: <a class="mail-link" href="mailto:info@reified.co.uk">info@reified.co.uk</a>
+                    <br>
+                    <br>
+                    © 2023 Reified Ltd.
+                </p>
+                </div-->
+
+            </div>
+                
+            <div id="devices-tab-container" class="tab-container" disabled>
+
+            <div class="card info-text">
+
+                <b><u>Other Devices</u></b>
+                <p>
+                    Click on a device's button to go to it's controller.
+                <p>
+
+                <br>
+
+                <div id="devices-list">
+
+                    <!-- Example of what is dynamically created. 
+
+                    <div id="device-127-0-0-1" class="settings-grid-container devices-grid-container">
+                        <div class="devices-grid-item devices-icon">
+                            <img src="icons/led-strip.png"></img>
+                        </div>
+                        <div class="devices-grid-item devices-name-label">
+                            Kitchen Ambient
+                        </div>
+                        <button class="button devices-grid-item devices-button" click="selectDevice('192.168.1.169');">
+                            <img src="icons/remote.png"/>
+                        </button>
+                    </div>
+                    
+                    -->
+
+                </div>
+
+            </div>
+                            
+        </div>
+    </div>
+
+    <div class="content-fixed-footer">
+        <div id="status-line" class="status-line">
+            
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+</html>

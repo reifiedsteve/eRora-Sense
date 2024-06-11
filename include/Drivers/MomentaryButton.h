@@ -20,7 +20,7 @@ public:
     }
 
     inline void setDebounceMs(const unsigned int ms) {
-        _button.setDebounceTicks(ms);
+        _button.setDebounceMs(ms);
     }
 
     inline void setClickMs(const unsigned int ms) {

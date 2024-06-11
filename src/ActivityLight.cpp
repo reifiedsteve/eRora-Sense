@@ -15,11 +15,11 @@ void ActivityLight::onFanSpeed(int speed) {
     _blink();
 }
 
-void ActivityLight::onBacklightBrightness(uint8_t brightness) {
+void ActivityLight::onCabinetBrightness(uint8_t brightness) {
     _blink();
 }
 
-void ActivityLight::onBacklightColour(uint8_t hue, uint8_t sat) {
+void ActivityLight::onCabinetColour(uint8_t hue, uint8_t sat) {
     _blink();
 }
 
@@ -32,29 +32,45 @@ void ActivityLight::_blink() {
 }
 
 void ActivityLight::onTemperature(float temperature) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onHumidity(float humidity) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onAirPressure(float hPa) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onTVOC(float tvoc) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onCO2(float co2) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onIAQAvailability(bool available) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
 }
 
 void ActivityLight::onIAQ(float iaq) {
-    // Only showing cotrol activity, so nothing to do here.
+    // Only showing control activity, so nothing to do here.
+}
+
+void ActivityLight::onPM01(uint16_t pm01) {
+    // Only showing control activity, so nothing to do here.
+}
+
+void ActivityLight::onPM25(uint16_t pm25) {
+    // Only showing control activity, so nothing to do here.
+}
+
+void ActivityLight::onPM10(uint16_t pm10) {
+    // Only showing control activity, so nothing to do here.
+}
+
+void ActivityLight::onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
+    // Only showing control activity, so nothing to do here.
 }

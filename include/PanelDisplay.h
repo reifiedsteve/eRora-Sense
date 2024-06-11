@@ -38,8 +38,8 @@ public:
     
     void onSwitchOnOff(bool on) override;
     void onFanSpeed(int speed) override;
-    void onBacklightBrightness(uint8_t brightness) override;
-    void onBacklightColour(uint8_t hue, uint8_t sat) override;
+    void onCabinetBrightness(uint8_t brightness) override;
+    void onCabinetColour(uint8_t hue, uint8_t sat) override;
 
     void onTemperature(float temperature) override;
     void onHumidity(float humidity) override;
@@ -49,8 +49,12 @@ public:
     void onIAQAvailability(bool available) override; // IAQ, TVOC, CO2.
     void onIAQ(float iaq) override;
 
-    void onParticleReading(uint16_t pm01, uint16_t pm25, uint16_t pm10);
+    void onPM01(uint16_t pm01) override;
+    void onPM25(uint16_t pm25) override;
+    void onPM10(uint16_t pm10) override;
     
+    void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) override;
+
 private:
 
     static const size_t _width = 16;

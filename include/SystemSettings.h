@@ -28,7 +28,7 @@ public:
     }
 
     inline std::string getDeviceDescriptiveName() const {
-        return _getSetting("dev-desc", "Multi-sensor");
+        return _getSetting("dev-desc", "3D Printer Cabinet");
     }
 
     inline void useManualNetworkConfig(bool useStatic) {

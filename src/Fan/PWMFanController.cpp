@@ -11,7 +11,7 @@
 
 PWMFanController::PWMFanController(uint8_t pwmPin, uint32_t pwmFrequency, uint8_t pwmResolution, uint8_t pwmChannelNo )
     : _isOn(false)
-    , _speedPercent(100)
+    , _dutyCyclePercentage(100)
     , _pwmPin(pwmPin)
     , _pwmFrequency(pwmFrequency)
     , _pwmResolution(pwmResolution)
@@ -27,7 +27,9 @@ PWMFanController::PWMFanController(uint8_t pwmPin, uint32_t pwmFrequency, uint8_
 /// MOSFET to physically turn the fan off by cutting power to it.
 /// @param onOffPin The pin to control the MOSFET/transistor.
 void PWMFanController::configSeparatePowerControlPin(uint8_t onOffPin) {
+    Log.verboseln("PWMFanController: setting power control pin (MOSFET) to pin %d.", onOffPin);
     _onOffPin = onOffPin;
+    pinMode(_onOffPin, OUTPUT);
     _useSeparateOnOffControlPin = true;
 }
 
@@ -56,17 +58,17 @@ void PWMFanController::setPower(bool on) {
     _isOn = on;
 }
 
-/// @brief Set the fan speed as a perventage. 0 -100. 
+/// @brief Set the fan speed expressed as duty cycle, a percentage. 0 -100. 
 /// 0 means minimum (in motion) speed. 100 means maximum allowed speed.
-/// @param speedPercentage 0 (minimum) - 100 (maximum).
-void PWMFanController::setFanSpeed(uint8_t speedPercentage)
+/// @param percentage 0 (minimum) - 100 (maximum).
+void PWMFanController::setSpeed(uint8_t percentage)
 {
-    _speedPercent = std::min(speedPercentage, (uint8_t)100);
+    _dutyCyclePercentage = std::min(percentage, (uint8_t)100);
 
     if (_isOn) {
-        _setSpeed(_speedPercent);
+        _setDutyCyclePercent(_dutyCyclePercentage);
     } else {
-        _setDutyCycle(0);
+        _setDutyCycleValue(0);
     }
 }
 
@@ -82,22 +84,23 @@ void PWMFanController::_init() {
 void PWMFanController::_setPower(bool on)
 {
     if (_useSeparateOnOffControlPin) {
-        // For fans that are not motionless at 0 duty cycle and require a (e.g.) MOSFET to be turned off.
+        // For fans that are not motionless at 0 duty cycle and require a (e.g.) relay/MOSFET to be turned off.
+        Log.verboseln("PWMFanController: switching fan on/off switch %s.", on ? "on" : "off");
         digitalWrite(_onOffPin, on ? true : false);
     }
     
-    // For fans that are motionless at 0% duty cycle.
-    // Note: we do this even if we are using a MOSFET as it might
-    // not be connected and this is then the best we can do.
+    // For fans that are motionless at 0% duty cycle and
+    // do not require a separate GPIO controller on/off switch.
+    // In which case going to 0% duty cycle is the best we can do.
 
     if (on) {
-        _setSpeed(_speedPercent);
+        _setDutyCyclePercent(_dutyCyclePercentage);
     } else {
-        _setDutyCycle(0);
+        _setDutyCycleValue(0);
     }
 }
 
-void PWMFanController::_setSpeed(uint8_t speedPercentage)
+void PWMFanController::_setDutyCyclePercent(uint8_t speedPercentage)
 {
     uint32_t dutyCycleMaxPossible(_maxValueForResolution(_pwmResolution));
 
@@ -116,12 +119,13 @@ void PWMFanController::_setSpeed(uint8_t speedPercentage)
     }
 
     uint32_t dutyCycleVal((uint32_t)(dutyCycleMin + (dutyCycleMax - dutyCycleMin) * (speedPercentage / 100.0)));
-    Log.verboseln("PWMFanController: fan speed %d pc.", (int)speedPercentage);
 
-    _setDutyCycle(dutyCycleVal);
+    Log.verboseln("PWMFanController: fan speed %d pc (duty cycle value of %d).", (int)speedPercentage, dutyCycleVal);
+
+    _setDutyCycleValue(dutyCycleVal);
 }
 
-void PWMFanController::_setDutyCycle(uint32_t dutyCycleVal) {
+void PWMFanController::_setDutyCycleValue(uint32_t dutyCycleVal) {
     ledcWrite(_pwmChannelNo, dutyCycleVal);
     Log.verboseln("PWMFanController: set duty cycle of %d (max is %d).", (int)dutyCycleVal, _maxValueForResolution(_pwmResolution));
 }

@@ -1,22 +1,68 @@
 #pragma once
 
-#include <inttypes.h>
-#include <queue>
-
 #include "SmartSensor.h"
+
+#include "Chronos/Stopwatch.h"
+
+#include <vector>
+
+// This will ensure that any callbacks from any controller give back
+// control to that controller in minimal time as we merely queue
+// the callback for (slightly) later execution here which will
+// be on our our thread and not that of the controller. 
+// This has two main benefits:
+// (a) returns control to the controller as quickly as possible.
+// (b) ensures synchronicity between control of and executing animations.
+// It has one disadvantage: it is more code (and code-space is tight).
+// However, it has a major benefit of avoiding possible re-entrancy issues,
+// thus reducing the number of considerations for (and complexity of)
+// other code.
+
+#define OPERATIONS_EXECUTE_ON_MAIN_THREAD
+
+#ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
+#include <queue>
+#include <mutex>
+#endif
 
 class SmartSensorController
 {
 public:
 
-    explicit SmartSensorController(SmartSensor& sensor);
+    typedef SmartSensorController This;
+ 
+    typedef CountdownTimer::Ticks Ticks;
+ 
+    enum class Responsiveness : uint8_t {
+        WhenOn,
+        Always
+    };
 
+    /// @brief Returns the descriptive name of the controller.
+    /// @return The name.
+    const char* controllerName() const;
+
+    /// @brief Set how often the controller runs.
+    /// @param ticks The interval (in ms) between iterations.
+    void setLoopInterval(Ticks ticks);
+
+    /// @brief Get how oftne the controller runs.
+    /// @return The interval (in ms) between iterations.
+    Ticks getLoopInterval() const;
+
+    /// @brief Inquire whether this controller should be reactive when the light is turned off.
+    /// @return If response then returns true, otherwise false.
+    bool responsiveWhenOff() const;
+
+    /// @brief Initialised the controller.
     void setup();
+
+    /// @brief Executes a single cycle of the controller.
     void loop();
 
 protected:
 
-    SmartSensorController(SmartSensor& sensor, const char* controllerName, const TimeSpan& executionInterval);
+    SmartSensorController(SmartSensor& sensor, const char* controllerName, const TimeSpan& executionInterval, Responsiveness responsiveness);
 
     virtual void _initInputs() = 0;
     virtual void _serviceInputs() = 0;
@@ -35,8 +81,7 @@ protected:
 
     /// @brief Adjust the fan speed.
     /// @param delta The amount by which to change the fan speed.
-    /// @return Returns true if the speed was adjusted; otherwise false.
-    bool _adjustFanSpeed(int8_t delta);
+    void _adjustFanSpeed(int8_t delta);
 
     // Set the cabinet backlight brightness, 0 being minimum,
     // 255 being full brightness.
@@ -46,6 +91,14 @@ protected:
     // void _setDisplayMode(DisplayMode mode); // TODO:
     void _selectNextDisplayMode();
     
+    void _reboot();
+
+    #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD    
+    typedef std::function<void()> _DeferredOperation;
+    void _scheduleOperation(_DeferredOperation op);
+    void _executeDeferredOperations();
+    #endif
+
     static bool _allDigits(const std::string& str);
 
     static bool _meansTrue(const std::string& str);
@@ -53,15 +106,28 @@ protected:
 
 private:
 
-    typedef std::function<void()> _Operation;
-    typedef std::queue<_Operation> _Operations;
+    typedef std::mutex _Mutex;
+    typedef std::lock_guard<_Mutex> _ScopedLock;
 
-    void _scheduleOperation(_Operation command);
-    size_t _executeDeferredOperations(size_t n);
-    bool _executeDeferredOperation();
-    
-    SmartSensor& _sensor;
+    #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
+    typedef std::queue<_DeferredOperation> _DeferredOperations;
+    #endif
+
+    SmartSensorController(const SmartSensorController& rhs) = delete;
+    SmartSensorController& operator=(const SmartSensorController& rhs) = delete;
+
+    // Internal state.
+
+    SmartSensor& _smartSensor;
+    const char* _controllerName;
+
+    Responsiveness _responsiveness;
+    bool _responsiveWhenOff;
 
     CountdownTimer _controllerTimer;
-    _Operations _operations;
+
+    #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
+    _Mutex _operationsMutex;
+    _DeferredOperations _deferredOperations;
+    #endif
 };

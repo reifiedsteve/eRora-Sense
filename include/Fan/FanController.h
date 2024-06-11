@@ -10,8 +10,8 @@ public:
     /// @param on If true then turn the fan on; otherwise turns the fan off (i.e. it becomes motionless).
     virtual void setPower(bool on) = 0;
 
-    /// @brief Set the fan speed.
+    /// @brief Set the fan speed, expressed as a duty cycle percentage.
     /// @param speed Speed of the fan, 0 -100. 0 is min (note: not fully off, just slowest speed), 100 is maximum speed.
-    virtual void setFanSpeed(uint8_t speedPercentage) = 0;
+    virtual void setSpeed(uint8_t speedPercentage) = 0;
 };
 

@@ -9,6 +9,7 @@
 
 bool fast(false);
 int fastSpeed(100);
+int mediumSpeed(5);
 int slowSpeed(25);
 uint32_t freq(25000);
 uint8_t resolution(8);
@@ -30,7 +31,7 @@ void setup()
     fan.limitPhysicalSpeedRange(50, 100);
     fan.begin();
     fan.setPower(true);
-    fan.setFanSpeed(slowSpeed);
+    fan.setDutyCycle(slowSpeed);
     timer.restart();
 }
 

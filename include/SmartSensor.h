@@ -1,23 +1,34 @@
 #pragma once
 
+// #define SMART_SENSOR_USES_PMS7003
+
 #include <list>
 
 #include "SmartSensorObserver.h"
 
 #include "Sensors/BME680Sensor.h"
 
+#ifdef SMART_SENSOR_USES_PMS7003
+#include "Sensors/PMS7003ParticleSensor.h"
+#endif
+
 #include "Chronos/CountdownTimer.h"
 #include "Chronos/TimeSpan.h"
 
 #include "Fan/FanController.h"
+
+#include "DeviceState.h"
 
 class SmartSensor
 {
 public:
 
     typedef SmartSensorObserver Observer;
-
+    
     static const TimeSpan DefaultInterval;
+
+    static const int MinFanSpeed = 1;
+    static const int MaxFanSpeed = 10;
 
     SmartSensor();
     
@@ -31,60 +42,131 @@ public:
     void selectNextMode();
 
     /// @brief Set the fan speed (for when fan is in manual mode).
-    /// @param speedSetting Setting of 0-10 (off to maximum).
-    void setFanSpeed(uint8_t speedSetting);
+    /// @param speedSetting Setting of 0-10 (off to maximum). 
+    /// (Values outside of 1-10 will be constrained to 1-10.)
+    void setFanSpeed(int speedSetting);
 
-    void adjustFanSpeed(int8_t delta);
+    /// @brief Adjust the fan speed (for when fan is in manual mode).
+    /// @param speedSetting Amount by which to adjust the fan speed.
+    void adjustFanSpeed(int delta);
 
     /// @brief Increase fan speed (for when fan is in manual mode).
-    void increaseFanSpeed();
+    // void increaseFanSpeed();
 
     /// @brief Decrease fan speed (for when fan is in manual mode).
-    void decreaseFanSpeed();
+    // void decreaseFanSpeed();
+
+    inline bool isSensorReady() const {
+        return _state.sensorReady;
+    }
+
+    inline float getTemperature() const {
+        return _state.temperature;
+    }
+
+    inline float getHumidity() const {
+        return _state.relHumidity;
+    }
+
+    inline float getAirPressure() const {
+        return _state.airPressure;
+    }
+
+    inline float getIAQ() const {
+        return _state.iaq;
+    }
+
+    inline float getTVOC() const {
+        return _state.tvoc;
+    }
+
+    inline float getCO2() const {
+        return _state.co2;
+    }
+
+    inline float getPM01() const {
+        return _state.pm01;
+    }
+
+    inline float getPM25() const {
+        return _state.pm25;
+    }
+
+    inline float getPM10() const {
+        return _state.pm10;
+    }
+
+   /// @brief Reboot the multi-sensor.
+    void reboot();
+
+    bool isOn() const;
+    int getFanSpeed() const;
 
     void setup();
     void loop();
 
 private:
 
-    // bool _setFanPower(bool on);
-    bool _setFanSpeed(uint8_t speedSetting);
+    #ifdef SMARTSENSOR_IS_MUTEX_GUARDED
+    typedef std::mutex _Mutex;
+    typedef std::lock_guard<_Mutex> _ScopedLock;
+    #else
+    class _Mutex { public: inline void lock() {}  inline bool try_lock() { return true; } inline void unlock() {} };
+    class _ScopedLock { public: inline _ScopedLock(_Mutex& mutex) {} };
+    #endif
+
+    void _doSetFanSpeed(int speedSetting);
+    void _doAdjustFanSpeed(int delta);
+
+    bool _setPower(bool on);
+    bool _setFanSpeed(int speedSetting);
 
     void _processTemperature(float temperature);
     void _processHumidity(float relHumidity);
+    void _processAirPressure(float airPressure);
     void _processTVOC(float tvoc);
     void _processCO2(float co2);
     void _processIAQ(bool available, float iaq);
 
+    void _processPM01(uint16_t pm01);
+    void _processPM25(uint16_t pm25);
+    void _processPM10(uint16_t pm10);
+
     void _informOfTemperature(float temperature);
     void _informOfHumidity(float humidity);
+    void _informOfAirPressure(float humidity);
     void _informOfTVOC(float tvoc);
     void _informOfCO2(float co2);
     void _informOfIAQ(float iaq);
 
+    void _informOfPM01(uint16_t pm01);
+    void _informOfPM25(uint16_t pm25);
+    void _informOfPM10(uint16_t pm10);
+
     void _informOfIAQAvailability(bool available);
 
-    void _informOfFanSpeed(uint8_t fanSpeed);
+    void _informOfPower(bool on);
+    void _informOfFanSpeed(int fanSpeed);
 
-    static uint8_t _constrainFanSpeed(uint8_t speed);
+    static int _constrainFanSpeed(int speed);
 
     typedef std::list<Observer*> _Observers;
 
     BME680Sensor _bmeSensor;
-    // SGP30Sensor _sgpSensor;
 
-    float _temperature, _relHumidity;
-    float _co2, _tvoc;
-    
-    bool _iaqAvailable;
-    float _iaq;
+    #ifdef SMART_SENSOR_USES_PMS7003
+    PMS7003ParticleSensor _pmSensor;
+    #endif
+
+    DeviceState _state;
 
     CountdownTimer _timer;
     _Observers _observers;
 
-    FanController* _fanController;
+    FanController* _fan;
 
-    bool _fanIsOn;
     int _fanSpeed;
+
+    mutable _Mutex _mutex;
 };
 

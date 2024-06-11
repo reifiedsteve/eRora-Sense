@@ -12,7 +12,7 @@ void CharacterMatrix1602::setup() {
 }
 
 void CharacterMatrix1602::defineCustomChar(size_t index, byte bitmap[]) {
-    _lcd.createChar(index, (byte*)bitmap);
+    _lcd.createChar(_mapCharacter(index), (byte*)bitmap);
 }
 
 void CharacterMatrix1602::on() {
