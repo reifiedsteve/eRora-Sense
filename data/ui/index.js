@@ -241,7 +241,8 @@ function onSelectNotificationPeriod(notificationNo, secs) {
     saveSetting("notification-" + notificationNo + "-period", secs);
 }
 
-function refreshPage() {
+function refreshPage()
+{
     var url = window.location.href;
     window.location.replace(url);
 }
@@ -285,6 +286,10 @@ var volumeLitRGB = getComputedStyle(root).getPropertyValue('--volumeLitRGB');
 var frequenciesUnlitRGB = getComputedStyle(root).getPropertyValue("--frequenciesUnlitRGB");
 var frequenciesLitRGB = getComputedStyle(root).getPropertyValue("--frequenciesLitRGB");
 
+var secondaryBackground = getComputedStyle(root).getPropertyValue("--secondary-background");
+var onSecondaryBackground = getComputedStyle(root).getPropertyValue("--on-secondary-background");
+var gaugeValueColor = getComputedStyle(root).getPropertyValue("--gauge-value-color");
+
 function readRootVars()
 {
     audioHistogramBackground = getComputedStyle(root).getPropertyValue("--audioHistogramBackground");
@@ -292,6 +297,9 @@ function readRootVars()
     volumeLitRGB = getComputedStyle(root).getPropertyValue('--volumeLitRGB');
     frequenciesUnlitRGB = getComputedStyle(root).getPropertyValue("--frequenciesUnlitRGB");
     frequenciesLitRGB = getComputedStyle(root).getPropertyValue("--frequenciesLitRGB");
+
+    secondaryBackground = getComputedStyle(root).getPropertyValue("--secondary-background");
+    onSecondaryBackground = getComputedStyle(root).getPropertyValue("--on-secondary-background");
 }
 
 function logRootVars()
@@ -847,7 +855,7 @@ function onAirQualityReadyMessage(args)
         } 
 
         else if ((state == "off") || (state == "false")) {
-            showAirQualitySummary("Unavailable", "iaq-info-category-unavailable");
+            showAirQualitySummary("Sensor is initialising...", "iaq-info-category-unavailable");
         }
 
         else {
@@ -891,7 +899,7 @@ function updateIAQSummary(iaq)
         textClass = "iaq-info-category-hazardous";
     }
 
-    showAirQualitySummary(text, textClass);
+    showAirQualitySummary("Air Quality: " + text, textClass);
 }
 
 function showAirQualitySummary(summaryText, styleClassID)
@@ -899,7 +907,8 @@ function showAirQualitySummary(summaryText, styleClassID)
     let elt = document.getElementById('iaq-summary-text');
     elt.innerHTML = summaryText;
 
-    let el = document.getElementById('iaq-summary-text-box');
+    // let el = document.getElementById('iaq-summary-text-box');
+    let el = document.getElementById('iaq-top-summary-text-box');
     el.classList.remove('iaq-info-category-good');
     el.classList.remove('iaq-info-category-moderate');
     el.classList.remove('iaq-info-category-sensitive');
@@ -3203,7 +3212,9 @@ function selectTheme(theme)
     loadTheme(theme);
     setCookie("theme", theme);
 
-    // refreshPage();
+    /*
+    refreshPage();
+    */
 
     /* Need to reload root vars as they will have changed. */
 
@@ -3367,7 +3378,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       value: 0,
       min: 0,
       max: 500,
-      valueFontColor: 'white',
+      valueFontColor: gaugeValueColor,
       symbol: '',
       pointer: true,
       pointerOptions: {
@@ -3406,192 +3417,54 @@ document.addEventListener("DOMContentLoaded", function(event) {
       relativeGaugeSize: true
     });
 
-      pm10Gauge = new JustGage({
-        id: 'pm10-gauge',
-        /* title: 'Air Quality', */
-        label: "PM 10 (\u00B5g/m3)",    /* \u00B3 for superscript3, but too small */
+    temperatureGauge = new JustGage({
+        id: 'temperature-gauge',
+        /* title: 'Temperature', */
+        label: "Temperature",
         value: 0,
         min: 0,
-        max: 10000,
-        valueFontColor: 'white',
-        symbol: '',
+        max: 50,
+        valueFontColor: gaugeValueColor,
+        symbol: '°C',
         pointer: true,
+        gaugeWidthScale: 0.6,
         pointerOptions: {
           toplength: -10,
           bottomlength: 8,
           bottomwidth: 8,
+          /*
+          color: '#2181cf',
+          stroke: '#ffffff',
+          */
           color: '#2181cf',
           stroke: 'white',
           stroke_width: 2,
           stroke_linecap: 'round'
         },
         customSectors: [{
-          color: '#118e15',
+          color: '#022cd3',
           lo: 0,
+          hi: 15
+        }, {
+          color: '#37c1fc',
+          lo: 15,
+          hi: 20
+        }, {
+          color: '#e2e226',
+          lo: 20,
+          hi: 25
+        }, {
+          color: '#f7ac2c',
+          lo: 25,
+          hi: 30
+        }, {
+          color: '#f7472c',
+          lo: 30,
           hi: 50
-        }, {
-          color: '#ede10b',
-          lo: 50,
-          hi: 100
-        }, {
-          color: '#ed9e06',
-          lo: 100,
-          hi: 150
-        }, {
-          color: '#ed440b',
-          lo: 150,
-          hi: 200
-        }, {
-          color: '#cc2cdd',
-          lo: 200,
-          hi: 500
-        }
-        ],
-        gaugeWidthScale: 0.6,
+        }],
         counter: true,
         relativeGaugeSize: true
       });
-  
-      pm25Gauge = new JustGage({
-        id: 'pm25-gauge',
-        /* title: 'Air Quality', */
-        label: "PM 2.5 (\u00B5g/m3)",    /* \u00B3 for superscript3, but too small */
-        value: 0,
-        min: 0,
-        max: 10000,
-        valueFontColor: 'white',
-        symbol: '',
-        pointer: true,
-        pointerOptions: {
-          toplength: -10,
-          bottomlength: 8,
-          bottomwidth: 8,
-          color: '#2181cf',
-          stroke: 'white',
-          stroke_width: 2,
-          stroke_linecap: 'round'
-        },
-        customSectors: [{
-          color: '#118e15',
-          lo: 0,
-          hi: 50
-        }, {
-          color: '#ede10b',
-          lo: 50,
-          hi: 100
-        }, {
-          color: '#ed9e06',
-          lo: 100,
-          hi: 150
-        }, {
-          color: '#ed440b',
-          lo: 150,
-          hi: 200
-        }, {
-          color: '#cc2cdd',
-          lo: 200,
-          hi: 500
-        }
-        ],
-        gaugeWidthScale: 0.6,
-        counter: true,
-        relativeGaugeSize: true
-      });
-  
-      pm1Gauge = new JustGage({
-        id: 'pm1-gauge',
-        /* title: 'Air Quality', */
-        label: "PM 1.0 (\u00B5g/m3)",    /* \u00B3 for superscript3, but too small */
-        value: 0,
-        min: 0,
-        max: 10000,
-        valueFontColor: 'white',
-        symbol: '',
-        pointer: true,
-        pointerOptions: {
-          toplength: -10,
-          bottomlength: 8,
-          bottomwidth: 8,
-          color: '#2181cf',
-          stroke: 'white',
-          stroke_width: 2,
-          stroke_linecap: 'round'
-        },
-        customSectors: [{
-          color: '#118e15',
-          lo: 0,
-          hi: 50
-        }, {
-          color: '#ede10b',
-          lo: 50,
-          hi: 100
-        }, {
-          color: '#ed9e06',
-          lo: 100,
-          hi: 150
-        }, {
-          color: '#ed440b',
-          lo: 150,
-          hi: 200
-        }, {
-          color: '#cc2cdd',
-          lo: 200,
-          hi: 500
-        }
-        ],
-        gaugeWidthScale: 0.6,
-        counter: true,
-        relativeGaugeSize: true
-      });
-  
-      temperatureGauge = new JustGage({
-      id: 'temperature-gauge',
-      /* title: 'Temperature', */
-      label: "Temperature",
-      value: 0,
-      min: 0,
-      max: 50,
-      valueFontColor: 'white',
-      symbol: '°C',
-      pointer: true,
-      gaugeWidthScale: 0.6,
-      pointerOptions: {
-        toplength: -10,
-        bottomlength: 8,
-        bottomwidth: 8,
-        /*
-        color: '#2181cf',
-        stroke: '#ffffff',
-        */
-        color: '#2181cf',
-        stroke: 'white',
-        stroke_width: 2,
-        stroke_linecap: 'round'
-      },
-      customSectors: [{
-        color: '#022cd3',
-        lo: 0,
-        hi: 15
-      }, {
-        color: '#37c1fc',
-        lo: 15,
-        hi: 20
-      }, {
-        color: '#e2e226',
-        lo: 20,
-        hi: 25
-      }, {
-        color: '#f7ac2c',
-        lo: 25,
-        hi: 30
-      }, {
-        color: '#f7472c',
-        lo: 30,
-        hi: 50
-      }],
-      counter: true,
-      relativeGaugeSize: true
-    });
 
     humidityGauge = new JustGage({
       id: 'humidity-gauge',
@@ -3600,7 +3473,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       value: 0,
       min: 0,
       max: 100,
-      valueFontColor: 'white',
+      valueFontColor: gaugeValueColor,
       symbol: '%',
       pointer: true,
       pointerOptions: {
@@ -3628,7 +3501,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         value: 0,
         min: 0,
         max: 2000,
-        valueFontColor: 'white',
+        valueFontColor: gaugeValueColor,
         symbol: '',
         pointer: true,
         pointerOptions: {
@@ -3656,7 +3529,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       value: 0,
       min: 0,
       max: 150,
-      valueFontColor: 'white',
+      valueFontColor: gaugeValueColor,
       symbol: '',
       pointer: true,
       pointerOptions: {
@@ -3685,7 +3558,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
       value: 0,
       min: 0,
       max: 10000,
-      valueFontColor: 'white',
+      valueFontColor: gaugeValueColor,
       symbol: '',
       pointer: true,
       pointerOptions: {

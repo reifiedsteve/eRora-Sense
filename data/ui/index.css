@@ -1774,9 +1774,9 @@ input[type="radio"] {
 }
 
 .gauge-info-box {
-    margin: 65px 10px 10px 20px;
+    margin: 55px 10px 10px 20px;
     padding: 5px 15px 5px 15px;
-    width: 150px;
+    width: 140px;
 }
 
 .gauge-controls-grid-container {
@@ -1784,6 +1784,8 @@ input[type="radio"] {
     grid-template-columns: 1fr 1fr;
     column-gap: 5px;
     row-gap: 5px;
+    margin-top: 15px;
+    margin-bottom: -10px;
     /*
     margin-left: -10px;
     margin-right: 0px;
@@ -1796,7 +1798,7 @@ input[type="radio"] {
 }
 
 .gauge-controls-grid-item {
-    margin: -5px -5px -5px -5px;
+    margin: -20px -5px -5px -5px;
     padding: -5px -5px -5px -5px;
     /* display: flex; */
     /* width: 100%; */
@@ -1812,6 +1814,7 @@ input[type="radio"] {
 .gauge-box {
     padding-top: 0px;
     width: 180px;   /* The gauge rendering will auto size to this! :) */
+    height: 100%;
 }
 
 .gauge {
@@ -1833,6 +1836,18 @@ input[type="radio"] {
 }
 
 .iaq-info-category {
+    padding: 6px;
+    margin-top: -10px;
+    height: 15px;
+    width: 40px;
+    border-radius: 30px;   
+    display: inline-block; 
+    width: 60%;
+    font-size: 14px;
+}
+
+/*
+.iaq-info-category {
     padding: 10px;
     margin-top: 40px;
     height: 15px;
@@ -1842,6 +1857,7 @@ input[type="radio"] {
     width: 60%;
     font-size: 14px;
 }
+*/
 
 .iaq-info-category-unavailable {
     background-color: white;
