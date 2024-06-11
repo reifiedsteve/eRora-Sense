@@ -5,6 +5,8 @@
 #include "SmartSensorObserver.h"
 // #include "PWMFanObserver.h"
 
+#include "DeviceState.h"
+
 #include "Chronos/CountdownTimer.h"
 
 class PanelDisplay : public SmartSensorObserver
@@ -88,7 +90,7 @@ private:
         Hazardous
     };
 
-    enum class _State {
+    enum class _DisplayState {
         Normal,
         StartNotification,
         Notification
@@ -138,6 +140,12 @@ private:
     Display _display;
     _Page _page;
 
+#if 1
+
+    DeviceState _deviceState;
+
+#else
+
     float _tempC, _relHumidity;
     float _tvoc, _co2;
     float _airPressure;
@@ -148,11 +156,13 @@ private:
     uint16_t _pm01, _pm25, _pm10;
 
     int _fanSpeed;
-    
+
+#endif
+
     CountdownTimer _timer;
 
     std::string _title, _message;
     CountdownTimer _notifyTimer;
 
-    _State _state;
+    _DisplayState _displayState;
 };

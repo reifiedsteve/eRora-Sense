@@ -9,21 +9,12 @@ PanelDisplay::PanelDisplay()
     : SmartSensorObserver("panel-display")
     , _display()
     , _page(_Page::Welcome0)
-    , _tempC(0)
-    , _relHumidity(0)
-    , _tvoc(0)
-    , _co2(0)
-    , _airPressure(0)
-    , _iaqAvailable(false)
-    , _iaq(0)
-    , _pm01(0)
-    , _pm25(0)
-    , _pm10(0)
+    , _deviceState()
     , _timer(5000)
     , _title()
     , _message()
     , _notifyTimer(5000)
-    , _state(_State::Normal)
+    , _displayState(_DisplayState::Normal)
 {}
 
 void PanelDisplay::selectNextPage() {
@@ -39,22 +30,22 @@ void PanelDisplay::setup() {
 
 void PanelDisplay::loop()
 {
-    switch (_state)
+    switch (_displayState)
     {
-        case _State::Normal:
+        case _DisplayState::Normal:
             _execStateNormal();
             break;
 
-        case _State::StartNotification:
+        case _DisplayState::StartNotification:
             _execStateStartNotification();
             break;
 
-        case _State::Notification:
+        case _DisplayState::Notification:
             _execStateNotification();
             break;
 
         default:
-            _state = _State::Normal;
+            _displayState = _DisplayState::Normal;
             break;
     }
 
@@ -62,13 +53,14 @@ void PanelDisplay::loop()
 }
 
 void PanelDisplay::onSwitchOnOff(bool on) {
+    _deviceState.power = on;
     _notify("Power", on ? "on" : "off");
     if (on) _display.on(); else _display.off();
 }
 
 void PanelDisplay::onFanSpeed(int speed) {
-    _fanSpeed = speed;
-    _notify("Fan Speed", _makeFanSpeedNotificationMessage(_fanSpeed));
+    _deviceState.fanSpeed = speed;
+    _notify("Fan Speed", _makeFanSpeedNotificationMessage(_deviceState.fanSpeed));
 }
 
 void PanelDisplay::onCabinetBrightness(uint8_t brightness) {
@@ -80,43 +72,43 @@ void PanelDisplay::onCabinetColour(uint8_t hue, uint8_t sat) {
 }
 
 void PanelDisplay::onTemperature(float temperature) {
-    _tempC = temperature;
+    _deviceState.temperature = temperature;
 }
 
 void PanelDisplay::onHumidity(float humidity){
-    _relHumidity = humidity;
+    _deviceState.relHumidity = humidity;
 }
 
 void PanelDisplay::onTVOC(float tvoc) {
-    _tvoc = tvoc;
+    _deviceState.tvoc = tvoc;
 }
 
 void PanelDisplay::onCO2(float co2) {
-    _co2 = co2;
+    _deviceState.co2 = co2;
 }
 
 void PanelDisplay::onAirPressure(float hPa) {
-    _airPressure = hPa;
+    _deviceState.airPressure = hPa;
 }
 
 void PanelDisplay::onIAQAvailability(bool available) {
-    _iaqAvailable = available;
+    _deviceState.sensorReady = available;
 }
 
 void PanelDisplay::onIAQ(float iaq) {
-    _iaq = iaq;
+    _deviceState.iaq = iaq;
 }
 
 void PanelDisplay::onPM01(uint16_t pm01) {
-    _pm01 = pm01;
+    _deviceState.pm01 = pm01;
 }
 
 void PanelDisplay::onPM25(uint16_t pm25) {
-    _pm25 = pm25;
+    _deviceState.pm25 = pm25;
 }
 
 void PanelDisplay::onPM10(uint16_t pm10) {
-    _pm10 = pm10;
+    _deviceState.pm10 = pm10;
 }
 
 void PanelDisplay::onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
@@ -157,7 +149,7 @@ void PanelDisplay::_execStateStartNotification()
     _display.show();
     
     _notifyTimer.restart();
-    _state = _State::Notification;
+    _displayState = _DisplayState::Notification;
 }
 
 void PanelDisplay::_execStateNotification()
@@ -166,7 +158,7 @@ void PanelDisplay::_execStateNotification()
         _page = _pageAfter(_page);
         _showPage(_page);
         _timer.restart();
-        _state = _State::Normal;
+        _displayState = _DisplayState::Normal;
     }
 }
 
@@ -247,17 +239,17 @@ void PanelDisplay::_showPage(_Page page)
 
         case _Page::PM01:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
-            _display.writeLine(1, _makePMLine("PM1", _pm01));
+            _display.writeLine(1, _makePMLine("PM1", _deviceState.pm01));
             break;
 
         case _Page::PM25:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
-            _display.writeLine(1, _makePMLine(std::string("PM2") + _customChar(halfChar), _pm25));
+            _display.writeLine(1, _makePMLine(std::string("PM2") + _customChar(halfChar), _deviceState.pm25));
             break;
 
         case _Page::PM10:
             _display.writeLine(0, _makeTemperatureHumidityFanSpeedText());
-            _display.writeLine(1, _makePMLine("PM10", _pm10));
+            _display.writeLine(1, _makePMLine("PM10", _deviceState.pm10));
             break;
 
         case _Page::CalibrationState:
@@ -278,45 +270,45 @@ void PanelDisplay::_showPage(_Page page)
 void PanelDisplay::_notify(const std::string& title, const std::string& message) {
     _title = title;
     _message = message;
-    _state = _State::StartNotification;
+    _displayState = _DisplayState::StartNotification;
 }
 
 std::string PanelDisplay::_makeTemperatureHumidityFanSpeedText() {
     std::ostringstream ss;
-    ss << _customChar(thermometerChar) << std::setw(4) << std::fixed << std::setprecision(1) << _tempC << _customChar(degreesChar) << "C";
+    ss << _customChar(thermometerChar) << std::setw(4) << std::fixed << std::setprecision(1) << _deviceState.temperature << _customChar(degreesChar) << "C";
     ss << " ";
-    ss << _customChar(waterDropChar) << std::setw(2) << (int)_relHumidity << "%";
+    ss << _customChar(waterDropChar) << std::setw(2) << (int)_deviceState.relHumidity << "%";
     ss << " ";
-    if (_fanSpeed < 10) ss << " ";
-    ss << _customChar(airflowChar) << _fanSpeed;
+    if (_deviceState.fanSpeed < 10) ss << " ";
+    ss << _customChar(airflowChar) << _deviceState.fanSpeed;
     return ss.str();
 }
 
 std::string PanelDisplay::_makeTVOCLine() {
     std::ostringstream ss;
-    ss << "TVOC " << (int)_tvoc << "ppm";
+    ss << "TVOC " << (int)_deviceState.tvoc << "ppm";
     std::string str(_fixLeft(ss.str(), _display.width() - 1));
     // Log.verboseln("### TVOC: '%s' len %d", str.c_str(), str.size());
     std::ostringstream ss2;
-    _selectFaceIcon(_determineTVOCCategory(_tvoc));
+    _selectFaceIcon(_determineTVOCCategory(_deviceState.tvoc));
     ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
 }
 
 std::string PanelDisplay::_makeCO2Line() {
     std::ostringstream ss;
-    ss << "eCO" << _customChar(subscriptTwoChar) << " " << (int)_co2 << "ppm";
+    ss << "eCO" << _customChar(subscriptTwoChar) << " " << (int)_deviceState.co2 << "ppm";
     std::string str(_fixLeft(ss.str(), _display.width() - 1));
     std::stringstream ss2;
-    _selectFaceIcon(_determineCO2Category(_co2));
+    _selectFaceIcon(_determineCO2Category(_deviceState.co2));
     ss2 << str << _customChar(faceChar); // TODO: reflect actual mood.
     return ss2.str();
 }
 
 std::string PanelDisplay::_makeIAQLine() {
     std::ostringstream ss;
-    if (_iaqAvailable) {
-        ss <<  (int)_iaq << ": " << _makeIAQDescription((int)_iaq);
+    if (_deviceState.sensorReady) {
+        ss <<  (int)_deviceState.iaq << ": " << _makeIAQDescription((int)_deviceState.iaq);
     } else {
         ss << "(measuring...)";
     }
@@ -338,7 +330,7 @@ std::string PanelDisplay::_makePMLine(const std::string& label, const uint16_t p
 
 std::string PanelDisplay::_makeFanSpeedNotificationMessage(int fanSpeed) {
     std::stringstream ss;
-    int percent(10 * _fanSpeed);
+    int percent(10 * fanSpeed);
     ss << percent << "%";
     return _fixCentre(ss.str(), _width);
 }
