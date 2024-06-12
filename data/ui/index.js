@@ -3202,6 +3202,18 @@ function loadTheme(theme)
         el.style.setProperty("--dummy", "/");
         // ...nice theory, but didn't work. :(
         el.classList.add("dummyClass");
+
+        /*
+
+        Should work - but no update() method.
+        Need later version of JustGage. TODO: get it!
+        https://github.com/toorshia/justgage
+        v 1.6.1. Also has a min.js variant!
+
+        */
+
+        iaqGauge.update('valueFontColor', gaugeValueColor);
+
     }
 }
 
@@ -3412,6 +3424,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         hi: 500
       }
       ],
+      /* labelMinFontSize: 10, */
+      valueMinFontSize: 25,
       gaugeWidthScale: 0.6,
       counter: true,
       relativeGaugeSize: true
@@ -3462,6 +3476,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
           lo: 30,
           hi: 50
         }],
+        /* labelMinFontSize: 10, */
+        valueMinFontSize: 25,
         counter: true,
         relativeGaugeSize: true
       });
@@ -3489,6 +3505,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         stroke_width: 2,
         stroke_linecap: 'round'
       },
+      /* labelMinFontSize: 10, */
+      valueMinFontSize: 25,
       gaugeWidthScale: 0.6,
       counter: true,
       relativeGaugeSize: true
@@ -3517,6 +3535,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
           stroke_width: 2,
           stroke_linecap: 'round'
         },
+        /* labelMinFontSize: 10, */
+        valueMinFontSize: 25,
         gaugeWidthScale: 0.6,
         counter: true,
         relativeGaugeSize: true
@@ -3545,6 +3565,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         stroke_width: 2,
         stroke_linecap: 'round'
       },
+      /* labelMinFontSize: 10, */
+      valueMinFontSize: 25,
       gaugeWidthScale: 0.6,
       counter: true,
       relativeGaugeSize: true
@@ -3574,6 +3596,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         stroke_width: 2,
         stroke_linecap: 'round'
       },
+      /* labelMinFontSize: 10, */
+      valueMinFontSize: 25,
       gaugeWidthScale: 0.6,
       counter: true,
       relativeGaugeSize: true
@@ -3588,28 +3612,40 @@ document.addEventListener("DOMContentLoaded", function(event) {
     }, 5000);
     */
 
-        /*
+    /* 
+    
+    Used to offline test gauge animations...
+
     let timer = setInterval(() => {
-        let n = getRandomInt(0, 4);
+        let n = getRandomNumber(1, 5);
         switch (n) {
             case 0:
-                iaqGauge.refresh(getRandomInt(0, 500));
+                iaqGauge.refresh(getRandomNumber(0, 500));
                 break;
             case 1:
-                temperatureGauge.refresh(getRandomInt(0, 50));
+                temperatureGauge.refresh(getRandomNumber(0, 50));
                 break;
             case 2:
-                humidityGauge.refresh(getRandomInt(0, 100));
+                humidityGauge.refresh(getRandomNumber(0, 100));
                 break;
             case 3:
-                tvocGauge.refresh(getRandomInt(0, 150));
+                tvocGauge.refresh(getRandomNumber(0, 150));
                 break;
             case 4:
-                eCo2Gauge.refresh(getRandomInt(0, 10000));
+                eCo2Gauge.refresh(getRandomNumber(0, 10000));
                 break;                                 
-        }
+            case 5:
+                airPressureGauge.refresh(getRandomNumber(0, 2000));
+                break;                                 
+                }
       }, 1000);
-      */
+
+    */
+
+    function getRandomNumber(min, max) {
+        let n = Math.floor(Math.random() * (max - min + 1)) + min;
+        return n;
+    }
 
     let fanRotationAngle = 1;
 

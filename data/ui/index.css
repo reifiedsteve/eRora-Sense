@@ -1798,8 +1798,12 @@ input[type="radio"] {
 }
 
 .gauge-controls-grid-item {
+    margin: 12px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+    /* Works with JustGage 1.6.1
     margin: -20px -5px -5px -5px;
     padding: -5px -5px -5px -5px;
+    */
     /* display: flex; */
     /* width: 100%; */
 }
