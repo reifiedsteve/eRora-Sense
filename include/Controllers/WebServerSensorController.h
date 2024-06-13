@@ -10,6 +10,8 @@
 // #define CONFIG_ASYNC_TCP_RUNNING_CORE 0 // -1 for any available core
 // TODO: decide on  which core to use. (Using -1 seems less visually glitchy on the lights.)
 
+#include <sstream>
+
 #include <DNSServer.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
@@ -33,6 +35,7 @@
 #include "DeviceState.h"
 
 #include "Utils/LabelledValues.h"
+#include "Utils/DelimitedTextBuilder.h"
 
 #include <queue>
 #include <string>
@@ -132,6 +135,20 @@ public:
 
     void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
 
+    // We need to know when a block update is happening so that 
+    // we can optimise our sending of this data over web sockets
+    // to client browsers. This is because the underlying 
+    // libraries do not like to be flooded with too many WS
+    // send requests at once.
+
+    virtual void onGroupUpdateBegins() override {
+        _beginAtomicSendToClients();
+    }
+
+    virtual void onGroupUpdateEnds() override {
+        _endAtomicSendToClients();
+    }
+
     // Specific to web-controller rather than a sensor-observer
     // (but that might need to change...?).
 
@@ -144,8 +161,29 @@ private:
     typedef _Devices::const_iterator _DevicesConstIter;
     typedef _Devices::iterator _DevicesIter;
 
+    typedef std::function<void ()> _UpdateFunc;
+    typedef std::queue<_UpdateFunc> _GroupUpdateQueue;
+
+    static const size_t _maxGroupUpdates = 32;
+
     static const char _messageDelimiter = '~';
     
+    void _respondToSwitchOnOff(bool on);
+    void _respondToFanSpeed(int speed);
+    void _respondToCabinetBrightness(uint8_t brightness);
+    void _respondToCabinetColour(uint8_t hue, uint8_t sat);
+    void _respondToTemperature(float temperature);
+    void _respondToHumidity(float humidity);
+    void _respondToAirPressure(float hPa);
+    void _respondToTVOC(float tvoc);
+    void _respondToCO2(float co2);
+    void _respondToIAQAvailability(bool available);
+    void _respondToIAQ(float iaq);
+    void _respondToPM01(uint16_t pm01);
+    void _respondToPM25(uint16_t pm25);
+    void _respondToPM10(uint16_t pm10);
+    void _respondToHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
+
     void _initInputs() override;
     void _serviceInputs() override;
 
@@ -177,6 +215,34 @@ private:
     void _appendAllControlStates(std::ostream& os);
     void _appendAllSensorReadings(std::ostream& os);
     
+    std::string _makePowerMessage(bool on);
+    std::string _makeFanSpeedMessage(int speed);
+    std::string _makeTemperatureMessage(float temperature);
+    std::string _makeHumidityMessage(float humidity);
+    std::string _makeAirPressureMessage(float pressure);
+    std::string _makeTVOCMessage(float tvoc);
+    std::string _makeCO2Message(float co2);
+    std::string _makeIAQAvailabilityMessage(bool available);
+    std::string _makeIAQMessage(float iaq);
+    std::string _makePM01Message(uint16_t pm01);
+    std::string _makePM25Message(uint16_t pm25);
+    std::string _makePM10Message(uint16_t pm10);
+    std::string _makeHeapUsageMessage(uint32_t totalHeap, uint32_t freeHeap);
+
+    void _appendPowerMessage(std::ostream& os, bool on);
+    void _appendFanSpeedMessage(std::ostream& os, int speed);
+    void _appendTemperatureMessage(std::ostream& os, float temperature);
+    void _appendHumidityMessage(std::ostream& os, float humidity);
+    void _appendAirPressureMessage(std::ostream& os, float pressure);
+    void _appendTVOCMessage(std::ostream& os, float tvoc);
+    void _appendCO2Message(std::ostream& os, float co2);
+    void _appendIAQAvailabilityMessage(std::ostream& os, bool available);
+    void _appendIAQMessage(std::ostream& os, float iaq);
+    void _appendPM01Message(std::ostream& os, uint16_t pm01);
+    void _appendPM25Message(std::ostream& os, uint16_t pm25);
+    void _appendPM10Message(std::ostream& os, uint16_t pm10);
+    void _appendHeapUsageMessage(std::ostream& os, uint32_t totalHeap, uint32_t freeHeap);
+ 
     void _appendAllUserSettingsMessage(std::ostream& os);
     void _appendUserSettingMessage(std::ostream& os, const char* settingName, int value);
     void _appendUserSettingMessage(std::ostream& os, const char* settingName, unsigned value);
@@ -233,6 +299,10 @@ private:
 
     static int _rssiToQuality(long dBm);
 
+    void _beginAtomicSendToClients();
+    void _sendToClients(const std::string& message);
+    void _endAtomicSendToClients();
+    
     void _webSocketSendAll(const std::string& message);
 
     #if defined(ONBOARDING_HERE)
@@ -279,8 +349,7 @@ private:
     AsyncWebServer _server;
 
     // ScheduledActions& _scheduledActions;
-    
-    
+
     AsyncWebSocket _ws;
     CountdownTimer _webSocketSendTimer;
     _MessageQueue _webSocketSendQueue; // See _wsSend for why this is necessary.
@@ -292,8 +361,10 @@ private:
     std::string _installationSSID;
     
     DeviceState _state;
-    
-    uint32_t _heapTotal, _heapFree;
-
     _Devices _allDevices; 
+
+    bool _groupUpdateInProgress;
+
+    DelimitedTextBuilder _builder;
+    std::stringstream _wsOutputStream;
 };

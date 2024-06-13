@@ -107,10 +107,244 @@ WebServerSensorController::WebServerSensorController(
   , _webSocketSendQueue()
   , _wsCleanupTimer(500, CountdownTimer::State::Running)
   , _state()
-  , _heapTotal(0)
-  , _heapFree(0)
+  , _allDevices()
+  , _groupUpdateInProgress(false)
+  , _builder("~")
+  , _wsOutputStream()
 {
-    WiFi.scanNetworks(true);
+    // WiFi.scanNetworks(true);
+}
+
+#if 0
+
+void WebServerSensorController::onAPSSID(const std::string& ssid) {
+    _installationSSID = ssid;
+}
+
+void WebServerSensorController::onWifiSSID(const std::string& ssid) 
+{
+    Log.verboseln("WebServerSensorController::onWifiSSID(\"%s\")", ssid.c_str());
+
+    std::ostringstream os;
+    os << "wifi-ssid " << ssid.c_str() ;
+
+    _webSocketSendAll(os.str());
+}
+
+void WebServerSensorController::onSignalStrength(long strength) {
+    // Not currently needed by the web page.
+}
+
+void WebServerSensorController::onIPAddress(const IPAddress& ip) {
+
+}
+
+void WebServerSensorController::onHostName(const std::string& hostName) {
+
+}
+
+void WebServerSensorController::onMAC(const MACAddress& mac) {
+
+}
+
+void WebServerSensorController::onProgressStart(const std::string& processName) {
+
+}
+
+void WebServerSensorController::onProgress(uint8_t percentageComplete, const std::string& progressMessage) {
+
+}
+
+void WebServerSensorController::onProgressEnd() {
+
+}
+
+#endif
+
+void WebServerSensorController::onSwitchOnOff(bool on) {
+    _respondToSwitchOnOff(on);
+}
+
+void WebServerSensorController::onFanSpeed(int speed) {
+    _respondToFanSpeed(speed);
+}
+
+void WebServerSensorController::onCabinetBrightness(uint8_t brightness) {
+    _respondToCabinetBrightness(brightness);
+}
+
+void WebServerSensorController::onCabinetColour(uint8_t hue, uint8_t sat) {
+    _respondToCabinetColour(hue, sat);
+}
+
+void WebServerSensorController::onTemperature(float temperature) {
+    _respondToTemperature(temperature);
+}
+
+void WebServerSensorController::onHumidity(float humidity) {
+    _respondToHumidity(humidity);
+}
+
+void WebServerSensorController::onAirPressure(float pressure) {
+    _respondToAirPressure(pressure);
+}
+
+void WebServerSensorController::onTVOC(float tvoc) {
+    _respondToTVOC(tvoc);
+}
+
+void WebServerSensorController::onCO2(float co2) {
+    _respondToCO2(co2);
+}
+
+void WebServerSensorController::onIAQAvailability(bool available) {
+    _respondToIAQAvailability(available);
+}
+
+void WebServerSensorController::onIAQ(float iaq) {
+    _respondToIAQ(iaq);
+}
+
+void WebServerSensorController::onPM01(uint16_t pm01) {
+    _respondToPM01(pm01);
+}
+
+void WebServerSensorController::onPM25(uint16_t pm25) {
+    _respondToPM25(pm25);
+}
+
+void WebServerSensorController:: onPM10(uint16_t pm10) {
+    _respondToPM10(pm10);
+}
+
+void WebServerSensorController::onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
+    _respondToHeapUsage(totalHeap, freeHeap);
+}
+
+void WebServerSensorController::addDevice(const DeviceInformation& device) {
+    Log.verboseln("WebServerLightsController: adding device %s.", device.str().c_str());
+    std::stringstream ss;
+    _allDevices.push_back(device);
+    _makeAddDeviceMessage(ss, device.address(), device.category(), _decodeSpaces(device.name()));
+    _sendToClients(ss.str());
+}
+
+void WebServerSensorController::removeDevice(const DeviceInformation& device) {
+    Log.verboseln("WebServerLightsController: removing device %s.", device.str().c_str());
+    std::stringstream ss;
+    _allDevices.remove_if([device](const DeviceInformation& otherDevice) {
+        return otherDevice.address() == device.address(); 
+    });
+    _makeRemoveDeviceMessage(ss, device.address());
+    _sendToClients(ss.str());
+}
+
+#if 0
+void WebServerSensorController::_respondToSwitchOnOff(bool on)
+{
+    _state.power = on;
+
+    if (_groupUpdateInProgress) {
+        if (!_groupUpdateFirst) {
+            _wsOutputStream << _messageDelimiter;
+        }
+        _appendPowerMessage(_wsOutputStream, on);
+        _groupUpdateFirst = false;
+    } 
+    
+    else {
+        _appendPowerMessage(_wsOutputStream, on);
+        _webSocketSendAll(_wsOutputStream.str().c_str());
+        _wsOutputStream.clear();
+    }
+}
+#endif
+
+void WebServerSensorController::_respondToSwitchOnOff(bool on) {
+    _state.power = on;
+    std::string message(_makePowerMessage(on));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToFanSpeed(int speed){
+    _state.fanSpeed = speed;
+    std::string message(_makeFanSpeedMessage(speed));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToCabinetBrightness(uint8_t brightness) {
+
+}
+
+void WebServerSensorController::_respondToCabinetColour(uint8_t hue, uint8_t sat) {
+
+}
+
+void WebServerSensorController::_respondToTemperature(float temperature) {
+    _state.temperature = temperature;
+    std::string message(_makeTemperatureMessage(temperature));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToHumidity(float humidity) {
+    _state.relHumidity = humidity;
+    std::string message(_makeHumidityMessage(humidity));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToAirPressure(float pressure) {
+    _state.airPressure = pressure;
+    std::string message(_makeAirPressureMessage(pressure));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToTVOC(float tvoc) {
+    _state.tvoc = tvoc;
+    std::string message(_makeTVOCMessage(tvoc));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToCO2(float co2) {
+    _state.co2 = co2;
+    std::string message(_makeCO2Message(co2));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToIAQAvailability(bool available) {
+    _state.sensorReady = available;
+    std::string message(_makeIAQAvailabilityMessage(available));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToIAQ(float iaq) {
+    _state.iaq = iaq;
+    std::string message(_makeIAQMessage(iaq));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToPM01(uint16_t pm01) {
+    _state.pm01 = pm01;
+    std::string message(_makePM01Message(pm01));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToPM25(uint16_t pm25) {
+    _state.pm25 = pm25;
+    std::string message(_makePM25Message(pm25));
+    _sendToClients(message);
+}
+
+void WebServerSensorController:: _respondToPM10(uint16_t pm10) {
+    _state.pm10 = pm10;
+    std::string message(_makePM10Message(pm10));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
+    _state.heapTotal = totalHeap;
+    _state.heapFree = freeHeap;
+    std::string message(_makeHeapUsageMessage(totalHeap, freeHeap));
+    _sendToClients(message);
 }
 
 void WebServerSensorController::_initInputs()
@@ -176,156 +410,6 @@ void WebServerSensorController::_initInputs()
 // void  WebServerSensorController::onObservationStarts(const SmartSensor& smartSensor) {
 //     _smartSensor = &smartSensor;
 // }
-
-#if 0
-
-void WebServerSensorController::onAPSSID(const std::string& ssid) {
-    _installationSSID = ssid;
-}
-
-void WebServerSensorController::onWifiSSID(const std::string& ssid) 
-{
-    Log.verboseln("WebServerSensorController::onWifiSSID(\"%s\")", ssid.c_str());
-
-    std::ostringstream os;
-    os << "wifi-ssid " << ssid.c_str() ;
-
-    _webSocketSendAll(os.str());
-}
-
-void WebServerSensorController::onSignalStrength(long strength) {
-    // Not currently needed by the web page.
-}
-
-void WebServerSensorController::onIPAddress(const IPAddress& ip) {
-
-}
-
-void WebServerSensorController::onHostName(const std::string& hostName) {
-
-}
-
-void WebServerSensorController::onMAC(const MACAddress& mac) {
-
-}
-
-void WebServerSensorController::onProgressStart(const std::string& processName) {
-
-}
-
-void WebServerSensorController::onProgress(uint8_t percentageComplete, const std::string& progressMessage) {
-
-}
-
-void WebServerSensorController::onProgressEnd() {
-
-}
-
-#endif
-
-void WebServerSensorController::onSwitchOnOff(bool on) {
-    _state.power = on;
-    std::string message(std::string("power ") + _toBoolString(on));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onFanSpeed(int speed) {
-    _state.fanSpeed = speed;
-    std::string message(std::string("fan-speed ") + _toString(speed));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onCabinetBrightness(uint8_t brightness) {
-
-}
-
-void WebServerSensorController::onCabinetColour(uint8_t hue, uint8_t sat) {
-
-}
-
-void WebServerSensorController::onTemperature(float temperature) {
-    _state.temperature = temperature;
-    std::string message(std::string("temperature ") + _toString(temperature, 1));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onHumidity(float humidity) {
-    _state.relHumidity = humidity;
-    std::string message(std::string("humidity ") + _toString(humidity, 1));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onAirPressure(float pressure) {
-    _state.airPressure = pressure;
-    std::string message(std::string("air-pressure ") + _toString((int)pressure));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onTVOC(float tvoc) {
-    _state.tvoc = tvoc;
-    std::string message(std::string("tvoc ") + _toString((int)tvoc));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onCO2(float co2) {
-    _state.co2 = co2;
-    std::string message(std::string("co2 ") + _toString((int)co2));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onIAQAvailability(bool available) {
-    _state.sensorReady = available;
-    std::string message(std::string("iaq-ready ") + _toBoolString(available));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onIAQ(float iaq) {
-    _state.iaq = iaq;
-    std::string message(std::string("iaq ") + _toString((int)iaq));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onPM01(uint16_t pm01) {
-    _state.pm01 = pm01;
-    std::string message(std::string("pm1 ") + _toString((int)pm01));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onPM25(uint16_t pm25) {
-    _state.pm25 = pm25;
-    std::string message(std::string("pm25 ") + _toString((int)pm25));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController:: onPM10(uint16_t pm10) {
-    _state.pm10 = pm10;
-    std::string message(std::string("pm10 ") + _toString((int)pm10));
-    _webSocketSendAll(message.c_str());
-}
-
-void WebServerSensorController::onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
-    _state.heapTotal = totalHeap;
-    _state.heapFree = freeHeap;
-    // TODO: send?
-}
-
-void WebServerSensorController::addDevice(const DeviceInformation& device) {
-    Log.verboseln("WebServerLightsController: adding device %s.", device.str().c_str());
-    std::stringstream ss;
-    _allDevices.push_back(device);
-    _makeAddDeviceMessage(ss, device.address(), device.category(), _decodeSpaces(device.name()));
-    _webSocketSendAll(ss.str());
-}
-
-void WebServerSensorController::removeDevice(const DeviceInformation& device) {
-    Log.verboseln("WebServerLightsController: removing device %s.", device.str().c_str());
-    std::stringstream ss;
-    _allDevices.remove_if([device](const DeviceInformation& otherDevice) {
-        return otherDevice.address() == device.address(); 
-    });
-    _makeRemoveDeviceMessage(ss, device.address());
-    _webSocketSendAll(ss.str());
-}
 
 void WebServerSensorController::_serviceInputs() {
     if (_wsCleanupTimer.hasExpired()) {
@@ -628,33 +712,33 @@ void WebServerSensorController::_sendUserSettings(AsyncWebSocketClient* client)
 
 void WebServerSensorController::_appendAllControlStates(std::ostream& os)
 {
-    os << "power " << _toBoolString(_state.power);
+    _appendPowerMessage(os, _state.power);
     os << _messageDelimiter;
-    
-    os << "fan-speed " << _toString(_state.fanSpeed);    
+
+    _appendFanSpeedMessage(os, _state.fanSpeed);     
 }
 
 void WebServerSensorController::_appendAllSensorReadings(std::ostream& os)
 {
-    os << "temperature " << _toString(_state.temperature, 1);
+    _appendTemperatureMessage(os, _state.temperature);
     os << _messageDelimiter;
-    
-    os << "humidity " << _toString(_state.relHumidity, 1);
+
+    _appendHumidityMessage(os, _state.relHumidity);
     os << _messageDelimiter;
         
-    os << "air-pressure " << _toString((int)_state.airPressure);
-    os << _messageDelimiter;
-        
-    os << "iaq " << (int)_state.iaq;
+    _appendAirPressureMessage(os, _state.airPressure);
     os << _messageDelimiter;
 
-    os << "tvoc " << (int)_state.tvoc;
+    _appendIAQMessage(os, _state.iaq); ;
     os << _messageDelimiter;
 
-    os << "co2 " << (int)_state.co2;
+    _appendTVOCMessage(os, _state.tvoc);
     os << _messageDelimiter;
 
-    os << "iaq-ready " << _toBoolString(_state.sensorReady);
+    _appendCO2Message(os, _state.co2);
+    os << _messageDelimiter;
+
+    _appendIAQAvailabilityMessage(os, _state.sensorReady);
     os << _messageDelimiter;
 
     #if 0
@@ -684,6 +768,136 @@ void WebServerSensorController::_appendAllUserSettingsMessage(std::ostream& os)
     os << _messageDelimiter;
     
     #endif
+}
+
+std::string WebServerSensorController::_makePowerMessage(bool on) {
+    std::ostringstream os;
+    _appendPowerMessage(os, on);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeFanSpeedMessage(int speed) {
+    std::ostringstream os;
+    _appendFanSpeedMessage(os, speed);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeTemperatureMessage(float temperature) {
+    std::ostringstream os;
+    _appendTemperatureMessage(os, temperature);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeHumidityMessage(float humidity) {
+    std::ostringstream os;
+    _appendHumidityMessage(os, humidity);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeAirPressureMessage(float pressure) {
+    std::ostringstream os;
+    _appendAirPressureMessage(os, pressure);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeTVOCMessage(float tvoc) {
+    std::ostringstream os;
+    _appendTVOCMessage(os, tvoc);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeCO2Message(float co2) {
+    std::ostringstream os;
+    _appendCO2Message(os, co2);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeIAQAvailabilityMessage(bool available) {
+    std::ostringstream os;
+    _appendIAQAvailabilityMessage(os, available);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeIAQMessage(float iaq) {
+    std::ostringstream os;
+    _appendIAQMessage(os, iaq);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makePM01Message(uint16_t pm01) {
+    std::ostringstream os;
+    _appendPM01Message(os, pm01);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makePM25Message(uint16_t pm25) {
+    std::ostringstream os;
+    _appendPM25Message(os, pm25);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makePM10Message(uint16_t pm10) {
+    std::ostringstream os;
+    _appendPM10Message(os, pm10);
+    return os.str();
+}
+
+std::string WebServerSensorController::_makeHeapUsageMessage(uint32_t totalHeap, uint32_t freeHeap) {
+    std::ostringstream os;
+    _appendHeapUsageMessage(os, totalHeap, freeHeap);
+    return os.str();
+}
+    
+void WebServerSensorController::_appendPowerMessage(std::ostream& os, bool on) {
+    os << "power " << _toBoolString(on);
+}
+
+void WebServerSensorController::_appendFanSpeedMessage(std::ostream& os, int speed) {
+    os << "fan-speed " << speed;
+}
+
+void WebServerSensorController::_appendTemperatureMessage(std::ostream& os, float temperature) {
+    os << "temperature " << _toString(temperature, 1);
+}
+
+void WebServerSensorController::_appendHumidityMessage(std::ostream& os, float humidity) {
+    os << "humidity " << _toString(humidity, 1);
+}
+
+void WebServerSensorController::_appendAirPressureMessage(std::ostream& os, float pressure) {
+    os << "air-pressure " << (int)pressure;
+}
+
+void WebServerSensorController::_appendTVOCMessage(std::ostream& os, float tvoc) {
+    os << "tvoc " << (int)tvoc;
+}
+
+void WebServerSensorController::_appendCO2Message(std::ostream& os, float co2) {
+    os << "co2 " << (int)co2;
+}
+
+void WebServerSensorController::_appendIAQAvailabilityMessage(std::ostream& os, bool available) {
+    os << "iaq-ready " << _toBoolString(available);
+}
+
+void WebServerSensorController::_appendIAQMessage(std::ostream& os, float iaq) {
+    os << "iaq " << (int)iaq;
+}
+
+void WebServerSensorController::_appendPM01Message(std::ostream& os, uint16_t pm01) {
+    os << "pm1 " << pm01;
+}
+
+void WebServerSensorController::_appendPM25Message(std::ostream& os, uint16_t pm25) {
+    os << "pm25 " << pm25;
+}
+
+void WebServerSensorController:: _appendPM10Message(std::ostream& os, uint16_t pm10) {
+    os << "pm10 " << pm10;
+}
+
+void WebServerSensorController::_appendHeapUsageMessage(std::ostream& os, uint32_t totalHeap, uint32_t freeHeap) {
+    os << "heap " << totalHeap << " " << freeHeap;
 }
 
 void WebServerSensorController::_appendUserSettingMessage(std::ostream& os, const char* settingName, int value) {
@@ -1502,6 +1716,34 @@ String WebServerSensorController::_processTemplates(const String& key)
     return String(value.c_str());
 }
 
+void WebServerSensorController::_beginAtomicSendToClients()
+{
+    if (_groupUpdateInProgress) {
+        Log.errorln("WebServerSensorController: group update begins while another is in progress!");
+    }
+
+    else {
+        _groupUpdateInProgress = true;
+    }
+}
+
+void WebServerSensorController::_sendToClients(const std::string& message) {
+    _webSocketSendAll(message.c_str());
+}
+
+void WebServerSensorController::_endAtomicSendToClients() 
+{
+    if (!_groupUpdateInProgress) {
+        Log.errorln("WebServerSensorController: group update ends but was never begun!");
+    }
+    
+    else {
+        _webSocketSendAll(_builder.str());
+        _builder.clear();
+        _groupUpdateInProgress = false;
+    }
+}    
+    
 int WebServerSensorController::_rssiToQuality(long dBm)
 {
     int quality = 0;
