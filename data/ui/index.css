@@ -1764,7 +1764,7 @@ input[type="radio"] {
 }
 
 .info-box {
-    padding: 0px 10px -10pxpx 10px;
+    padding: 0px 10px -10px 10px;
     margin: 45px 0px 10px -15px;
     width: 95%;
     height: 90%;
@@ -1775,7 +1775,7 @@ input[type="radio"] {
 
 .gauge-info-box {
     margin: 55px 10px 10px 20px;
-    padding: 5px 15px 5px 15px;
+    padding: 0px 15px 0px 15px;
     width: 140px;
 }
 
@@ -1784,26 +1784,25 @@ input[type="radio"] {
     grid-template-columns: 1fr 1fr;
     column-gap: 5px;
     row-gap: 5px;
-    margin-top: 15px;
-    margin-bottom: -10px;
-    /*
+    /* margin-top: 15px; */
+    /* margin-bottom: 5px; */
     margin-left: -10px;
     margin-right: 0px;
-    margin-top: 0px;
+    margin-top: 5px;
     margin-bottom:0px;
-    */
     /* 
     background: green;
     */
 }
 
 .gauge-controls-grid-item {
-    margin: 12px 0px 0px 0px;
+    /* Works with JustGage 2.x as title is no longer supported.
+    margin: 10px 0px 5px 0px;
     padding: 0px 0px 0px 0px;
-    /* Works with JustGage 1.6.1
+    */
+    /* Works with JustGage 1.6.1 */
     margin: -20px -5px -5px -5px;
     padding: -5px -5px -5px -5px;
-    */
     /* display: flex; */
     /* width: 100%; */
 }

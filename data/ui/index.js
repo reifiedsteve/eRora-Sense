@@ -288,6 +288,7 @@ var frequenciesLitRGB = getComputedStyle(root).getPropertyValue("--frequenciesLi
 
 var secondaryBackground = getComputedStyle(root).getPropertyValue("--secondary-background");
 var onSecondaryBackground = getComputedStyle(root).getPropertyValue("--on-secondary-background");
+
 var gaugeValueColor = getComputedStyle(root).getPropertyValue("--gauge-value-color");
 
 function readRootVars()
@@ -300,6 +301,8 @@ function readRootVars()
 
     secondaryBackground = getComputedStyle(root).getPropertyValue("--secondary-background");
     onSecondaryBackground = getComputedStyle(root).getPropertyValue("--on-secondary-background");
+
+    gaugeValueColor = getComputedStyle(root).getPropertyValue("--gauge-value-color");
 }
 
 function logRootVars()
@@ -309,6 +312,7 @@ function logRootVars()
     console.log("#### audio histogram vol lit is: " + volumeLitRGB);
     console.log("#### audio histogram freq unlit is: " + frequenciesUnlitRGB);
     console.log("#### audio histogram freq lit is: " + frequenciesLitRGB);
+    console.log("### gauge value text colour is: " + gaugeValueColor);
 }
 
 
@@ -805,6 +809,10 @@ function onPowerMessage(args)
     }
 }
 
+function isOn() {
+    return document.getElementById('powerSwitch').checked;
+}
+
 function applyClass(elementId, className, on)
 {
     let el = document.getElementById(elementId);
@@ -855,7 +863,7 @@ function onAirQualityReadyMessage(args)
         } 
 
         else if ((state == "off") || (state == "false")) {
-            showAirQualitySummary("Sensor is initialising...", "iaq-info-category-unavailable");
+            showAirQualitySummary("Sensor is warming up...", "iaq-info-category-unavailable");
         }
 
         else {
@@ -951,7 +959,7 @@ function onHumidityMessage(args)
         let humidity = parseFloat(value);
 
         if (isNaN(humidity)) {
-            console.log("ws: temperature expected a specific humidity value, but got " + value);
+            console.log("ws: humidity - expected a specific humidity value, but got " + value);
         } 
         
         else {
@@ -972,7 +980,7 @@ function onAirPressureMessage(args)
         let pressure = parseInt(value);
 
         if (isNaN(pressure)) {
-            console.log("ws: temperature expected a specific air pressure value, but got " + value);
+            console.log("ws: air pressure - expected a specific air pressure value, but got " + value);
         } 
         
         else {
@@ -993,7 +1001,7 @@ function onTVOCMessage(args)
         let tvoc = parseInt(value);
 
         if (isNaN(tvoc)) {
-            console.log("ws: temperature expected a specific TVOC value, but got " + value);
+            console.log("ws: TVOC - expected a specific TVOC value, but got " + value);
         } 
         
         else {
@@ -1014,7 +1022,7 @@ function onCO2Message(args)
         let co2 = parseInt(value);
 
         if (isNaN(co2)) {
-            console.log("ws: temperature expected a specific CO2 value, but got " + value);
+            console.log("ws: eCO2 - expected a specific CO2 value, but got " + value);
         } 
         
         else {
@@ -1035,7 +1043,7 @@ function onFanSpeedMessage(args)
         let speed = parseInt(value);
 
         if (isNaN(speed)) {
-            console.log("ws: fan-speed expected a specific speed value, but got " + value);
+            console.log("ws: fan-speed - expected a specific speed value, but got " + value);
         } 
         
         else {
@@ -3188,6 +3196,7 @@ function initHelpPopup()
     modalCloseBtn.addEventListener("click", hideModal);
 }
 
+
 function loadTheme(theme)
 {
     var el = document.getElementById('theme');
@@ -3211,9 +3220,6 @@ function loadTheme(theme)
         v 1.6.1. Also has a min.js variant!
 
         */
-
-        iaqGauge.update('valueFontColor', gaugeValueColor);
-
     }
 }
 
@@ -3230,34 +3236,97 @@ function selectTheme(theme)
 
     /* Need to reload root vars as they will have changed. */
 
+    /*
     console.log("Reading root vars for theme " + theme + "...");
     readRootVars();
     console.log("Root vars for theme " + theme + " are:");
     logRootVars();
+
+    console.log("###### New font color is " + gaugeValueColor);
+    iaqGauge.valueFontColor = gaugeValueColor;
+    iaqGauge.update('valueFontColor', gaugeValueColor);
+    */
+
+    /* Can't do this here - too soon as load of new theme is performed async by the browser.
+   onThemeChanged();
+    */
+
+    /*
+    The link for 'theme' seems to not trigger the onload event when the href is changed.
+    This can be due to different browsers having different behavioiur.
+    So lets try deleting the link and re-adding it.
+    */
+
+    let themeEl = document.getElementById('theme');
+    let clonedEl = themeEl.cloneNode();
+
+    let newHref = 'themes/' + theme + '.css';
+    clonedEl.href = newHref;
+    clonedEl.type = 'text/css';
+    clonedEl.onload = onThemeChanged;
+
+    themeEl.parentNode.replaceChild(clonedEl, themeEl);
+}
+
+function onThemeChanged()
+{
+    console.log("Theme loaded.");
+
+    readRootVars();
+    logRootVars();
+
+    /* This just adds some duplicates. Not even all. Weird.
+    console.log("Recreating gauges.");
+    recreateGauges();
+    */
+
+    // iaqGauge.config.valueFontColor = gaugeValueColor;
+    // iaqGauge.valueFontColor = gaugeValueColor;
+    
+    /* Mmm, this just doubles up the number. Need to remove the old ones first...
+    Note: the new ones DO HAVE THE CORRECT THEME APPLIED! Yay!
+    makeGauges();
+    */
 }
 
 function onLoad(event)
 {
     console.log("Executing onLoad()");
 
-    readRootVars();
+    // readRootVars();
+
     initHelpPopup();
     initialisePage();
     initAudioRendering();
 
-    let theme = getCookie("theme");
+    let theme = "dark";
 
-    theme = "dark";
+    /*
+
+    theme = getCookie("theme");
 
     if (theme == undefined) {
         console.info("No theme cookie was found.");
+        theme = "dark";
     }
+ 
+    */
 
     console.info("Starting with theme '" + theme + "'");
+
+    readRootVars();
+    logRootVars();
+
+    /*
+
     loadTheme(theme);
- 
+
     let el = document.getElementById("settings-theme");
-    el.value = theme;
+    if (el) {
+        el.value = theme;
+    }
+
+    */
 
     let rootEl = document.getElementById("content");
     let loadingEl = document.getElementById("loading-screen");
@@ -3369,77 +3438,18 @@ function hideModal() {
     modal.style.display = "none";
 }
 
-  /* end modal */
-
-window.addEventListener('load', onLoad);
-
-var iaqGauge;
-var pm25Gauge;
-var pm10Gauge;
-var temperatureGauge;
-var humidityGauge;
-var tvocGauge;
-var eCo2Gauge;
-
-document.addEventListener("DOMContentLoaded", function(event) {
-
-    iaqGauge = new JustGage({
-      id: 'iaq-gauge',
-      /* title: 'Air Quality', */
-      label: "Air Quality Index",
-      value: 0,
-      min: 0,
-      max: 500,
-      valueFontColor: gaugeValueColor,
-      symbol: '',
-      pointer: true,
-      pointerOptions: {
-        toplength: -10,
-        bottomlength: 8,
-        bottomwidth: 8,
-        color: '#2181cf',
-        stroke: 'white',
-        stroke_width: 2,
-        stroke_linecap: 'round'
-      },
-      customSectors: [{
-        color: '#118e15',
-        lo: 0,
-        hi: 50
-      }, {
-        color: '#ede10b',
-        lo: 50,
-        hi: 100
-      }, {
-        color: '#ed9e06',
-        lo: 100,
-        hi: 150
-      }, {
-        color: '#ed440b',
-        lo: 150,
-        hi: 200
-      }, {
-        color: '#cc2cdd',
-        lo: 200,
-        hi: 500
-      }
-      ],
-      /* labelMinFontSize: 10, */
-      valueMinFontSize: 25,
-      gaugeWidthScale: 0.6,
-      counter: true,
-      relativeGaugeSize: true
-    });
-
-    temperatureGauge = new JustGage({
-        id: 'temperature-gauge',
+function makeGauge(gaugeId, minVal, maxVal, val, gaugeLabel, gaugeSymbol)
+{
+    let gauge = new JustGage({
+        id: gaugeId,
         /* title: 'Temperature', */
-        label: "Temperature",
-        value: 0,
-        min: 0,
-        max: 50,
-        valueFontColor: gaugeValueColor,
-        symbol: '°C',
+        label: gaugeLabel,
+        value: val,
+        min: minVal,
+        max: maxVal,
+        /* valueFontColor: gaugeValueColor, */
+        valueFontColor: '#ffffff',
+        symbol: gaugeSymbol,
         pointer: true,
         gaugeWidthScale: 0.6,
         pointerOptions: {
@@ -3482,127 +3492,138 @@ document.addEventListener("DOMContentLoaded", function(event) {
         relativeGaugeSize: true
       });
 
-    humidityGauge = new JustGage({
-      id: 'humidity-gauge',
-      /* title: 'Humidity', */
-      label: 'Relative Humidity',
-      value: 0,
-      min: 0,
-      max: 100,
-      valueFontColor: gaugeValueColor,
-      symbol: '%',
-      pointer: true,
-      pointerOptions: {
-        toplength: -10,
-        bottomlength: 8,
-        bottomwidth: 8,
-        /*
-        color: '#2181cf',
-        stroke: '#ffffff',
-        */
-        color: '#2181cf',
-        stroke: 'white',
-        stroke_width: 2,
-        stroke_linecap: 'round'
-      },
-      /* labelMinFontSize: 10, */
-      valueMinFontSize: 25,
-      gaugeWidthScale: 0.6,
-      counter: true,
-      relativeGaugeSize: true
+      return gauge;
+}
+
+var iaqGauge;
+var pm25Gauge;
+var pm10Gauge;
+var temperatureGauge;
+var humidityGauge;
+var tvocGauge;
+var eCo2Gauge;
+
+function makeGauges()
+{
+    console.log("Making gauges...");
+
+    iaqGauge = makeIAQGauge();
+    airPressureGauge = makeAirPressureGauge();
+    tvocGauge = makeTVOCGauge();
+    co2Gauge = makeCO2Gauge();
+    temperatureGauge = makeTemperatureGauge();
+    humidityGauge = makeHumidityGauge();
+}
+
+function recreateGauges() {
+    /*
+    iaqGauge.destroy();
+    airPressureGauge.destroy();
+    tvocGauge.destroy();
+    co2Gauge.destroy();
+    temperatureGauge.destroy();
+    humidityGauge.destroy();
+    */
+
+    /*
+   iaqGauge = null;
+   airPressureGauge = null;
+   tvocGauge = null;
+   co2Gauge = null;
+   temperatureGauge = null;
+   humidityGauge = null;
+   */
+
+   let newIAQGauge = makeIAQGauge();
+   replaceGauge('iaq-gauge', newIAQGauge);
+   iaqGauge = newIAQGauge;
+
+   let newAirPressureGauge = makeAirPressureGauge();
+   replaceGauge('air-pressure-gauge', newAirPressureGauge);
+   airPressureGauge = newAirPressureGauge;
+
+   let newTVOCGauge = makeTVOCGauge();
+   replaceGauge('tvoc-gauge', newTVOCGauge);
+   tvocGauge = newTVOCGauge;
+
+   let newCO2Gauge = makeCO2Gauge();
+   replaceGauge('co2-gauge', newCO2Gauge);
+   eCo2Gauge = newCO2Gauge;
+
+   let newTemperatureGauge = makeTemperatureGauge();
+   replaceGauge('temperature-gauge', newTemperatureGauge);
+   temperatureGauge = newTemperatureGauge;
+
+   let newHumidityGauge = makeHumidityGauge();
+   replaceGauge('humidity-gauge', newHumidityGauge);
+   humidityGauge = newHumidityGauge;
+
+    window.dispatchEvent(new Event('resise'));
+}
+
+function replaceGauge(id, newGauge)
+{
+    let containerId = id + '-box';
+    let el = document.getElementById(containerId);
+
+    if (el) {
+        let parentEl = el.parentNode;
+        let id = '';
+        if (parentEl.firstChild) {
+            id = parentEl.firstChild.id;
+             parentEl.removeChild(parentEl.firstChild);
+        }
+        newElement = document.createElement('div');
+        newElement.id = id;
+        newElement.classList.add('gauge');
+        parentEl.appendChild(newElement);
+        iaqGauge = null;
+    }
+ }
+
+function makeIAQGauge() {
+    return makeGauge('iaq-gauge', 0, 500, 0,"Air Quality Index", '');
+}
+
+function makeAirPressureGauge() {
+    return makeGauge('air-pressure-gauge', 0, 2000, 0, 'Air Pressure (hPa)', '');
+}
+
+function makeTVOCGauge() {
+    return makeGauge('tvoc-gauge', 0, 200, 0, 'TVOC (ppm)', '');
+}
+
+function makeCO2Gauge() {
+    return makeGauge('eco2-gauge', 0, 10000, 0, 'eCO2 (ppm)', '');
+}
+
+function makeTemperatureGauge() {
+    return makeGauge('temperature-gauge', 0, 50, 0, 'Temperature', '°C');
+}
+
+function makeHumidityGauge() {
+    return makeGauge('humidity-gauge', 0, 100, 0, 'Relative Humidity', '');
+}
+
+  /* end modal */
+
+
+/*
+let themeEl =  document.getElementById('theme');
+if (themeEl) {
+    console.log("Setting up listening for load of theme.");
+    theme.addEventListener('load', function() {
+        console.log("Load theme triggered.");
     });
+}
+*/
 
-    airPressureGauge = new JustGage({
-        id: 'air-pressure-gauge',
-        /* title: 'Humidity', */
-        label: 'Air Pressure (hPa)',
-        value: 0,
-        min: 0,
-        max: 2000,
-        valueFontColor: gaugeValueColor,
-        symbol: '',
-        pointer: true,
-        pointerOptions: {
-          toplength: -10,
-          bottomlength: 8,
-          bottomwidth: 8,
-          /*
-          color: '#2181cf',
-          stroke: '#ffffff',
-          */
-          color: '#2181cf',
-          stroke: 'white',
-          stroke_width: 2,
-          stroke_linecap: 'round'
-        },
-        /* labelMinFontSize: 10, */
-        valueMinFontSize: 25,
-        gaugeWidthScale: 0.6,
-        counter: true,
-        relativeGaugeSize: true
-      });
-  
-      tvocGauge = new JustGage({
-      id: 'tvoc-gauge',
-      /* title: 'TVOC', */
-      label: 'TVOC (ppm)',
-      value: 0,
-      min: 0,
-      max: 150,
-      valueFontColor: gaugeValueColor,
-      symbol: '',
-      pointer: true,
-      pointerOptions: {
-        toplength: -10,
-        bottomlength: 8,
-        bottomwidth: 8,
-        /*
-        color: '#2181cf',
-        stroke: '#ffffff',
-        */
-        color: '#2181cf',
-        stroke: 'white',
-        stroke_width: 2,
-        stroke_linecap: 'round'
-      },
-      /* labelMinFontSize: 10, */
-      valueMinFontSize: 25,
-      gaugeWidthScale: 0.6,
-      counter: true,
-      relativeGaugeSize: true
-    });
+window.addEventListener('load', onLoad);
 
+document.addEventListener("DOMContentLoaded", function(event) {
 
-    eCo2Gauge = new JustGage({
-      id: 'eco2-gauge',
-      /* title: 'eCO2', */
-      label: 'eCO2 (ppm)',
-      value: 0,
-      min: 0,
-      max: 10000,
-      valueFontColor: gaugeValueColor,
-      symbol: '',
-      pointer: true,
-      pointerOptions: {
-        toplength: -10,
-        bottomlength: 8,
-        bottomwidth: 8,
-        /*
-        color: '#2181cf',
-        stroke: '#ffffff',
-        */
-        color: '#2181cf',
-        stroke: 'white',
-        stroke_width: 2,
-        stroke_linecap: 'round'
-      },
-      /* labelMinFontSize: 10, */
-      valueMinFontSize: 25,
-      gaugeWidthScale: 0.6,
-      counter: true,
-      relativeGaugeSize: true
-    });
-
+makeGauges();
+    
     /*
     let timer = setInterval(() => {
         let iaq = getRandomInt(0, 500);
@@ -3655,9 +3676,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
             if (el)
             {
-                let newFanRotationAngle = fanRotationAngle + 3.0 * fanSpeed;
-                newFanRotationAngle = newFanRotationAngle % 360;
+                let newFanRotationAngle = 0;
 
+                if (isOn()) {
+                    newFanRotationAngle = fanRotationAngle + 3.0 * fanSpeed;
+                    newFanRotationAngle = newFanRotationAngle % 360;
+                }
+                
                 if (newFanRotationAngle != fanRotationAngle) {
                     fanRotationAngle = newFanRotationAngle;
                     el.style.transform = `rotate(${fanRotationAngle}deg)`;
