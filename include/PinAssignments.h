@@ -21,6 +21,8 @@ struct PinAssignments
     static const int FanPWM = 5;
     static const int FanPowerControl = 23; // e.g. to control a MOSFET/relay.
 
+    static const int CabinetLightsDataPin = 25;
+    
     // Al I2C devices use Arduino TwoWire abstraction, using the
     // default SDA,SCL pins i.e. SDA is GPIO-21, SCL is GPIO-22
 };

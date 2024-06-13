@@ -30,6 +30,7 @@ SmartSensor::SmartSensor()
     , _observers()
     , _fan(nullptr)
     , _fanSpeed(1)
+    , _cabinetLights(30)
 {}
 
 void SmartSensor::bindObserver(Observer& observer)
@@ -40,21 +41,23 @@ void SmartSensor::bindObserver(Observer& observer)
     // TODO: Ooops. This will be too many messages for web WS to handle!
     // Observer needs a method to take all values in one hit.
     
-    observer.onSwitchOnOff(_state.power);
-    observer.onFanSpeed(_state.fanSpeed);
-    observer.onTemperature(_state.temperature);
-    observer.onAirPressure(_state.airPressure);
-    observer.onHumidity(_state.relHumidity);
-    observer.onAirPressure(_state.airPressure);
-    observer.onIAQAvailability(_state.sensorReady);
-    observer.onIAQ(_state.iaq);
-    observer.onTVOC(_state.tvoc);
-    observer.onCO2(_state.co2);
-    #ifdef SMART_SENSOR_USES_PMS7003
-    observer.onPM01(_pm01);
-    observer.onPM25(_pm25);
-    observer.onPM10(_pm10);
-    #endif
+    observer.onGroupUpdateBegins();
+        observer.onSwitchOnOff(_state.power);
+        observer.onFanSpeed(_state.fanSpeed);
+        observer.onTemperature(_state.temperature);
+        observer.onAirPressure(_state.airPressure);
+        observer.onHumidity(_state.relHumidity);
+        observer.onAirPressure(_state.airPressure);
+        observer.onIAQAvailability(_state.sensorReady);
+        observer.onIAQ(_state.iaq);
+        observer.onTVOC(_state.tvoc);
+        observer.onCO2(_state.co2);
+        #ifdef SMART_SENSOR_USES_PMS7003
+        observer.onPM01(_pm01);
+        observer.onPM25(_pm25);
+        observer.onPM10(_pm10);
+        #endif
+    observer.onGroupUpdateBegins();
 }
 
 void SmartSensor::bindFanController(FanController& controller) {
@@ -74,7 +77,7 @@ void SmartSensor::togglePower() {
     _setPower(!_state.power);
 }
 
-void SmartSensor::selectNextMode() {
+void SmartSensor::selectNextDisplayMode() {
     _ScopedLock lock(_mutex);
     // TODO
 }
@@ -91,6 +94,10 @@ void SmartSensor::adjustFanSpeed(int delta) {
     Log.infoln("SmartSensor: adjusting fan speed by %d.", delta);
     _doAdjustFanSpeed(delta);
     Log.infoln("SmartSensor: fan speed is now %d.", _state.fanSpeed);
+}
+
+void SmartSensor::triggerInspection() {
+    _cabinetLights.triggerInspection();
 }
 
 void SmartSensor::reboot()
@@ -225,6 +232,7 @@ bool SmartSensor::_setPower(bool on) {
     if (changed && _fan) {
         Log.verboseln("SmartSensor: fan power now %s.", on ? "on" : "off");
         _fan->setPower(on);
+        _cabinetLights.setPower(on);
         _state.power = on;
         _informOfPower(on);
     }

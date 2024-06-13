@@ -829,7 +829,7 @@ function applyClass(elementId, className, on)
 function onAirQualityMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received air-quality message");
+        console.error("ws: missing argument (state) from received air-quality message");
     }
 
     else
@@ -838,7 +838,7 @@ function onAirQualityMessage(args)
         var iaq = parseInt(value);
 
         if (isNaN(iaq)) {
-            console.log("ws: temperature expected a specific air quality index, but got " + value);
+            console.error("ws: temperature expected a specific air quality index, but got " + value);
         } 
         
         else {
@@ -851,7 +851,7 @@ function onAirQualityMessage(args)
 function onAirQualityReadyMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received iaq ready message");
+        console.error("ws: missing argument (state) from received iaq ready message");
     }
 
     else
@@ -867,7 +867,7 @@ function onAirQualityReadyMessage(args)
         }
 
         else {
-            console.log("ws: expected true/false for iaq-ready command, but got " + state);
+            console.error("ws: expected true/false for iaq-ready command, but got " + state);
         }
     }
 }
@@ -929,7 +929,7 @@ function showAirQualitySummary(summaryText, styleClassID)
 function onTemperatureMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received temperature message");
+        console.error("ws: missing argument (state) from received temperature message");
     }
 
     else
@@ -938,7 +938,7 @@ function onTemperatureMessage(args)
         let tempC = parseFloat(value);
 
         if (isNaN(tempC)) {
-            console.log("ws: temperature expected a specific temperature value, but got " + value);
+            console.error("ws: temperature expected a specific temperature value, but got " + value);
         } 
         
         else {
@@ -950,7 +950,7 @@ function onTemperatureMessage(args)
 function onHumidityMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received humidity message");
+        console.error("ws: missing argument (state) from received humidity message");
     }
 
     else
@@ -959,7 +959,7 @@ function onHumidityMessage(args)
         let humidity = parseFloat(value);
 
         if (isNaN(humidity)) {
-            console.log("ws: humidity - expected a specific humidity value, but got " + value);
+            console.error("ws: humidity - expected a specific humidity value, but got " + value);
         } 
         
         else {
@@ -971,7 +971,7 @@ function onHumidityMessage(args)
 function onAirPressureMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received air pressure message");
+        console.error("ws: missing argument (state) from received air pressure message");
     }
 
     else
@@ -980,7 +980,7 @@ function onAirPressureMessage(args)
         let pressure = parseInt(value);
 
         if (isNaN(pressure)) {
-            console.log("ws: air pressure - expected a specific air pressure value, but got " + value);
+            console.error("ws: air pressure - expected a specific air pressure value, but got " + value);
         } 
         
         else {
@@ -992,7 +992,7 @@ function onAirPressureMessage(args)
 function onTVOCMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received TVOC message");
+        console.error("ws: missing argument (state) from received TVOC message");
     }
 
     else
@@ -1001,7 +1001,7 @@ function onTVOCMessage(args)
         let tvoc = parseInt(value);
 
         if (isNaN(tvoc)) {
-            console.log("ws: TVOC - expected a specific TVOC value, but got " + value);
+            console.error("ws: TVOC - expected a specific TVOC value, but got " + value);
         } 
         
         else {
@@ -1013,7 +1013,7 @@ function onTVOCMessage(args)
 function onCO2Message(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received CO2 message");
+        console.error("ws: missing argument (state) from received CO2 message");
     }
 
     else
@@ -1022,11 +1022,11 @@ function onCO2Message(args)
         let co2 = parseInt(value);
 
         if (isNaN(co2)) {
-            console.log("ws: eCO2 - expected a specific CO2 value, but got " + value);
+            console.error("ws: eCO2 - expected a specific CO2 value, but got " + value);
         } 
         
         else {
-            eCo2Gauge.refresh(co2);
+            co2Gauge.refresh(co2);
         }
     }
 }
@@ -1034,7 +1034,7 @@ function onCO2Message(args)
 function onFanSpeedMessage(args)
 {
     if (args.length == 0) {
-        console.log("ws: missing argument (state) from received fan-speed command");
+        console.error("ws: missing argument (state) from received fan-speed command");
     }
 
     else
@@ -1043,7 +1043,7 @@ function onFanSpeedMessage(args)
         let speed = parseInt(value);
 
         if (isNaN(speed)) {
-            console.log("ws: fan-speed - expected a specific speed value, but got " + value);
+            console.error("ws: fan-speed - expected a specific speed value, but got " + value);
         } 
         
         else {
@@ -1052,7 +1052,7 @@ function onFanSpeedMessage(args)
             if (el) {
                 el.value = speed;
             } else {
-                console.log("ws: failed to find fan-speed-slider.");
+                console.error("ws: failed to find fan-speed-slider.");
             }
 
             fanSpeed = speed;
@@ -3501,7 +3501,51 @@ var pm10Gauge;
 var temperatureGauge;
 var humidityGauge;
 var tvocGauge;
-var eCo2Gauge;
+var co2Gauge;
+
+Coloris({
+    format: 'hex',
+    themeMode: 'light',
+    theme: 'polaroid',
+    focusInput: true,
+    swatchesOnly: true,
+    alpha: false,
+    swatches: [
+        '#ff0000',
+        '#00ff00',
+        '#0000ff',
+        '#ffff00',
+        '#00ffff',
+        '#ff00ff',
+        '#ffffff',
+        '#6105ff',
+        '#ff7300'
+      ],
+      defaultColor: '6105ff',
+      formatToggle: false,
+      onChange: (color, inputEl) => onNewLEDsColourPicked
+});
+
+Coloris.setInstance('leds-picker', {      
+    theme: 'pill',
+    themeMode: 'dark',
+    formatToggle: true,
+    closeButton: true,
+    clearButton: true,
+    swatches: [
+    '#067bc2',
+    '#84bcda',
+    '#80e377',
+    '#ecc30b',
+    '#f37748',
+    '#d56062'
+    ]
+});
+
+
+function onNewLEDsColourPicked(color, inputEl) {
+    console.log("Chose colour: " + color);
+}
 
 function makeGauges()
 {
@@ -3548,7 +3592,7 @@ function recreateGauges() {
 
    let newCO2Gauge = makeCO2Gauge();
    replaceGauge('co2-gauge', newCO2Gauge);
-   eCo2Gauge = newCO2Gauge;
+   co2Gauge = newCO2Gauge;
 
    let newTemperatureGauge = makeTemperatureGauge();
    replaceGauge('temperature-gauge', newTemperatureGauge);
@@ -3653,7 +3697,7 @@ makeGauges();
                 tvocGauge.refresh(getRandomNumber(0, 150));
                 break;
             case 4:
-                eCo2Gauge.refresh(getRandomNumber(0, 10000));
+                co2Gauge.refresh(getRandomNumber(0, 10000));
                 break;                                 
             case 5:
                 airPressureGauge.refresh(getRandomNumber(0, 2000));
@@ -3676,13 +3720,13 @@ makeGauges();
 
             if (el)
             {
-                let newFanRotationAngle = 0;
+                let newFanRotationAngle = fanRotationAngle;
 
                 if (isOn()) {
                     newFanRotationAngle = fanRotationAngle + 3.0 * fanSpeed;
                     newFanRotationAngle = newFanRotationAngle % 360;
                 }
-                
+
                 if (newFanRotationAngle != fanRotationAngle) {
                     fanRotationAngle = newFanRotationAngle;
                     el.style.transform = `rotate(${fanRotationAngle}deg)`;
@@ -3698,7 +3742,7 @@ makeGauges();
       temperatureGauge.refresh(getRandomInt(0, 50));
       humidityGauge.refresh(getRandomInt(0, 100));
       tvocGauge.refresh(getRandomInt(0, 150));
-      eCo2Gauge.refresh(getRandomInt(0, 10000));
+      co2Gauge.refresh(getRandomInt(0, 10000));
     });
     */
   });

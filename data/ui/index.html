@@ -9,6 +9,8 @@
     <!--script src="index.js" type="text/javascript"></script-->
     <script src="raphael-2.1.4.min.js"></script>
     <script src="justgage-1.2.2.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="coloris.min.css"/>
+    <script src="coloris.min.js"></script>
     <script src="index.js" type="text/javascript"></script>
     <link id="theme" rel="stylesheet" type="text/css" href="themes/dark.css" onload="onThemeChanged()"/>
     <link rel="stylesheet" type="text/css" href="index.css">
@@ -198,18 +200,18 @@ jscolor.presets.default = {
                     <img class="svg-icon" src="icons/tune-2.svg"/>
                 </button>
             </div-->
-            <div id="settings-tab">
+            <!--div id="settings-tab">
                 <button class="tab-link" onclick="onTabClick(event, 1, 'settings-tab-container')">
                     <img class="svg-icon" src="icons/cogs.svg"/>
                 </button>
-            </div>
+            </div-->
             <div id="info-tab">
-                <button class="tab-link" onclick="onTabClick(event, 2, 'info-tab-container')">
+                <button class="tab-link" onclick="onTabClick(event, 1, 'info-tab-container')">
                     <img class="svg-icon" src="icons/book.svg"/>
                 </button>
             </div>
             <div id="devices-tab" class="invisible">
-                <button class="tab-link" onclick="onTabClick(event, 3, 'devices-tab-container')">
+                <button class="tab-link" onclick="onTabClick(event, 2, 'devices-tab-container')">
                     <img class="svg-icon" src="icons/lan.svg"/>
                 </button>
             </div>
@@ -325,6 +327,10 @@ jscolor.presets.default = {
                 
             </div>
 
+            <!--div class ="card">
+                <input id="led-colorpicker" type="text" value="#0000ff" data-coloris>
+            </div-->
+
             <!--div id="hazard-tab-container" class="tab-container">
 
                 <div class="card">
@@ -392,7 +398,7 @@ jscolor.presets.default = {
 
             </div-->
 
-            <div id="settings-tab-container" class="tab-container" disabled>
+            <!--div id="settings-tab-container" class="tab-container" disabled>
 
                 <div class="settings-section">
 
@@ -415,7 +421,7 @@ jscolor.presets.default = {
                         <div>
                             <table id="settings-table">
 
-                                <!--tr>
+                                <tr>
                                     <div id="settings-user-interface-help" class="settings-descriptive help-popup">
                                         <h3>User Interface</h3>
                                         <b>Theme</b>
@@ -424,9 +430,9 @@ jscolor.presets.default = {
                                         a different set of colours, look and feel.
                                         </p>
                                     </div>
-                                </tr-->
+                                </tr>
                     
-                                <!--tr>
+                                <tr>
                                     <td>
                                         <div class="settings-grid-container">
                             
@@ -447,14 +453,14 @@ jscolor.presets.default = {
                             
                                         </div>
                                     </td>
-                                </tr-->        
+                                </tr>        
 
                             </table>
                         </div>
                         </div>
                 </div>
             
-            </div>
+            </div-->
 
             <div id="info-tab-container" class="tab-container" disabled>
 

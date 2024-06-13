@@ -62,12 +62,12 @@ void SmartSensorController::_selectNextDisplayMode() {
     #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
     _scheduleOperation([this]() {
         if (_smartSensor.isOn() || _responsiveWhenOff) {
-            _smartSensor.selectNextMode();
+            _smartSensor.selectNextDisplayMode();
         }
     });
     #else
     if (_smartSensor.isOn() || _responsiveWhenOff) {
-        _smartSensor.selectNextMode();
+        _smartSensor.selectNextDisplayMode();
     }
     #endif
 }
@@ -112,6 +112,21 @@ void SmartSensorController::_setFanSpeed(uint8_t speed) {
     }
     #endif
  }
+
+void SmartSensorController::_triggerInspection() {
+    Log.verboseln("SmartSensorController: queuing triggerInspection - from controller '%s'.", _controllerName);
+    #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
+    _scheduleOperation([this]() {
+        if (_smartSensor.isOn() || _responsiveWhenOff) {
+            _smartSensor.triggerInspection();
+        }
+    });
+    #else
+    if (_smartSensor.isOn() || _responsiveWhenOff) {
+        _smartSensor.triggerInspection();
+    }
+    #endif
+}
 
 #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
 

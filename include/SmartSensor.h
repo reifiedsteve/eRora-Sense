@@ -16,6 +16,7 @@
 #include "Chronos/TimeSpan.h"
 
 #include "Fan/FanController.h"
+#include "CabinetLights.h"
 
 #include "DeviceState.h"
 
@@ -39,7 +40,7 @@ public:
     void switchPower(bool on);
     void togglePower();
 
-    void selectNextMode();
+    void selectNextDisplayMode();
 
     /// @brief Set the fan speed (for when fan is in manual mode).
     /// @param speedSetting Setting of 0-10 (off to maximum). 
@@ -50,11 +51,10 @@ public:
     /// @param speedSetting Amount by which to adjust the fan speed.
     void adjustFanSpeed(int delta);
 
-    /// @brief Increase fan speed (for when fan is in manual mode).
-    // void increaseFanSpeed();
+    /// @brief Trigger extra illumination for inspection purposes.
+    void triggerInspection();
 
-    /// @brief Decrease fan speed (for when fan is in manual mode).
-    // void decreaseFanSpeed();
+#if 0
 
     inline bool isSensorReady() const {
         return _state.sensorReady;
@@ -95,6 +95,8 @@ public:
     inline float getPM10() const {
         return _state.pm10;
     }
+
+#endif
 
    /// @brief Reboot the multi-sensor.
     void reboot();
@@ -166,6 +168,8 @@ private:
     FanController* _fan;
 
     int _fanSpeed;
+
+    CabinetLights _cabinetLights;
 
     mutable _Mutex _mutex;
 };

@@ -26,6 +26,7 @@ public:
       , _fanIncButton(fanControl1Button)
       , _fanDecButton(fanControl2Button)
       , _timer(500)
+      , _modeTimer(1000)
     {}
 
 private:
@@ -46,14 +47,20 @@ private:
         });
 
         _modeButton.attachClick([this]() {
-            // TODO: toggle between holding current display page vs cycling?
+            _triggerInspection();
         });
 
-        _modeButton.attachDoubleClick([this]() {
-            // TODO: toggle between nornal display and config settings pages?
-            // (which times out after a while back to normal pages(s)).
+        _modeButton.attachLongPressStart([this]() {
+            _modeTimer.restart();
         });
         
+        _modeButton.attachDuringLongPress([this]() { 
+            if (_modeTimer.hasExpired()) {
+                _selectNextDisplayMode();
+                _modeTimer.restart();
+            }
+        });
+
         _fanIncButton.attachClick([this](){
             _adjustFanSpeed(+1);
         });
@@ -74,6 +81,10 @@ private:
             }
         });
         
+        _fanIncButton.attachLongPressStop([this]() { 
+
+        });
+
         _fanDecButton.attachLongPressStart([this]() {
             _adjustFanSpeed(-1);
             _timer.restart();
@@ -85,7 +96,12 @@ private:
                 _timer.restart();
             }
         });
-        
+
+        _fanDecButton.attachLongPressStop([this]() { 
+
+        });
+
+
         // TODO: etc.
     }
 
@@ -102,4 +118,5 @@ private:
     Button& _fanDecButton;
 
     CountdownTimer _timer;
+    CountdownTimer _modeTimer;
 };

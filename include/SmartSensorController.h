@@ -83,10 +83,17 @@ protected:
     /// @param delta The amount by which to change the fan speed.
     void _adjustFanSpeed(int8_t delta);
 
+    /// @brief Trigger extra illumination for inspection purposes.
+    void _triggerInspection();
+
+#if 0
+
     // Set the cabinet backlight brightness, 0 being minimum,
     // 255 being full brightness.
     void _setBacklightBrightness(uint8_t brightness);
     void _setBacklightColour(uint8_t hue, uint8_t sat);
+
+# endif
 
     // void _setDisplayMode(DisplayMode mode); // TODO:
     void _selectNextDisplayMode();
