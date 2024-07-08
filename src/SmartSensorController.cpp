@@ -118,7 +118,7 @@ void SmartSensorController::_triggerInspection() {
     #ifdef OPERATIONS_EXECUTE_ON_MAIN_THREAD
     _scheduleOperation([this]() {
         if (_smartSensor.isOn() || _responsiveWhenOff) {
-            _smartSensor.triggerInspection();
+            _smartSensor.triggerInspectionLight();
         }
     });
     #else
@@ -145,7 +145,7 @@ void SmartSensorController::_executeDeferredOperations()
         Log.verboseln("SmartSensorController: executing %d deferred operations.", n);
     }
     
-    for (int i=0; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         _DeferredOperation op(_deferredOperations.front());
         _deferredOperations.pop();
         Log.verboseln("Popped a deferred op and about to execute it.");

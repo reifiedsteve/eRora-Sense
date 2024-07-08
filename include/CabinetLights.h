@@ -16,12 +16,14 @@ public:
     explicit CabinetLights(size_t noOfLEDs);
 
     void setColour(const CRGB& rgb);
-    void setIlluminationColour(const CRGB& rgb);
+    void setInspectionColour(const CRGB& rgb);
     void setInspectionTime(const TimeSpan& interval);
+    void setMaximumBrightness(int brightness);
+    void setCurrentLimit(unsigned mA);
 
     void setPower(bool on);
 
-    void triggerInspection();
+    void triggerInspectionLight();
 
     void setup();
     void loop();

@@ -1,0 +1,161 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <title>eRora Lights - WiFi Installation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="setup.css">
+</head>
+
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+
+<body onload="onLoad()">
+
+  <script type='text/javascript' charset='utf-8'>
+    // Hides mobile browser's address bar when page is done loading. Supposedly.
+      window.addEventListener('load', function(e) {
+        setTimeout(function() { window.scrollTo(0, 1); }, 1);
+      }, false);
+  </script>
+
+  <script>
+
+    function showSignalAndSecurityIcons() // ...and security Icons
+    {
+      // TODO: This probably ought to be done in the CSS (once I have time to figure out how).
+
+      table = document.getElementById("lanTable");
+
+      for (var i = 0, row; row = table.rows[i]; i++)
+      {
+          sigCell = row.cells[0];
+          secCell = row.cells[1];
+          lanName = row.cells[2].innerText;
+
+          valStr = sigCell.innerText;
+          signalPercent = parseInt(valStr);
+          imgIndex = determineSignalImage(signalPercent);
+
+          imgId = "iconSignal" + imgIndex;
+          image = document.getElementById(imgId);
+
+          // item = sigCell.childNodes[0];
+          clonedImage = image.cloneNode(true);
+          clonedImage.removeAttribute("id");
+          sigCell.replaceChild(clonedImage, sigCell.childNodes[0]);
+
+          isSecure = (secCell.innerText == '*');
+          
+          secImageId = (isSecure ? "iconLocked" : "iconUnlocked");
+          secImage = document.getElementById(secImageId);
+
+          clonedSecImage = secImage.cloneNode(true);
+          clonedSecImage.removeAttribute("id");
+          secCell.replaceChild(clonedSecImage, secCell.childNodes[0]);
+      }
+    }
+
+    function determineSignalImage(signalPercent) {
+        imgIndex = 0;
+        if (signalPercent > 75) {
+          imgIndex = 3;
+        } else if (signalPercent > 50) {
+          imgIndex = 2;
+        } else if (signalPercent > 25) {
+          imgIndex = 1;
+        } else {
+          imgIndex = 0;
+        }
+        return imgIndex;
+    }
+
+    function onClickLAN(cell) {
+        lanName = cell.innerText;
+	      document.getElementById("ssidInput").value = lanName;
+        document.getElementById("passwordInput").focus();
+    }
+
+  </script>
+
+  <div class="topnav">
+    <h1 class="titleBanner">eRora Installation</h1>
+  </div>
+
+  <div id="topbanner">
+    <img src="/ui/eRoraBanner.png" id="bannerimg"></image>
+  </div>
+
+  <div class="descriptive">
+    Add your lights to your WiFi network by providing your WiFi SSID and password here.
+    You may need to refresh the page to see all of the available networks.
+  </div>
+
+  <div id="networksDiv">
+    <table class="lanTable" id="lanTable">
+      %LANITEMS%
+    </table>
+  </div>
+
+  <div class="card">
+  
+    <form action="/wifi/join.html" method="get">   
+      <table class="wifiTable">
+        <tr>
+          <td class="wifiParamLabel">
+        	  <label for="ssidInput">SSID:</label>
+          </td>
+          <td>
+            <div class="wifiTextEntry">
+            	<input type="text" id="ssidInput" class="inputBox" name="ssid" placeholder="Click above or type here" value="%SSID%">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="wifiParamLabel">
+            <label for="passwordInput">Password:</label>
+          </td>
+          <td>
+            <div class="wifiTextEntry">
+            	<input type="text" id="passwordInput" class="inputBox" name="psk" value="%PSK%">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <th>
+             
+          </th>
+          <th>
+            <div class="wifiTextEntry">
+	            <input type="submit" value="Join Network" class="button"> 
+            </div>
+          </th>
+        </tr>
+      </table>
+    </form>
+    
+  </div>
+  
+  <!-- Reference all signal images here to implicitly preload them. -->
+
+  <div id="signalImages" class="hidden"> 
+    <image id="iconSignal0" src="/ui/icons/signal-0.png"></image>
+    <image id="iconSignal1" src="/ui/icons/signal-1.png"></image>
+    <image id="iconSignal2" src="/ui/icons/signal-2.png"></image>
+    <image id="iconSignal3" src="/ui/icons/signal-3.png"></image>
+    <image id="iconUnlocked" src="/ui/icons/lock-open.png"></image>
+    <image id="iconLocked" src="/ui/icons/lock-closed.png"></image>
+  </div>
+
+  
+  <script>
+    // function onLoad(event) {
+    function onLoad() {
+      showSignalAndSecurityIcons();
+    }
+  </script>
+
+</body>
+</html>
+

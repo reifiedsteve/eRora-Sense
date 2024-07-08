@@ -133,7 +133,8 @@ public:
     
     // General MCU health being observed.
 
-    void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
+    void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) override;
+    void onFPS(unsigned fps) override;
 
     // We need to know when a block update is happening so that 
     // we can optimise our sending of this data over web sockets
@@ -182,7 +183,9 @@ private:
     void _respondToPM01(uint16_t pm01);
     void _respondToPM25(uint16_t pm25);
     void _respondToPM10(uint16_t pm10);
+
     void _respondToHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
+    void _respondToFPS(unsigned fps);
 
     void _initInputs() override;
     void _serviceInputs() override;
@@ -228,6 +231,7 @@ private:
     std::string _makePM25Message(uint16_t pm25);
     std::string _makePM10Message(uint16_t pm10);
     std::string _makeHeapUsageMessage(uint32_t totalHeap, uint32_t freeHeap);
+    std::string _makeFPSMessage(unsigned fps);
 
     void _appendPowerMessage(std::ostream& os, bool on);
     void _appendFanSpeedMessage(std::ostream& os, int speed);
@@ -242,6 +246,7 @@ private:
     void _appendPM25Message(std::ostream& os, uint16_t pm25);
     void _appendPM10Message(std::ostream& os, uint16_t pm10);
     void _appendHeapUsageMessage(std::ostream& os, uint32_t totalHeap, uint32_t freeHeap);
+    void _appendFPSMessage(std::ostream& os, unsigned fps);
  
     void _appendAllUserSettingsMessage(std::ostream& os);
     void _appendUserSettingMessage(std::ostream& os, const char* settingName, int value);

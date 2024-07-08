@@ -723,11 +723,11 @@ function onSettingMessage(args)
                 onSettingManagePower(value);  
             }
 
-            else if (setting == "fps") {
-                onSettingFPS(value);
-            }
-
             ***/
+
+            else if (setting == "fps") {
+               //  onSettingFPS(value);
+            }
 
             else {
                 console.error("ws: unrecognised setting '" +setting+ "'");
@@ -3642,11 +3642,11 @@ function makeCO2Gauge() {
 }
 
 function makeTemperatureGauge() {
-    return makeGauge('temperature-gauge', 0, 50, 0, 'Temperature', '°C');
+    return makeGauge('temperature-gauge', 0, 50, 0, 'Temperature', '\u00B0C');  // \u00B0 is °
 }
 
 function makeHumidityGauge() {
-    return makeGauge('humidity-gauge', 0, 100, 0, 'Relative Humidity', '');
+    return makeGauge('humidity-gauge', 0, 100, 0, 'Relative Humidity', '%');
 }
 
   /* end modal */

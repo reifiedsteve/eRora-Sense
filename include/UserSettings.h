@@ -27,4 +27,45 @@ public:
 
     // Are there any user settings?
 
+    inline void setCabinetLightColour(const CRGB& rgb) {
+        _putSetting("led-r", (int)rgb.r);
+        _putSetting("led-g", (int)rgb.g);
+        _putSetting("led-b", (int)rgb.b);
+    }
+
+    inline CRGB getCabinetLightColour() const {
+        uint8_t r = (uint8_t)_getSetting("led-r", 0);
+        uint8_t g = (uint8_t) _getSetting("led-g", 0);
+        uint8_t b = (uint8_t) _getSetting("led-b", 32);
+        return CRGB(r, g, b);
+    }
+
+    inline void setCabinetInspectionLightColour(const CRGB& rgb) {
+        _putSetting("ins-led-r", (int)rgb.r);
+        _putSetting("ins-led-g", (int)rgb.g);
+        _putSetting("ins-led-b", (int)rgb.b);
+    }
+
+    inline CRGB getCabinetInspectionLightColour() const {
+        uint8_t r = (uint8_t)_getSetting("ins-led-r", 255);
+        uint8_t g = (uint8_t) _getSetting("ins-led-g", 255);
+        uint8_t b = (uint8_t) _getSetting("ins-led-b", 255);
+        return CRGB(r, g, b);
+    }
+
+    inline void setInspectionTime(const TimeSpan& period) {
+        _putSetting("ins-ms",  (int)period.millis());
+    }
+
+    inline TimeSpan getInspectionTime() const {
+        return TimeSpan::fromMilliseconds(_getSetting("ins-ms", 10000));
+    }
+
+    inline void setCabinetLightBrightness(int brightness) {
+        _putSetting("bri", (int)brightness);
+    }
+
+    inline int getCabinetLightBrightness() const {
+        return _getSetting("bri", 64);
+    }
 };

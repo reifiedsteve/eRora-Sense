@@ -1,0 +1,44 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <title>eRora Lights - Connected</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="setup.css">
+</head>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<body>
+
+    <script type='text/javascript' charset='utf-8'>
+        // Hides mobile browser's address bar when page is done loading. Supposedly.
+        window.addEventListener('load', function(e) {
+            setTimeout(function() { window.scrollTo(0, 1); }, 1);
+        }, false);
+    </script>
+
+    <div class="topnav">
+    <h1 class="titleBanner">eRora WiFi LAN Sign-On</h1>
+    </div>
+
+    <div id="topbanner">
+    <img src="/ui/eRoraBanner.png" width="100%" height="8px" padding="0" margin="0"></image>
+    </div>
+
+    eRora network SSID is now set to "$SSID".
+    <p>
+    Your eRora lights have been configured and will now restart...
+    <p>
+    Now connect to your WiFi router and click on the following:
+    XXXXXX
+    </p>]
+    Detail such as WiFi SSID, IP address, hostname, and controlling URL are shown on your light's control display.
+    Further instructions can be found at http:/xxxxxx/blah/index.html
+    <script>
+    function onLoad(event) {
+        // TODO: something. 
+    }
+    </script>
+
+</body>
+</html>

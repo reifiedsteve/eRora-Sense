@@ -465,31 +465,9 @@ jscolor.presets.default = {
             <div id="info-tab-container" class="tab-container" disabled>
 
                 <div class="card info-text">
-                    <b><u>Hardware</u></b>
+                    <b><u>Firmware</u></b>
                     <p>
-                        LED Type: ws2812b
-                    <br>
-                        LED Count: %LEDCOUNT%
-                    <!--
-                    <br>
-                        Reversed: %LEDREVERSE% 
-                    -->
-                    <br>
-                        Gamma Correct: %GAMMACORRECT%
-                    <br>
-                    <p>
-                        PSU Voltage: 5 V
-                        <br>
-                        PSU Current: %PSUMILLIAMPS% mA
-                        <br>
-                        Power Management: %PSUMANAGE%
-                    </p>
-                </div>
-
-                <div class="card info-text">
-                    <b><u>Software</u></b>
-                    <p>
-                        eRora Version: %VERSION%
+                        eRora Sensor Version: %VERSION%
                         <br>
                         Built: %BUILDDATE% %BUILDTIME%
                         <br>
@@ -514,6 +492,26 @@ jscolor.presets.default = {
                 </div>
 
                 <div class="card info-text">
+                    <b><u>Inspection LEDs</u></b>
+                    <p>
+                        LED Type: ws2812b
+                    <br>
+                        LED Count: %LEDCOUNT%
+                    <!--
+                    <br>
+                        Reversed: %LEDREVERSE% 
+                    -->
+                    <br>
+                    <p>
+                        Voltage: 5 V
+                        <br>
+                        Max Current: %PSUMILLIAMPS% mA
+                        <br>
+                        Power Management: %PSUMANAGE%
+                    </p>
+                </div>
+
+                <!--div class="card info-text">
                     <b><u>Timekeeping</u></b>
                     <p>
                         NTP Domain: %NTPDOMAIN%
@@ -523,7 +521,7 @@ jscolor.presets.default = {
                         TZ: %TIMEZONESPEC%
                     <p>
                     </p>
-                </div>
+                </div-->
 
                 <div class="card info-text">
                     <b><u>Configuration</u></b>

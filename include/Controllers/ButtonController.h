@@ -17,14 +17,14 @@ public:
         const TimeSpan& loopInterval,
         Button& powerButton,
         Button& modeButton,
-        Button& fanControl1Button,
-        Button& fanControl2Button
+        Button& fanDecButton,
+        Button& fanIncButton
     )
       : SmartSensorController(smartSensor, "button panel", loopInterval, Responsiveness::WhenOn)
       , _powerButton(powerButton)
       , _modeButton(modeButton)
-      , _fanIncButton(fanControl1Button)
-      , _fanDecButton(fanControl2Button)
+      , _fanDecButton(fanDecButton)
+      , _fanIncButton(fanIncButton)
       , _timer(500)
       , _modeTimer(1000)
     {}
@@ -61,12 +61,16 @@ private:
             }
         });
 
-        _fanIncButton.attachClick([this](){
-            _adjustFanSpeed(+1);
+        _modeButton.attachLongPressStop([this]() { 
+
         });
 
         _fanDecButton.attachClick([this](){
             _adjustFanSpeed(-1);
+        });
+
+        _fanIncButton.attachClick([this](){
+            _adjustFanSpeed(+1);
         });
 
         _fanIncButton.attachLongPressStart([this]() { 
@@ -101,7 +105,6 @@ private:
 
         });
 
-
         // TODO: etc.
     }
 
@@ -114,8 +117,8 @@ private:
 
     Button& _powerButton;
     Button& _modeButton;
-    Button& _fanIncButton;
     Button& _fanDecButton;
+    Button& _fanIncButton;
 
     CountdownTimer _timer;
     CountdownTimer _modeTimer;

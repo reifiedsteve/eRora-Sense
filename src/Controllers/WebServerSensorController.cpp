@@ -221,6 +221,10 @@ void WebServerSensorController::onHeapUsage(uint32_t totalHeap, uint32_t freeHea
     _respondToHeapUsage(totalHeap, freeHeap);
 }
 
+void WebServerSensorController::onFPS(unsigned fps) {
+    _respondToFPS(fps);
+}
+
 void WebServerSensorController::addDevice(const DeviceInformation& device) {
     Log.verboseln("WebServerLightsController: adding device %s.", device.str().c_str());
     std::stringstream ss;
@@ -344,6 +348,12 @@ void WebServerSensorController::_respondToHeapUsage(uint32_t totalHeap, uint32_t
     _state.heapTotal = totalHeap;
     _state.heapFree = freeHeap;
     std::string message(_makeHeapUsageMessage(totalHeap, freeHeap));
+    _sendToClients(message);
+}
+
+void WebServerSensorController::_respondToFPS(unsigned fps) {
+    // _state.fps = fps;
+    std::string message(_makeFPSMessage(fps));
     _sendToClients(message);
 }
 
@@ -848,6 +858,12 @@ std::string WebServerSensorController::_makeHeapUsageMessage(uint32_t totalHeap,
     return os.str();
 }
     
+std::string WebServerSensorController::_makeFPSMessage(unsigned fps) {
+    std::ostringstream os;
+    _appendFPSMessage(os, fps);
+    return os.str();
+}
+    
 void WebServerSensorController::_appendPowerMessage(std::ostream& os, bool on) {
     os << "power " << _toBoolString(on);
 }
@@ -898,6 +914,10 @@ void WebServerSensorController:: _appendPM10Message(std::ostream& os, uint16_t p
 
 void WebServerSensorController::_appendHeapUsageMessage(std::ostream& os, uint32_t totalHeap, uint32_t freeHeap) {
     os << "heap " << totalHeap << " " << freeHeap;
+}
+
+void WebServerSensorController::_appendFPSMessage(std::ostream& os, unsigned fps) {
+    os << "fps " << fps;
 }
 
 void WebServerSensorController::_appendUserSettingMessage(std::ostream& os, const char* settingName, int value) {
@@ -968,7 +988,7 @@ void WebServerSensorController::_parseRequest(const std::string& message)
         bool handled(_parseSingleRequest(singleMessage));
 
         if (!handled) {
-            Log.errorln("WebServerSensorController::_wsHandleLightRequest: unhandled websocket request \"%s\".", singleMessage.c_str());
+            Log.errorln("WebServerSensorController: unhandled websocket request \"%s\".", singleMessage.c_str());
         }
     }
 }
@@ -1291,7 +1311,6 @@ std::string WebServerSensorController::_applySettings(const LabelledValues& sett
             _systemSettings.setDeviceDescriptiveName(value);
         }
 
-        /*
         else if ((name == "LC") || (name == "led-count"))
         {
             int numLEDs(0);
@@ -1308,7 +1327,9 @@ std::string WebServerSensorController::_applySettings(const LabelledValues& sett
                 _systemSettings.setNumberOfLEDs(numLEDs);
             }
         }
-       
+
+        /*
+
         else if ((name == "GC") || (name == "gamma-correct"))
         {
             bool on(false);
@@ -1320,8 +1341,6 @@ std::string WebServerSensorController::_applySettings(const LabelledValues& sett
         }
 
         */
-
-        #if 0
 
         else if ((name == "PC") || (name == "psu-milliamps"))
         {
@@ -1346,8 +1365,6 @@ std::string WebServerSensorController::_applySettings(const LabelledValues& sett
                 _systemSettings.setManagePower(managePower);
             }
         }
-
-        #endif
 
         else if ((name == "QA") || (name == "mqtt-address")) {
             // Could be ip or domain name.
@@ -1551,11 +1568,11 @@ String WebServerSensorController::_processTemplates(const String& key)
         value = std::string(WiFi.localIP().toString().c_str());
     }
 
-    #if 0
-
     else if (key == "LEDCOUNT") {
         value = _toString(_systemSettings.getNumberOfLEDs());
     }
+
+    #if 0
 
     else if (key == "LEDDENSITY") {
         value = _toString(_userSettings.getNumberOfLEDsPerMetre());
@@ -1576,8 +1593,6 @@ String WebServerSensorController::_processTemplates(const String& key)
     }
     ***/
 
-   #if 0
-
     else if (key == "PSUMILLIAMPS") {
         value = _toString(_systemSettings.getLEDsPSUMilliamps());
     }
@@ -1585,8 +1600,6 @@ String WebServerSensorController::_processTemplates(const String& key)
     else if (key == "PSUMANAGE") {
         value = _systemSettings.getManagePower() ? "on" : "off";
     }
-
-    #endif
 
     else if (key == "MQTTADDR") {
         value = _systemSettings.getMQTTBrokerAddress();

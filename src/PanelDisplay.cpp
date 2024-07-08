@@ -54,13 +54,17 @@ void PanelDisplay::loop()
 
 void PanelDisplay::onSwitchOnOff(bool on) {
     _deviceState.power = on;
-    _notify("Power", on ? "on" : "off");
+    _notify("eRora Sensor", std::string("Power ") + (on ? "on" : "off"));
     if (on) _display.on(); else _display.off();
 }
 
 void PanelDisplay::onFanSpeed(int speed) {
     _deviceState.fanSpeed = speed;
     _notify("Fan Speed", _makeFanSpeedNotificationMessage(_deviceState.fanSpeed));
+}
+
+void PanelDisplay::onTriggerInspectionLight() {
+    _notify("Inspection", "Light On");
 }
 
 void PanelDisplay::onCabinetBrightness(uint8_t brightness) {

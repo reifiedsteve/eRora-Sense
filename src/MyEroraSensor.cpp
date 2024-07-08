@@ -46,6 +46,7 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
     )
     , _fanPWMPinNo(PinAssignments::FanPWM)
     , _fan(_fanPWMPinNo)
+    , _cabinetLights(_systemSettings.getNumberOfLEDs())
 {}
 
 void MyEroraSensor::setup()
@@ -73,9 +74,38 @@ void MyEroraSensor::setup()
     _fan.setPower(true);
     _smartSensor.bindFanController(_fan);
 
+    _cabinetLights.setup();
+
+    _cabinetLights.setCurrentLimit(_systemSettings.getLEDsPSUMilliamps());
+    _cabinetLights.setMaximumBrightness(_userSettings.getCabinetLightBrightness());
+    _cabinetLights.setColour(_userSettings.getCabinetLightColour());
+    _cabinetLights.setInspectionColour(_userSettings.getCabinetInspectionLightColour());
+    _cabinetLights.setInspectionTime(_userSettings.getInspectionTime());
+    _smartSensor.bindCabinetLights(_cabinetLights);
+    
     _initMQTTController();
+
+    unsigned clickMs(200);
+    unsigned pressMs(500);
+    unsigned debounceMs(50);
+
+    _button1.setClickMs(clickMs);
+    _button1.setDebounceMs(debounceMs);
+    _button1.setPressMs(pressMs);
+    _button2.setClickMs(clickMs);
+    _button2.setDebounceMs(debounceMs);
+    _button2.setPressMs(pressMs);
+    _button3.setClickMs(clickMs);
+    _button3.setDebounceMs(debounceMs);
+    _button3.setPressMs(pressMs);
+    _button4.setClickMs(clickMs);
+    _button4.setDebounceMs(debounceMs);
+    _button4.setPressMs(pressMs);
+
     _buttonController.setup();
+
     _webController.setup();
+    
     delay(500);
 
     _smartSensor.setup();
@@ -127,6 +157,7 @@ void MyEroraSensor::loop()
 
     _smartSensor.loop();
 
+    _cabinetLights.loop();
     _display.loop();
 
     _discoveryService->loop();

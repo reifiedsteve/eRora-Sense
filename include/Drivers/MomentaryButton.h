@@ -9,12 +9,9 @@ public:
 
     typedef std::function<void()> ButtonFunc;
 
-    MomentaryButton() : _button() {
-        _init();
-    }
-
     explicit MomentaryButton(const int pin, const boolean activeLow = true, const bool pullupActive = true)
-      : _button(pin, activeLow, pullupActive) 
+      : _button(pin, activeLow, pullupActive)
+      , _pinNo(pin) 
     {
         _init();
     }
@@ -93,13 +90,49 @@ public:
 
 private:
 
-    void _init() {
-        _button.attachClick([](void *scope) { ((MomentaryButton *) scope)->_onClicked();}, this);
-        _button.attachDoubleClick([](void *scope) { ((MomentaryButton *) scope)->_onDoubleClicked();}, this);
-        _button.attachMultiClick([](void *scope) { ((MomentaryButton *) scope)->_onMultiClick();}, this);
-        _button.attachLongPressStart([](void *scope) { ((MomentaryButton *) scope)->_onLongPressStart();}, this);
-        _button.attachDuringLongPress([](void *scope) { ((MomentaryButton *) scope)->_onDuringLongPress();}, this);
-        _button.attachLongPressStop([](void *scope) { ((MomentaryButton *) scope)->_onLongPressStop();}, this);
+    void _init()
+    {
+        _button.attachClick([](void *scope) {
+                // Log.verboseln("MomentaryButton: click detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onClicked();
+            }, 
+            this
+        );
+
+        _button.attachDoubleClick([](void *scope) {
+                // Log.verboseln("MomentaryButton: double-click detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onDoubleClicked();
+            },
+            this
+        );
+
+        _button.attachMultiClick([](void *scope) {
+                // Log.verboseln("MomentaryButton: mnulti-click detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onMultiClick();
+            },
+            this
+        );
+
+        _button.attachLongPressStart([](void *scope) {
+                // Log.verboseln("MomentaryButton: long-press-start detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onLongPressStart();
+            },
+            this
+        );
+
+        _button.attachDuringLongPress([](void *scope) {
+                // Log.verboseln("MomentaryButton: during-long-press detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onDuringLongPress();
+            },
+            this
+        );
+
+        _button.attachLongPressStop([](void *scope) {
+                // Log.verboseln("MomentaryButton: long-press-stop detected on pin %d.", ((MomentaryButton *) scope)->_pinNo);
+                ((MomentaryButton *) scope)->_onLongPressStop();
+            },
+            this
+        );
     }
 
     void _onClicked() {
@@ -131,5 +164,7 @@ private:
     }
 
     OneButton _button;
+    int _pinNo;
+
     ButtonFunc _clickFunc, _doubleClickFunc, _multiClickFunc, _longPressStartFunc, _duringLongPressFunc, _longPressStopFunc, _idleFunc;
 };

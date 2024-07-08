@@ -11,7 +11,7 @@ struct PinAssignments
     static const int OnboardBootButton = 0;
     
     static const int Button1 = 12;   // Pwr.
-    static const int Button2 = 13;   // Mode.
+    static const int Button2 = 26;   // Mode.
     static const int Button3 = 14;   // Fan-
     static const int Button4 = 27;   // Fan+
     

@@ -29,8 +29,9 @@ SmartSensor::SmartSensor()
     , _timer(5000)
     , _observers()
     , _fan(nullptr)
-    , _fanSpeed(1)
-    , _cabinetLights(30)
+    , _cabinetLights(nullptr)
+    , _heapProfiler()
+    , _fpsProfiler("smart senbsor", 1000)
 {}
 
 void SmartSensor::bindObserver(Observer& observer)
@@ -67,6 +68,12 @@ void SmartSensor::bindFanController(FanController& controller) {
     _fan->setSpeed(10 * _state.fanSpeed); // As underlying speed control is a percentage.
 }
 
+void SmartSensor::bindCabinetLights(CabinetLights& cabinetLights) {
+    _ScopedLock lock(_mutex);
+    _cabinetLights = &cabinetLights;
+    _cabinetLights->setPower(_state.power);
+}
+
 void SmartSensor::switchPower(bool on) {
     _ScopedLock lock(_mutex);
     _setPower(on);
@@ -79,6 +86,7 @@ void SmartSensor::togglePower() {
 
 void SmartSensor::selectNextDisplayMode() {
     _ScopedLock lock(_mutex);
+    Log.infoln("SmartSensor: selecting next display mode (NOTE: not yet implemented!).");
     // TODO
 }
 
@@ -96,8 +104,10 @@ void SmartSensor::adjustFanSpeed(int delta) {
     Log.infoln("SmartSensor: fan speed is now %d.", _state.fanSpeed);
 }
 
-void SmartSensor::triggerInspection() {
-    _cabinetLights.triggerInspection();
+void SmartSensor::triggerInspectionLight() {
+    _ScopedLock lock(_mutex);
+    Log.infoln("SmartSensor: trigger inspection light.");
+    _triggerInspectionLight();
 }
 
 void SmartSensor::reboot()
@@ -129,6 +139,14 @@ void SmartSensor::setup()
     _bmeSensor.setup();
     Log.infoln("BME680 initialised.");
 
+    _heapProfiler.setObserver([this](uint32_t totalHeap, uint32_t freeHeap) {
+        _informOfHeapUsage(totalHeap, freeHeap);
+    });
+
+    _fpsProfiler.setObserver([this](unsigned fps) {
+        _informOfFPS(fps);
+    });
+
     #ifdef SMART_SENSOR_USES_PMS7003
     _pmSensor.setup();
     Log.infoln("PM7003 initialised.");
@@ -147,6 +165,9 @@ void SmartSensor::loop()
     _bmeSensor.setHumidityOffset(+6.0);
 
     _bmeSensor.loop();
+    
+    _heapProfiler.loop();
+    _fpsProfiler.advanceOneFrame();
 
     #ifdef SMART_SENSOR_USES_PMS7003
     _pmSensor.loop();
@@ -219,11 +240,13 @@ void SmartSensor::loop()
 }
 
 void SmartSensor::_doSetFanSpeed(int speed) {
-    _setFanSpeed(_constrainFanSpeed(speed));
+    int withinBoundsSpeed(_constrainFanSpeed(speed));
+    Log.verboseln("SmartSensor: fan spped constrained from %d to %d", speed, withinBoundsSpeed);
+    _setFanSpeed(withinBoundsSpeed);
 }
 
 void SmartSensor::_doAdjustFanSpeed(int delta) {
-    int newSpeed(_fanSpeed + delta);
+    int newSpeed(_state.fanSpeed + delta);
     _doSetFanSpeed(newSpeed);
 }
 
@@ -232,7 +255,7 @@ bool SmartSensor::_setPower(bool on) {
     if (changed && _fan) {
         Log.verboseln("SmartSensor: fan power now %s.", on ? "on" : "off");
         _fan->setPower(on);
-        _cabinetLights.setPower(on);
+        _cabinetLights->setPower(on);
         _state.power = on;
         _informOfPower(on);
     }
@@ -272,6 +295,13 @@ bool SmartSensor::_setFanSpeed(int newFanSpeed)
     }
 
     return changed;
+}
+
+void SmartSensor::_triggerInspectionLight() {
+    if (_cabinetLights) {
+        _cabinetLights->triggerInspectionLight();
+        _informOfTriggerInspectionLight();
+    }
 }
 
 void SmartSensor::_processTemperature(float temperature) {
@@ -417,6 +447,25 @@ void SmartSensor::_informOfFanSpeed(int fanSpeed) {
     for (Observer* observer: _observers) {
         Log.verboseln("Informing \"%s\" about fan speed of %d.", observer->observerName(), fanSpeed);
         observer->onFanSpeed(fanSpeed);
+    }
+}
+
+void SmartSensor::_informOfTriggerInspectionLight() {
+    for (Observer* observer: _observers) {
+        Log.verboseln("Informing \"%s\" about triggering of inspection light.", observer->observerName());
+        observer->onTriggerInspectionLight();
+    }
+}
+
+void SmartSensor::_informOfHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {
+    for (Observer* observer: _observers) {
+        observer->onHeapUsage(totalHeap, freeHeap);
+    }
+}
+
+void SmartSensor::_informOfFPS(unsigned fps) {
+    for (Observer* observer: _observers) {
+        observer->onFPS(fps);
     }
 }
 

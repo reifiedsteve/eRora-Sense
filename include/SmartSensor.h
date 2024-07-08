@@ -19,7 +19,10 @@
 #include "CabinetLights.h"
 
 #include "DeviceState.h"
+#include "CabinetLights.h"
 
+#include "Diagnostics/HeapProfiler.h"
+#include "Diagnostics/FrameRateProfiler.h"
 class SmartSensor
 {
 public:
@@ -34,7 +37,10 @@ public:
     SmartSensor();
     
     void bindObserver(Observer& observer);
+
     void bindFanController(FanController& controller);
+    void bindCabinetLights(CabinetLights& cabinetLights);
+
     // void bindFanSpeedObserver();
 
     void switchPower(bool on);
@@ -52,7 +58,7 @@ public:
     void adjustFanSpeed(int delta);
 
     /// @brief Trigger extra illumination for inspection purposes.
-    void triggerInspection();
+    void triggerInspectionLight();
 
 #if 0
 
@@ -123,6 +129,8 @@ private:
     bool _setPower(bool on);
     bool _setFanSpeed(int speedSetting);
 
+    void _triggerInspectionLight();
+
     void _processTemperature(float temperature);
     void _processHumidity(float relHumidity);
     void _processAirPressure(float airPressure);
@@ -150,6 +158,11 @@ private:
     void _informOfPower(bool on);
     void _informOfFanSpeed(int fanSpeed);
 
+    void _informOfTriggerInspectionLight();
+
+    void _informOfHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
+    void _informOfFPS(unsigned fps);
+    
     static int _constrainFanSpeed(int speed);
 
     typedef std::list<Observer*> _Observers;
@@ -167,9 +180,10 @@ private:
 
     FanController* _fan;
 
-    int _fanSpeed;
+    CabinetLights* _cabinetLights;
 
-    CabinetLights _cabinetLights;
+    HeapProfiler _heapProfiler;
+    FrameRateProfiler _fpsProfiler;
 
     mutable _Mutex _mutex;
 };

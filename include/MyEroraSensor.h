@@ -21,6 +21,7 @@
 #include "UserSettings.h"
 
 #include "Fan/PWMFanController.h"
+#include "CabinetLights.h"
 
 #include "Controllers/ButtonController.h"
 #include "Drivers/MomentaryButton.h"
@@ -78,6 +79,8 @@ private:
     uint8_t _fanPWMPinNo;
     PWMFanController _fan;
 
+    CabinetLights _cabinetLights;
+    
     DeviceExplorer* _discoveryService; 
 };
 

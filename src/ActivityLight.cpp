@@ -23,6 +23,10 @@ void ActivityLight::onCabinetColour(uint8_t hue, uint8_t sat) {
     _blink();
 }
 
+void ActivityLight::onTriggerInspectionLight() {
+    _blink();
+}
+
 // void ActivityLight::onDisplayMode(DisplayMode mode) {
 //    _blink();
 //}

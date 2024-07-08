@@ -1,0 +1,1522 @@
+
+:root {
+  --primary-color: #2181cf;
+  --secondary-color: #fff;
+
+  
+  --audioHistogramBackground: #202020;
+  --volumeUnlitRGB: #440044;
+  --volumeLitRGB: #AA00AA;
+  --frequenciesUnlitRGB: #004400;
+  --frequenciesLitRGB: #00CC00;
+
+  --dropdownRGB: #a8dcfc;
+  --dropdownBackgroundRGB: #1A1A1A;
+}
+
+html {
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  transform: scale(100%);
+}
+
+#loading-screen  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/**
+body {
+  margin: 0;
+  color: #e3e3e3;
+  background-color: #181818;
+  // min-width:320px;  Typical width for small mobile phone, circa 2022.
+  min-width: 360px;
+  max-width: 420px; //  Typical width for large mobile phone, circs 2022.
+}
+**/
+
+body
+{
+  margin: 0;
+  color: #e3e3e3;
+  background-color: #181818;
+
+  /* Typical width for small mobile phone, circa 2022. */
+  /* min-width:320px; */ 
+  
+  min-width: 360px;
+  
+  /* Typical width for large mobile phone, circs 2022. */
+  max-width: 420px;
+
+  height: 100vh;
+
+  position: relative;
+  display: flex;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: white;
+}
+
+h2{
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #143642;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+.top-level-container {
+  min-width: 320;
+  max-width: 450;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 75px;
+  font-size: smaller;
+  background-color: #0b025f;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  transform: translate(-35px, 0px);
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.dropdown {
+  width: 205px;
+  height: 30px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  background-color: #1A1A1A;
+  border-radius: 5px;
+  align-self: left;
+  /* box-shadow: 4px 4px #ccc; */
+}
+
+.active, .collapsible:hover {
+  background-color: #303030;
+}
+
+.collapsibleContent {
+  /*
+  background-color: #303030;
+  */
+  background-color: #252525;
+  padding-bottom: 20px;
+}
+
+.collapsible {
+  /*
+  background-color: #202020;
+  */
+  /*
+  background-color: #303030;
+  */
+  background-color: #252525;
+
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+}
+
+.topnav {
+  overflow: hidden;
+  color: white;
+  background-color: #0b025f;
+}
+
+.titleBanner {
+  /*
+  font-family: Verdana;
+  */
+  font-family: Arial;
+  font-size: 30px;
+}
+
+.topbanner {
+  width: 100%;
+  height: 4px;
+}
+
+.soft-lights {
+  width: 100%;
+  height: 4px;
+}
+
+/*** Not used.
+
+.vertically-centered-element {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+***/
+
+.banner-grid-container {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 8fr 1fr;
+}
+
+.banner-grid-icon-item {
+  padding-top: 25px;
+  padding-left:10px;
+  padding-right:10px;
+}
+
+.banner-grid-title-item {
+  margin: 0px;
+}
+
+/*
+.content {
+  padding: 10px;
+  max-width: 600px;
+  margin: 5px auto;
+  justify-content: center;
+}
+*/
+
+.effectName {
+  font-size: 16px;
+}
+
+.card {
+  /*
+  background-color: #252525;
+  */
+  background-color: #252525;
+  /* box-shadow: 2px 2px 12px 1px rgba(140,140,140,.5); */
+  padding:15px;
+  margin-bottom: 5px;
+  justify-content: center;
+
+}
+
+.button {
+  /* padding: 15px 50px; */
+  font-size: 24px;
+  text-align: center;
+  align-content: center;
+  outline: none;
+  color: #fff;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.button:active {
+  background-color: #3099f0;
+  box-shadow: 2 2px #CDCDCD;
+  transform: translateY(2px);
+}
+
+.basicRgbSelector {
+  display: inline-block;
+  height: 45px;
+}
+
+/***
+
+.basicControlsTable1 {
+  width: 100%;
+}
+
+.basicControlsTable2 {
+  width: 100%;
+}
+
+.presetsTable {
+  width: 100%;
+}
+
+***/
+
+/**
+.presetButton-classic {
+  width: 60px;
+  height: 30px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.presetButton-classic:active {
+  background-color: #3099f0;
+  box-shadow: 2 2px #CDCDCD;
+  transform: translateY(2px);
+}
+***/
+
+.presetButton {
+  width: 60px;
+  height: 30px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  color: #fff;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.presetButton:active {
+  background-color: #3099f0;
+  box-shadow: 2 2px #CDCDCD;
+  transform: translateY(2px);
+}
+
+/*
+.settingsOperatonButtonsTable {
+
+}
+*/
+
+
+.settings-operation-button {
+  width: 45px;
+  height: 30px;
+  padding: 5px 5px;
+  margin:5px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+  color: #fff;
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 5px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+
+.settings-operation-button:active {
+  background-color: #3099f0;
+  box-shadow: 2 2px #CDCDCD;
+  transform: translateY(2px);
+}
+
+.state {
+  font-size: 1.5rem;
+  color:#8c8c8c;
+  font-weight: bold;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/***
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--primary-color);
+
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary-color);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+***/
+
+
+/*        Checkbox (on/offswitch)          */
+
+/***
+
+input[type="checkbox"].power-switch {
+  font-size: 30px;
+  -webkit-appearance: none;
+    -moz-appearance: none;
+          appearance: none;
+  width: 3.5em;
+  height: 1.5em;
+  background: #ddd;
+  border-radius: 3em;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+  
+input[type="checkbox"].power-switch:checked{
+  background: #2181cf;
+}
+  
+input[type="checkbox"].power-switch:after{
+  position: absolute;
+  content: "";
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 50%;
+  background: #fff;
+  -webkit-box-shadow: 0 0 .25em rgba(0,0,0,.3);
+          box-shadow: 0 0 .25em rgba(0,0,0,.3);
+  -webkit-transform: scale(.7);
+          transform: scale(.7);
+  left: 0;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+  
+input[type="checkbox"].power-switch:checked:after{
+  left: calc(100% - 1.5em);
+}
+
+***/
+
+/*        Checkbox (effect parameter switch)       */
+
+input[type="checkbox"].param_switch {
+  font-size: 30px;
+  -webkit-appearance: none;
+    -moz-appearance: none;
+          appearance: none;
+  width: 2.5em;                 /* WAS 3.5em */
+  height: 1.0em;                /* WAS 1.5em */
+  margin: 1px;
+  /*background: #ddd; */
+  background: #0145b8;
+  border-radius: 3em;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+  
+input[type="checkbox"].param_switch:checked{
+  background: var(--primary-color);
+}
+  
+input[type="checkbox"].param_switch:after{
+  position: absolute;
+  content: "";
+  width: 1.0em;     /* WAS 1.5em */
+  height: 1.0em;    /* WAS 1.5em */
+  border-radius: 50%;
+  background: #fff;
+  -webkit-box-shadow: 0 0 .25em rgba(0,0,0,.3);
+          box-shadow: 0 0 .25em rgba(0,0,0,.3);
+  -webkit-transform: scale(.7);
+          transform: scale(.7);
+  left: 0;
+  -webkit-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+  
+input[type="checkbox"].param_switch:checked:after{
+  /* left: calc(100% - 1.5em); */
+  left: calc(100% - 1.0em);
+}
+
+/*
+#rgbSelector {
+  min-width: 30px;
+  max-width: 45px;
+}
+*/
+
+/*        Range slider         */
+
+/***
+
+.brightness-slider {
+  -webkit-appearance: none;
+  margin-left: 0%;
+  margin-right: 0%;
+  height: 10px;
+  background: #d3d3d3;
+  border-radius: 17px;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  transform: translateY(50%);
+  width: 100%;
+}
+
+.brightness-slider:hover {
+  opacity: 1;
+}
+  
+.brightness-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 18px;
+  width: 35px;
+  height: 35px;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+  
+.brightness-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+***/
+
+.restart-button {
+  margin: 10px;
+  font-size: 16px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.brightness-slider {
+  -webkit-appearance: none;
+  margin-left: 0%;
+  margin-right: 0%;
+  margin-top: 0%;
+  margin-bottom:0%;
+  /* width: 140px */
+  width: 100%;
+  height: 10px;
+  /* background: #d3d3d3; */
+  background: linear-gradient(to right, #0145b8, #0145b8);
+  border-radius: 10px;
+  outline: none;
+  opacity: 1.0;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  transform: translateY(75%);
+}
+
+.brightness-slider::hover {
+  opacity: 1;
+  align-self: center;
+  align-content: center;
+}
+
+.brightness-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 16px;
+  width: 32px;
+  height: 32px;
+  background: var(--primary-color);
+  cursor: pointer;
+
+}
+
+.brightness-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+
+/* Smaller slider */
+
+.property-slider {
+  -webkit-appearance: none;
+  margin-left: 0%;
+  margin-right: 0%;
+  margin-top: 0%;
+  margin-bottom:0%;
+  /* width: 140px */
+  width: 100%;
+  height: 10px;
+  /* background: #d3d3d3; */
+  background: linear-gradient(to right, #0145b8, #0145b8);
+  border-radius: 10px;
+  outline: none;
+  opacity: 1.0;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.property-slider::hover {
+  opacity: 1;
+  align-self: center;
+  align-content: center;
+}
+
+.property-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 12px;
+  width: 25px;
+  height: 25px;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+.property-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: var(--primary-color);
+  cursor: pointer;
+}
+
+/* Dropdown */
+
+.property-dropdown {
+  width: 100%;
+  height: 30px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  background-color: #1A1A1A;
+  border-radius: 5px;
+  align-self: left;
+  /* box-shadow: 4px 4px #ccc; */
+}
+
+/*     Tabs      */
+
+.ledsPreview {
+  height: 15px;
+  /* background: black; */
+  background: linear-gradient(to right, #f00, #0f0)
+}
+
+/* Colour gradients */
+
+.erora-gradient {
+  height: 10px;
+  background-color: blue;
+  background-image: linear-gradient(to right, #d27169, #f1b779, #73d95f);
+}
+
+.soft-lights {
+  /* background-image: linear-gradient(to right, #d27169, #f1b779, #73d95f); */
+  height: 4px;
+}
+
+.rainbow-gradient {
+  height: 10px;
+  background-color: blue;
+  background-image: linear-gradient(to right, red,orange,yellow,green,blue,indigo,violet);
+}
+
+/* Basic control layout */
+
+.basic-controls-grid-container {
+  display: grid;
+  grid-row-gap: 0px;
+  grid-column-gap: 5px;
+  grid-row-gap: 15px;
+  grid-template-columns: 70fr 1fr 165px;
+  margin-left:15px;
+  margin-right:15px;
+  margin-bottom: 0px;
+  margin-top: 15px;
+  /* background: lightcoral; */
+}
+
+.basic-controls-grid-item  {
+  /* background: red; */
+}
+
+.basic-controls-grid-power-item {
+  margin: 0px;
+  display: flex;
+  /* background-color: yellow; */
+}
+
+.basic-controls-grid-expanding-gap {
+  display: flex;
+  /* background-color: darkolivegreen; */
+}
+
+.basic-controls-grid-rgb-item {
+  margin: 0px;
+  display: flex;
+  /* background-color: orange; */
+}
+
+.brightness-controls-grid-container {
+  display: grid;
+  grid-row-gap: 0px;
+  grid-column-gap: 5px;
+  grid-row-gap: 15px;
+  grid-template-columns: 70fr 1fr;
+  margin-left:15px;
+  margin-right:15px;
+  margin-bottom: 0px;
+  margin-top: 25px;
+  /* background: lightcoral; */
+}
+
+.brightness-controls-grid-item {
+  margin: 0px;
+  display: flex;
+  width: 100%;
+  /* background-color: gray; */
+}
+
+.basic-controls-grid-icon {
+  margin-right: 10px;
+  width: 30px;
+  height: 30px;
+  align-self: center;
+  /* background-color: red; */
+}
+
+.basic-controls-grid-power-control {
+  margin: 0px;
+  align-self: center;
+  /* background-color: green; */
+}
+
+.basic-controls-grid-rgb-control {
+  margin: 0px;
+  align-self: center;
+  /* background-color: purple; */
+}
+
+.basic-controls-grid-brightness-control {
+  margin: 0px;
+  align-self: center;
+  /* background-color: purple; */
+}
+
+.power-control {
+  align-self: left;
+}
+
+.colour-control {
+  padding: 0px;
+}
+
+.grid-col-span-2 {
+  grid-column: span 2;
+}
+
+.grid-col-span-3 {
+  grid-column: span 3;
+}
+
+.lampRGBSelector {
+  width: 20px;
+}
+
+/* The presets keypad layout */
+
+.presets-grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 10px;
+  grid-row-gap: 20px;
+}
+
+.presets-grid-item {
+  margin: 0px;
+}
+
+.effects-grid-container {
+  display: grid;
+  grid-template-columns: 80px 200px;
+  grid-column-gap: 18px;
+  grid-row-gap: 10px;
+  margin-top: 5px;
+  margin-bottom: 0px;
+  /* background: green; */
+}
+
+.effects-grid-item {
+  padding-bottom: 10px;
+}
+
+.property-controls-grid-container {
+  display: grid;
+  grid-template-columns: 80px 140px 55px;
+  grid-column-gap: 10px;
+
+  grid-row-gap: 10px;
+  margin-bottom: 10px;
+
+  align-items: center; /* vertically.
+
+  /* visibility: collapse; */
+  /* background: purple; */
+}
+
+.property-controls-grid-item {
+  margin: 0px;
+  /* background: red; */
+  height:30px;
+}
+
+.primary-label {
+  font-size:medium;
+  text-align: right;
+  align-self: center;
+  height: 30px;
+  line-height: 30px;
+}
+
+.property-label {
+  font-size:small;
+  text-align: right;
+  vertical-align: center;
+  align-self: center;
+  height: 30px;
+  line-height: 30px;
+  /* background: red; */
+}
+
+.property-control {
+  display: flex;
+  height: 30px;
+  line-height: 30px;
+  position: relative;
+  vertical-align: center;
+  /* background: green; */
+}
+
+.property-control-int-slider {
+  transform: translateY(10px);
+}
+
+.property-control-int-dropdown {
+  /* Default is fine for now */
+}
+
+.rgb-property-control {
+  height: 27px;
+  line-height: 27px;
+  cursor: pointer;
+  overflow:hidden;
+}
+
+.hsv-property-control {
+  height: 27px;
+  line-height: 27px;
+  overflow:hidden;
+}
+
+.int-property-control {
+  height: 27px;
+  line-height: 27px;
+}
+
+.bool-property-control {
+  height: 27px;
+  line-height: 27px;
+}
+
+.property-value {
+  font-size: smaller;
+  line-height: 30px;
+  text-align: left;
+  margin-left: 0px;
+  color: white;
+  /* background: darkgray; */
+  /* background: blue; */
+}
+
+.rgb-property-value {
+  opacity: 0.3;
+}
+
+.hsv-property-value {
+  opacity: 0.3;
+}
+
+.int-property-value {
+  opacity: 0.3;
+}
+
+.bool-property-value {
+  opacity: 0;
+}
+
+/* The edit command keys layout */
+
+.edit-commands-grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 10px;
+  grid-row-gap: 20px;
+}
+
+.edit-commands-grid-item {
+  margin: 0px;
+}
+
+/*
+.preset-name-text {
+  width: 100%;
+  color: #a8dcfc;
+  background-color: #1A1A1A;
+}
+*/
+
+/*
+.preset-dropdown {
+  width: 100%;
+  height: 30px;
+  border: 1px solid #999;
+  font-size: 14px;
+  color: #1c87c9;
+  background-color: #eee;
+  border-radius: 5px;
+  align-self: left;
+}
+*/
+
+.presets-grid-container {
+  width: 100%;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 30px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  background-color: #1A1A1A;
+  border-radius: 5px;
+  align-self: left;
+}
+
+/**
+.load-save-preset-grid-container {
+
+  display: grid;
+  grid-template-columns: 45px 5fr 2fr 2fr;
+  grid-column-gap: 10px;
+  grid-row-gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+**/
+
+.load-save-preset-grid-container {
+  display: grid;
+  grid-template-columns: 70px 5fr 2fr 2fr;
+  grid-template-rows: 50px 50px;
+  column-gap: 5px;
+  row-gap: 5px;
+  justify-content: center;
+  align-items: center;
+  grid-template-areas:
+    "a b b b"
+    "c d e f";
+}
+
+.load-save-preset-grid-item {
+  margin: 0px;
+}
+
+.load-save-preset-label {
+  justify-content: right;
+  align-items: right;
+}
+
+.preset-dropdown {
+    width: 100%;
+    height: 30px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border: 1px solid #999;
+    font-size: 12px;
+    color: var(--dropdownRGB);
+    background-color: #1A1A1A;
+    border-radius: var(--soft-corner);
+    align-self: left;
+}
+
+.preset-name-text {
+    width: 100%;
+    height: 25px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border: 1px solid #999;
+    font-size: 12px;
+    color: #a8dcfc;
+    background-color: #1A1A1A;
+    /*
+    color: #1c87c9;
+    background-color: #eee;
+    */
+    border-radius: 5px;
+    align-self: left;
+    /* box-shadow: 4px 4px #ccc; */
+  }
+  
+  .new-row {
+  grid-column-start: 1;
+}
+
+/* Audio boost sliders */
+
+.audio-controls-grid-container {
+  display: grid;
+  grid-template-columns: 80px 180px 55px;
+  grid-column-gap: 10px;
+
+  grid-row-gap: 10px;
+  margin-bottom: 10px;
+
+  align-items: center; /* vertically.
+
+  /* visibility: collapse; */
+  /* background: purple; */
+}
+
+.audio-controls-grid-item {
+  margin: 0px;
+  /* background: red; */
+  height:30px;
+}
+
+.audio-label {
+  font-size:small;
+  text-align: right;
+  vertical-align: center;
+  align-self: center;
+  height: 30px;
+  line-height: 30px;
+  /* background: red; */
+}
+
+.audio-control {
+  display: flex;
+  height: 30px;
+  height: 30px;
+  line-height: 30px;
+
+  position: relative;
+  vertical-align: center;
+  /* background: green; */
+}
+
+.audio-control-int {
+  transform: translateY(10px);
+}
+
+.audio-value {
+  font-size: smaller;
+  line-height: 30px;
+  text-align: left;
+  margin-left: 0px;
+  color: white;
+  /* background: darkgray; */
+  /* background: blue; */
+}
+
+.audio-value-int {
+  opacity: 0.3;
+}
+
+
+/* Style the buttons that are used to open the tab content */
+
+.tab-link-container {
+  overflow: hidden;
+  border: 1px solid #202020;
+  background-color: #202020;
+  margin-bottom: 0px;
+}
+
+.tab-link {
+  width: 47px;
+  height: 50px;
+  font-size: 16px;
+  margin-right: 5px;
+  color: #b0b0b0;
+  background-color: #252525;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: -6px 16px;
+  transition: 0.3s;
+}
+
+.tab-container {
+  width: 100%;
+}
+
+/* Change background color of buttons on hover */
+
+.tab-link:hover {
+  color: #e3e3e3;
+  background-color: #303030;
+}
+
+/* Create an active/current tablink class */
+
+.tab-link-container .active {
+  /* color: #e3e3e3; */
+  background-color: #353535;
+}
+
+/* Style the tab content */
+
+.lampRgbSelector {
+  height: 35px;
+  width: 40px;
+}
+
+/*     Parameter settings controls table     */
+
+/*
+
+.paramstable {
+  width: 350px;
+  align-content: left;
+}
+
+.paramsrow {
+  padding: 10px;
+  margin-left: 10px;
+  height: 40px;
+  visibility: collapse;
+}
+
+.paramnamelabel {
+  font-size: 14px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+*/
+
+.effectNameLabel {
+  font-size: 16px;
+  padding-left:  10px;
+  padding-right: 10px;
+  padding-bottom: 15px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+/* The following two represent how a dropdown appears on the effects tab.
+They should be a common style for both. TODO Or should they?
+*/
+
+.effectNameControl {
+  padding-left:  10px;
+  padding-right: 10px;
+  padding-bottom: 15px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+.presetSelectControl {
+  font-size: 6px;
+  padding-left:  10px;
+  padding-right: 10px;
+  padding-bottom: 15px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+/***
+
+.param_rgb_control {
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+.param_int_control {
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+.param_bool_control {
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+***/
+
+/*     Parameter settings values table     */
+
+.paramsvaluestable {
+  width: 350px;
+}
+
+.paramsvaluesrow {
+  padding: 12px;
+  margin-left: 10px;
+  height: 40px;
+  /* visibility: collapse; */
+}
+
+.paramvaluesnamelabel {
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.paramvaluesvalue {
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+.hidden {
+	visibility: collapse;
+}
+
+.audioSettingsTable {
+  width: 350px;
+  vertical-align: left;
+}
+
+.audioSettingsRow {
+  padding: 10px;
+  margin-left: 10px;
+  vertical-align: middle;
+  height: 40px;
+}
+
+.settings-section {
+  margin-bottom: 5px;
+}
+
+.settingstable {
+  width: 350px;
+  vertical-align: left;
+}
+
+.settingsrow {
+  padding: 10px;
+  margin-left: 10px;
+  vertical-align: middle;
+  height: 40px;
+}
+
+.settings-button {
+  font-size: 14px;
+  height: 30px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.settings-grid-container {
+  display: grid;
+  grid-template-columns: 130px 160px 35px;
+  grid-column-gap: 10px;
+
+  grid-row-gap: 10px;
+  margin-bottom: 10px;
+
+  align-items: center; /* vertically.
+
+  /* visibility: collapse; */
+  /* background: purple; */
+}
+
+.settings-grid-item {
+  margin: 0px;
+  /* background: red; */
+  height:30px;
+}
+
+.settings-section-banner {
+  font-size: 15px;
+}
+
+.settings-descriptive {
+  /* font-family: Tahoma; */
+  font-size: 13px;
+  color: #E0E0E0;
+  /* background-color: #303030; */
+  background-color: #252525;
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 5%; /* 20px */
+  padding-bottom: 5%;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.settings-label {
+  font-size:small;
+  text-align: right;
+  vertical-align: center;
+  align-self: center;
+  height: 30px;
+  line-height: 30px;
+/*
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  text-align: right;
+*/
+}
+
+.settings-control {
+display: flex;
+height: 30px;
+height: 30px;
+line-height: 30px;
+position: relative;
+vertical-align: center;
+/* background: green; */
+}
+
+.settings-dropdown {
+  width: auto;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 30px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  background-color: #1A1A1A;
+  border-radius: 5px;
+  align-self: left;
+}
+
+.settings-textbox {
+  width: 100%;
+  height: 25px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  /*color: white; */
+  background-color: #1A1A1A;
+  /*
+  color: #1c87c9;
+  background-color: #eee;
+  */
+  border-radius: 5px;
+  align-self: left;
+  /* box-shadow: 4px 4px #ccc; */
+}
+
+.settings-numeric {
+  width: 80px;
+  height: 25px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border: 1px solid #999;
+  font-size: 12px;
+  color: #a8dcfc;
+  /*color: white; */
+  background-color: #1A1A1A;
+  /*
+  color: #1c87c9;
+  background-color: #eee;
+  */
+  border-radius: 5px;
+  align-self: left;
+  /* box-shadow: 4px 4px #ccc; */
+}
+
+.unavailable {
+  /* font-family: Tahoma; */
+  font-size: 13px;
+  color: #B0B0B0;
+  /* background-color: #303030; */
+  background-color: #252525;
+  padding-left: 5%;
+  padding-right: 5%;
+  padding-top: 5%; /* 20px */
+  padding-bottom: 5%;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+/*
+.settings-control-ip-address {
+
+}
+
+.settings-ip-byte {
+width: 40px;
+height: 25px;
+border: 1px solid #999;
+font-size: 12px;
+color: #1c87c9;
+background-color: #eee;
+border-radius: 5px;
+align-self: left;
+}
+
+*/
+
+.settingsnamelabel {
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  text-align: right;
+}
+
+.saveAlertLabel {
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  text-align: left;
+  color: turquoise;
+}
+
+.settingsvalue {
+  font-size: 12px;
+  padding-left:  10px;
+  padding-right: 10px;
+  vertical-align: middle;
+  align-items: left;
+  text-align: left;
+}
+
+.settingsvalueoption {
+  vertical-align: middle;
+  padding-right: 3px;
+}
+
+/* Vertically align any radio button text to it's control */
+
+input[type="radio"] {
+  display: table-cell;
+  vertical-align: middle;
+}
+
+/*
+body {
+  font-family: monospace;
+  height: 100%;
+  display: grid;
+  grid-gap: 5rem;
+  place-items: center;
+  padding: 10%;
+}
+*/
+
+
+

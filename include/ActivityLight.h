@@ -18,6 +18,8 @@ public:
     virtual void onFanSpeed(int speed) override; 
     virtual void onCabinetBrightness(uint8_t brightness) override;
     virtual void onCabinetColour(uint8_t hue, uint8_t sat) override;
+    virtual void onTriggerInspectionLight() override;
+
     // virtual void onDisplayMode(DisplayMode mode) override;
 
     void onTemperature(float temperature) override;

@@ -134,6 +134,14 @@ public:
 
     #endif
     
+    inline void setMQTTEnabled(bool enable) {
+        _putSetting("mqtt-on", enable);
+    }
+
+    inline bool getMQTTEnabled() const {
+        return _getSetting("mqtt-on", false);
+    }
+
     inline void setMQTTBrokerAddress(const std::string& address) {
         _putSetting("mqtt-ip", address);
     }
@@ -174,8 +182,6 @@ public:
         return _getSetting("mqtt-prefix", "eRora/sensors/office");
     }
 
-    #if 0
-
     inline void setNumberOfLEDs(unsigned count) {
         _putSetting("led-count", (int)count);
     }
@@ -184,6 +190,8 @@ public:
         return _getSetting("led-count", DefaultLightstripNumLEDs);
     }
 
+    #if 0
+
     inline void setGammaCorrect(bool correct) {
         _putSetting("gamma-fix", correct);
     }
@@ -191,6 +199,8 @@ public:
     inline bool getGammaCorrect() const {
         return _getSetting("gamma-fix", DefaultApplyGamma);
     }
+
+    #endif
 
     inline void setLEDsPSUVoltage(unsigned volts) {
         _putSetting("psu-volts", (int)volts);
@@ -215,8 +225,6 @@ public:
     inline bool getManagePower() const {
         return _getSetting("psu-limit", true);
     }
-
-    #endif
 
 private:
 

@@ -40,6 +40,7 @@ public:
     
     void onSwitchOnOff(bool on) override;
     void onFanSpeed(int speed) override;
+    void onTriggerInspectionLight() override;
     void onCabinetBrightness(uint8_t brightness) override;
     void onCabinetColour(uint8_t hue, uint8_t sat) override;
 

@@ -19,13 +19,16 @@ public:
     virtual void onSwitchOnOff(bool on) {}
     virtual void onFanSpeed(int speed) {}
 
+    virtual void onTriggerInspectionLight() {}
+
     virtual void onCabinetBrightness(uint8_t brightness) {}
     virtual void onCabinetColour(uint8_t hue, uint8_t sat) {}
 
     // virtual void onDisplayMode(DisplayMode mode) = 0;
     
     virtual void onHeapUsage(uint32_t totalHeap, uint32_t freeHeap) {}
-
+    virtual void onFPS(unsigned fps) {}
+    
     /// @brief Inform when IAQ is available (or not).
     /// @param available Returns true if available; otherwise false.
     virtual void onIAQAvailability(bool available) {}
