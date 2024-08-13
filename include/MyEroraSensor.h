@@ -14,7 +14,7 @@
 #include "PanelDisplay.h"
 
 #include "MQTTConnection.h"
-#include "MQTTSensorController.h"
+#include "Controllers/MQTTSensorController.h"
 
 #include "Controllers/WebServerSensorController.h"
 #include "Chronos/Stopwatch.h"
