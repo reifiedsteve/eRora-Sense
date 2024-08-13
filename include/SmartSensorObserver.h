@@ -19,10 +19,9 @@ public:
     virtual void onSwitchOnOff(bool on) {}
     virtual void onFanSpeed(int speed) {}
 
-    virtual void onTriggerInspectionLight() {}
-
     virtual void onCabinetBrightness(uint8_t brightness) {}
     virtual void onCabinetColour(uint8_t hue, uint8_t sat) {}
+    virtual void onCabinetInspectionLightOnOff(bool onOff) {}
 
     // virtual void onDisplayMode(DisplayMode mode) = 0;
     

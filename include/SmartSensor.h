@@ -157,8 +157,7 @@ private:
 
     void _informOfPower(bool on);
     void _informOfFanSpeed(int fanSpeed);
-
-    void _informOfTriggerInspectionLight();
+    void _informOfInspectionLight(bool onOff);
 
     void _informOfHeapUsage(uint32_t totalHeap, uint32_t freeHeap);
     void _informOfFPS(unsigned fps);

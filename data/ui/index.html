@@ -314,15 +314,21 @@ jscolor.presets.default = {
 
                 <div class ="card">
 
-                    <div class="fan-controls-grid-container">
+                    <div class="fan-controls-grid-container controls-grid-item">
                         <div class="fan-controls-grid-item basic-controls-grid-item grid-col-span-3">
                             <img id="spinning-fan" src="icons/fan.svg" class="basic-controls-grid-icon svg-icon"/>
                             <div class="basic-controls-grid-control fan-controls-grid-item grid-col-span-3">
                                 <input id="fan-speed-slider" class="fan-speed-slider" type="range" min="1" max="10" value="1" onchange="changeFanSpeed(this.value)">
                             </div>
+                            <div class="">
+                                <button class="button bulb-button basic-controls-grid-button" onclick="turnInspectionLightOn();">
+                                    <img id="inspection-light-off" src="icons/lightbulb-off.svg" class="inspection-light basic-controls-grid-icon svg-icon show-element"/>
+                                    <img id="inspection-light-on" src="icons/lightbulb-on.svg" class="inspection-light basic-controls-grid-icon svg-icon hide-element"/>
+                                </button>
+                            </div>
                         </div>
                     </div>
-        
+
                 </div>
                 
             </div>

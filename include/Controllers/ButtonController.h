@@ -25,9 +25,15 @@ public:
       , _modeButton(modeButton)
       , _fanDecButton(fanDecButton)
       , _fanIncButton(fanIncButton)
-      , _timer(500)
-      , _modeTimer(1000)
-    {}
+      , _repeatTimer(500)
+      , _modeCycleTimer(1000)
+    {
+        static const int singleClickMs = 400; // TODO: try smaller values for quicker responses.
+        _powerButton.setClickMs(singleClickMs);
+        _modeButton.setClickMs(singleClickMs);
+        _fanDecButton.setClickMs(singleClickMs);
+        _fanIncButton.setClickMs(singleClickMs);
+    }
 
 private:
 
@@ -51,13 +57,13 @@ private:
         });
 
         _modeButton.attachLongPressStart([this]() {
-            _modeTimer.restart();
+            _modeCycleTimer.restart();
         });
         
         _modeButton.attachDuringLongPress([this]() { 
-            if (_modeTimer.hasExpired()) {
+            if (_modeCycleTimer.hasExpired()) {
                 _selectNextDisplayMode();
-                _modeTimer.restart();
+                _modeCycleTimer.restart();
             }
         });
 
@@ -75,13 +81,13 @@ private:
 
         _fanIncButton.attachLongPressStart([this]() { 
             _adjustFanSpeed(+1);
-            _timer.restart();
+            _repeatTimer.restart();
         });
         
         _fanIncButton.attachDuringLongPress([this]() { 
-            if (_timer.hasExpired()) {
+            if (_repeatTimer.hasExpired()) {
                 _adjustFanSpeed(+1);
-                _timer.restart();
+                _repeatTimer.restart();
             }
         });
         
@@ -91,13 +97,13 @@ private:
 
         _fanDecButton.attachLongPressStart([this]() {
             _adjustFanSpeed(-1);
-            _timer.restart();
+            _repeatTimer.restart();
         });
 
         _fanDecButton.attachDuringLongPress([this]() {
-            if (_timer.hasExpired()) {
+            if (_repeatTimer.hasExpired()) {
                 _adjustFanSpeed(-1);
-                _timer.restart();
+                _repeatTimer.restart();
             }
         });
 
@@ -120,6 +126,6 @@ private:
     Button& _fanDecButton;
     Button& _fanIncButton;
 
-    CountdownTimer _timer;
-    CountdownTimer _modeTimer;
+    CountdownTimer _repeatTimer;
+    CountdownTimer _modeCycleTimer;
 };

@@ -17,6 +17,7 @@ struct DeviceState
       , pm01(0)
       , pm25(0)
       , pm10(0)
+      , inspecting(false)
     {}
 
     // Device/control state.
@@ -31,4 +32,6 @@ struct DeviceState
     int airPressure;
 
     int pm01, pm25, pm10;
+
+    bool inspecting;
 };

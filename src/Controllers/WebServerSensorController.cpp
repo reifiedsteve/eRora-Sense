@@ -177,6 +177,10 @@ void WebServerSensorController::onCabinetColour(uint8_t hue, uint8_t sat) {
     _respondToCabinetColour(hue, sat);
 }
 
+void WebServerSensorController::onCabinetInspectionLightOnOff(bool onOff) {
+    _respondToCabinetInspectionLight(onOff);
+}
+
 void WebServerSensorController::onTemperature(float temperature) {
     _respondToTemperature(temperature);
 }
@@ -282,6 +286,12 @@ void WebServerSensorController::_respondToCabinetBrightness(uint8_t brightness) 
 
 void WebServerSensorController::_respondToCabinetColour(uint8_t hue, uint8_t sat) {
 
+}
+
+void WebServerSensorController::_respondToCabinetInspectionLight(bool onOff) {
+    _state.inspecting = onOff;
+    std::string message(_makeCabinetInspectionLightMessage(onOff));
+    _sendToClients(message);
 }
 
 void WebServerSensorController::_respondToTemperature(float temperature) {
@@ -619,6 +629,11 @@ bool WebServerSensorController::_apiHandleStateQuery(AsyncWebServerRequest* requ
         request->send(200, "text/plain", String(_toString(fanSpeed).c_str()));
     }
 
+    else if (queryItemName == "inspect") {
+        int inspecting(_state.inspecting); 
+        request->send(200, "text/plain", (inspecting ? "on" : "off"));
+    }
+
     else if (queryItemName == "iaq") {
         int iaq((int)_state.iaq); 
         request->send(200, "text/plain", String(_toString(iaq).c_str()));
@@ -690,6 +705,10 @@ bool WebServerSensorController::_apiHandleCommand(const std::string& command, co
 
     if (command == "power") {
         handled = _parsePowerRequest(value);
+    }
+
+    else if (command == "inspect") {
+        handled = _parseInspectRequest(value);
     }
 
     else if ((command == "fan-speed") || (command == "level")) {
@@ -792,6 +811,12 @@ std::string WebServerSensorController::_makeFanSpeedMessage(int speed) {
     return os.str();
 }
 
+std::string WebServerSensorController::_makeCabinetInspectionLightMessage(bool onOff) {
+    std::ostringstream os;
+    _appendCabinetInspectionLightMessage(os, onOff);
+    return os.str();
+}
+
 std::string WebServerSensorController::_makeTemperatureMessage(float temperature) {
     std::ostringstream os;
     _appendTemperatureMessage(os, temperature);
@@ -865,11 +890,15 @@ std::string WebServerSensorController::_makeFPSMessage(unsigned fps) {
 }
     
 void WebServerSensorController::_appendPowerMessage(std::ostream& os, bool on) {
-    os << "power " << _toBoolString(on);
+    os << "power " << _toBoolString(on, "on", "off");
 }
 
 void WebServerSensorController::_appendFanSpeedMessage(std::ostream& os, int speed) {
     os << "fan-speed " << speed;
+}
+
+void WebServerSensorController::_appendCabinetInspectionLightMessage(std::ostream& os, bool onOff) {
+    os << "inspect " << _toBoolString(onOff, "on", "off");
 }
 
 void WebServerSensorController::_appendTemperatureMessage(std::ostream& os, float temperature) {
@@ -1015,6 +1044,11 @@ bool WebServerSensorController::_parseSingleRequest(const std::string& message)
                 handled = _parsePowerRequest(stateStr);
             }
 
+            else if (command == "inspect") {
+                const std::string& onOffStr(parts[1].c_str());
+                handled = _parseInspectRequest(onOffStr);
+            }
+
             else if ((command == "fan-speed") || (command == "level")) {
                 const std::string& speedStr(parts[1].c_str());
                 handled = _parseFanSpeedRequest(speedStr);
@@ -1042,6 +1076,25 @@ bool WebServerSensorController::_parsePowerRequest(const std::string& value)
         _toggleOnOff();
     }
 
+    else {
+        handled = false;
+    }
+
+    return handled;
+}
+
+bool WebServerSensorController::_parseInspectRequest(const std::string& value)
+{
+    bool handled(true);
+
+    if (value == "on") {
+        _triggerInspection();
+    }
+    
+    else if (value == "off") {
+        // Off is on an auto-timer.
+    }
+    
     else {
         handled = false;
     }
@@ -1916,8 +1969,12 @@ std::string WebServerSensorController::_toString(int value) {
 }
 
 std::string WebServerSensorController::_toBoolString(bool state) {
+    return _toBoolString(state, "true", "false");
+}
+
+std::string WebServerSensorController::_toBoolString(bool state, const char* trueStr, const char* falseStr) {
     std::ostringstream os;
-    os << (state ? "true" : "false");
+    os << (state ? trueStr : falseStr);
     return os.str();
 }
 

@@ -23,8 +23,8 @@ void ActivityLight::onCabinetColour(uint8_t hue, uint8_t sat) {
     _blink();
 }
 
-void ActivityLight::onTriggerInspectionLight() {
-    _blink();
+void ActivityLight::onCabinetInspectionLightOnOff(bool on) {
+    if (on) _blink(); // Note: only on is user-triggered.
 }
 
 // void ActivityLight::onDisplayMode(DisplayMode mode) {

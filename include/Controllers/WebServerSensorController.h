@@ -115,6 +115,7 @@ public:
 
     void onCabinetBrightness(uint8_t brightness) override;
     void onCabinetColour(uint8_t hue, uint8_t sat) override;
+    void onCabinetInspectionLightOnOff(bool on) override;
 
     // Sensor measurements being observed.
 
@@ -173,6 +174,7 @@ private:
     void _respondToFanSpeed(int speed);
     void _respondToCabinetBrightness(uint8_t brightness);
     void _respondToCabinetColour(uint8_t hue, uint8_t sat);
+    void _respondToCabinetInspectionLight(bool onOff);
     void _respondToTemperature(float temperature);
     void _respondToHumidity(float humidity);
     void _respondToAirPressure(float hPa);
@@ -220,6 +222,7 @@ private:
     
     std::string _makePowerMessage(bool on);
     std::string _makeFanSpeedMessage(int speed);
+    std::string _makeCabinetInspectionLightMessage(bool onOff);
     std::string _makeTemperatureMessage(float temperature);
     std::string _makeHumidityMessage(float humidity);
     std::string _makeAirPressureMessage(float pressure);
@@ -235,6 +238,7 @@ private:
 
     void _appendPowerMessage(std::ostream& os, bool on);
     void _appendFanSpeedMessage(std::ostream& os, int speed);
+    void _appendCabinetInspectionLightMessage(std::ostream& os, bool onOff);
     void _appendTemperatureMessage(std::ostream& os, float temperature);
     void _appendHumidityMessage(std::ostream& os, float humidity);
     void _appendAirPressureMessage(std::ostream& os, float pressure);
@@ -272,6 +276,7 @@ private:
     bool _parseSingleRequest(const std::string& message);
 
     bool _parsePowerRequest(const std::string& value);
+    bool _parseInspectRequest(const std::string& value);
     bool _parseFanSpeedRequest(const std::string& value);
     // bool _parseControlBrightnessRequest(const std::string& value, bool isPercentage);
     
@@ -324,6 +329,7 @@ private:
 
     static std::string _toString(int value);
     static std::string _toBoolString(bool state);
+    static std::string _toBoolString(bool state, const char* trueStr, const char* falseStr);
     static std::string _toString(const IPAddress& address);
     static std::string _toString(float value, int precision);
 

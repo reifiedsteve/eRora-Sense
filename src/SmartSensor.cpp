@@ -58,6 +58,7 @@ void SmartSensor::bindObserver(Observer& observer)
         observer.onPM25(_pm25);
         observer.onPM10(_pm10);
         #endif
+        observer.onCabinetInspectionLightOnOff(_state.inspecting);
     observer.onGroupUpdateBegins();
 }
 
@@ -145,6 +146,11 @@ void SmartSensor::setup()
 
     _fpsProfiler.setObserver([this](unsigned fps) {
         _informOfFPS(fps);
+    });
+
+    _cabinetLights->observeInspectionLight([this](bool onOff) {
+        _state.inspecting = onOff;
+        _informOfInspectionLight(onOff);
     });
 
     #ifdef SMART_SENSOR_USES_PMS7003
@@ -300,7 +306,9 @@ bool SmartSensor::_setFanSpeed(int newFanSpeed)
 void SmartSensor::_triggerInspectionLight() {
     if (_cabinetLights) {
         _cabinetLights->triggerInspectionLight();
-        _informOfTriggerInspectionLight();
+        // Note: _cabinetLights has an observer that we've set
+        // to call _informOfInspectionLight(true), so no need
+        // to do it explicitly here as well.
     }
 }
 
@@ -450,10 +458,10 @@ void SmartSensor::_informOfFanSpeed(int fanSpeed) {
     }
 }
 
-void SmartSensor::_informOfTriggerInspectionLight() {
+void SmartSensor::_informOfInspectionLight(bool onOff) {
     for (Observer* observer: _observers) {
-        Log.verboseln("Informing \"%s\" about triggering of inspection light.", observer->observerName());
-        observer->onTriggerInspectionLight();
+        Log.verboseln("Informing \"%s\" state of inspection light to %s.", observer->observerName(), onOff ? "on" : "off");
+        observer->onCabinetInspectionLightOnOff(onOff);
     }
 }
 

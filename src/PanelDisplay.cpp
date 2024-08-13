@@ -63,10 +63,6 @@ void PanelDisplay::onFanSpeed(int speed) {
     _notify("Fan Speed", _makeFanSpeedNotificationMessage(_deviceState.fanSpeed));
 }
 
-void PanelDisplay::onTriggerInspectionLight() {
-    _notify("Inspection", "Light On");
-}
-
 void PanelDisplay::onCabinetBrightness(uint8_t brightness) {
 
 }
@@ -75,6 +71,12 @@ void PanelDisplay::onCabinetColour(uint8_t hue, uint8_t sat) {
     
 }
 
+void PanelDisplay::onCabinetInspectionLightOnOff(bool on) {
+    if (on) {
+        _notify("Inspection", "Light On");
+    } 
+
+}
 void PanelDisplay::onTemperature(float temperature) {
     _deviceState.temperature = temperature;
 }

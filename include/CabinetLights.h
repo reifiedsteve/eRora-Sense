@@ -7,6 +7,8 @@
 
 #include "PinAssignments.h"
 
+#include <functional>
+
 class CabinetLights
 {
 public:
@@ -25,6 +27,9 @@ public:
 
     void triggerInspectionLight();
 
+    typedef std::function<void(bool onOff)> ObserverFunc;
+    void observeInspectionLight(ObserverFunc func);
+
     void setup();
     void loop();
 
@@ -32,6 +37,8 @@ private:
 
     void _setLedsColour();
 
+    void _notifyObserver(bool onOff);
+    
     size_t _noOfLEDs;
     std::vector<CRGB> _leds;
     CRGBSet _ledSet;
@@ -46,6 +53,7 @@ private:
 
     TimeSpan _inspectionPeriod;
     CountdownTimer _inspectionTimer;
+    ObserverFunc _observerFunc;
 
     TimeSpan _loopPeriod;
     CountdownTimer _loopTimer;

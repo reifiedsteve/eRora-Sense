@@ -10,6 +10,7 @@ CabinetLights::CabinetLights(size_t noOfLEDs)
     , _inspecting(false)
     , _inspectionPeriod(TimeSpan::fromSeconds(30))
     , _inspectionTimer(_inspectionPeriod.millis())
+    , _observerFunc()
     , _loopPeriod(TimeSpan::fromMilliseconds(50)) // Static colours so doesn't need to be fast.
     , _loopTimer(_loopPeriod.millis(), CountdownTimer::State::Running)
 {
@@ -41,14 +42,23 @@ void CabinetLights::setPower(bool on) {
     _power = on;
     if (!_power) {
         _inspecting = false;
+        _notifyObserver(_inspecting);
     }
 }
 
 void CabinetLights::triggerInspectionLight() {
     if (_power) {
-        _inspecting = true;
+        if (!_inspecting) {
+            _inspecting = true;
+            _notifyObserver(_inspecting);
+        }
         _inspectionTimer.restart();
     }
+}
+
+void CabinetLights::observeInspectionLight(ObserverFunc func) {
+    _observerFunc = func;
+    _notifyObserver(_inspecting);
 }
 
 void CabinetLights::setup() {
@@ -73,13 +83,29 @@ void CabinetLights::_setLedsColour()
 
     if (_power) 
     {
-        colour = _inspecting ? _inspectionColour : _colour;
-
         if (_inspecting && _inspectionTimer.hasExpired()) {
             _inspecting = false;
+            _notifyObserver(_inspecting);
+        }
+
+        colour = _inspecting ? _inspectionColour : _colour;
+    }
+
+    else {
+        if (_inspecting) {
+            _inspectionTimer.expire();
+            _inspecting = false;
+            _notifyObserver(_inspecting);
         }
     }
 
     _ledSet = colour;
 }
+
+void CabinetLights::_notifyObserver(bool onOff) {
+    if (_observerFunc) {
+        _observerFunc(_inspecting);
+    }
+}
+
 

@@ -91,7 +91,8 @@ unsigned getRestartReasonBlinkCode()
     return blinks;
 }
 
-void scanWiFiNetworks() {
+void scanWiFiNetworks()
+{
     Serial.println("Scanning WiFi networks...");
 
     int n = WiFi.scanNetworks();

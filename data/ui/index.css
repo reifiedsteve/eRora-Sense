@@ -365,6 +365,10 @@ h2 {
     -webkit-tap-highlight-color: rgba(0,0,0,0);
 }
 
+.bulb-button {
+    width: auto;
+}
+
 .button:active {
     background-color: #3099f0;
     box-shadow: 2 2px #CDCDCD;
@@ -641,9 +645,9 @@ left: calc(100% - 1.0em);
 
 .fan-speed-slider {
     -webkit-appearance: none;
-    margin-left: 0%;
+    margin-left: 10px;
     margin-right: 0%;
-    margin-top: 0%;
+    margin-top: 8px;
     margin-bottom:0%;
     width: 100%;
     height: 10px;
@@ -764,8 +768,8 @@ left: calc(100% - 1.0em);
     grid-column-gap: 5px;
     grid-row-gap: 15px;
     grid-template-columns: 70fr 20px 165fr;
-    margin-left:15px;
-    margin-right:15px;
+    margin-left: 15px;
+    margin-right: 15px;
     margin-bottom: 0px;
     margin-top: 15px;
     /* background: lightcoral; */
@@ -818,6 +822,19 @@ left: calc(100% - 1.0em);
     margin-bottom:0px;
 }
 
+.inspection-light {
+    margin-left: 0px;
+    margin-top: 1px;
+}
+
+.hide-element {
+    display: none;
+}
+
+.show-element {
+    display: block;
+}
+
 .fan-controls-grid-item {
     margin: 0px;
     display: flex;
@@ -825,9 +842,16 @@ left: calc(100% - 1.0em);
 }
 
 .basic-controls-grid-icon {
-    margin-right: 10px;
     width: 30px;
     height: 30px;
+    align-self: center;
+  /* background-color: red; */
+}
+
+.basic-controls-grid-button {
+    margin-left: 20px;
+    width: 40px;
+    height: 40px;
     align-self: center;
   /* background-color: red; */
 }
@@ -861,6 +885,10 @@ left: calc(100% - 1.0em);
 
 .grid-col-span-3 {
     grid-column: span 3;
+}
+
+.grid-col-span-4 {
+    grid-column: span 4;
 }
 
 /* The presets keypad layout */

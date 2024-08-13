@@ -11,6 +11,7 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
     , _systemSettings()
     , _userSettings("user")
     , _wifiClient()
+    #ifdef ERORA_SENSE_SUPPORTS_MQTT
     , _mqttClient(
         _wifiClient, 
         "192.168.1.186", 
@@ -18,8 +19,11 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         "mqtt",
         "mqtt"
     )
+    #endif
     , _smartSensor()
+    #ifdef ERORA_SENSE_SUPPORTS_DISPLAY
     , _display()
+    #endif
     , _webController(
         _smartSensor, 
         _systemSettings,
@@ -27,11 +31,15 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         TimeSpan::fromMilliseconds(_webControllerPollingInterval),
         80
     )
+    #ifdef ERORA_SENSE_SUPPORTS_MQTT
     , _mqttController(
         _smartSensor, 
         TimeSpan::fromMilliseconds(_mqttPollingInterval),
         _mqttClient
     )
+    #endif
+    , _bootButton(PinAssignments::OnboardBootButton)
+    #ifdef ERORA_SENSE_SUPPORTS_BUTTONS
     , _button1(PinAssignments::Button1)
     , _button2(PinAssignments::Button2)
     , _button3(PinAssignments::Button3)
@@ -44,16 +52,27 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
         _button3,
         _button4
     )
+    #endif
+    #ifdef ERORA_SENSE_SUPPORTS_FAN
     , _fanPWMPinNo(PinAssignments::FanPWM)
     , _fan(_fanPWMPinNo)
+    #endif
     , _cabinetLights(_systemSettings.getNumberOfLEDs())
 {}
 
 void MyEroraSensor::setup()
 {
+    // Default is 400,000. 
+    // 10Khz is fast enough but more reliable with longer wires.
+    // But BME680 requires minimum of 100KHz.
+    Wire.setClock(100000); 
+
     delay(500);
+
+    #ifdef ERORA_SENSE_SUPPORTS_DISPLAY
     _display.setup();
     delay(1000);
+    #endif
 
     Log.verboseln("About to initialise WiFi...");
     _initWiFi();
@@ -64,16 +83,18 @@ void MyEroraSensor::setup()
     // Log.infoln("Hostname is %s", _getDefaultDeviceHostName().c_str());
     Log.infoln("Hostname is %s", _systemSettings.getDeviceName().c_str());
 
-    {
-        _fan.configSeparatePowerControlPin(PinAssignments::FanPowerControl);
-        // _fanController.limitPhysicalSpeedRange(0, 100);
-        _fan.begin();
-    }
+    #ifdef ERORA_SENSE_SUPPORTS_FAN
+    _fan.configSeparatePowerControlPin(PinAssignments::FanPowerControl);
+    // _fanController.limitPhysicalSpeedRange(0, 100);
+    _fan.begin();
+    #endif
 
+    #ifdef ERORA_SENSE_SUPPORTS_FAN
     _fan.setSpeed(100);
     _fan.setPower(true);
     _smartSensor.bindFanController(_fan);
-
+    #endif
+    
     _cabinetLights.setup();
 
     _cabinetLights.setCurrentLimit(_systemSettings.getLEDsPSUMilliamps());
@@ -83,11 +104,24 @@ void MyEroraSensor::setup()
     _cabinetLights.setInspectionTime(_userSettings.getInspectionTime());
     _smartSensor.bindCabinetLights(_cabinetLights);
     
+    #ifdef ERORA_SENSE_SUPPORTS_MQTT
     _initMQTTController();
+    #endif
 
-    unsigned clickMs(200);
-    unsigned pressMs(500);
-    unsigned debounceMs(50);
+    static const unsigned clickMs(200);
+    static const unsigned pressMs(500);
+    static const unsigned debounceMs(50);
+
+    _bootButton.setClickMs(clickMs);
+    _bootButton.setDebounceMs(debounceMs);
+    _bootButton.setPressMs(pressMs);
+
+    _bootButton.attachClick([this]() {
+        _blinker.start(3, 250);
+        _startAPMode();
+    });
+
+    #ifdef ERORA_SENSE_SUPPORTS_BUTTONS
 
     _button1.setClickMs(clickMs);
     _button1.setDebounceMs(debounceMs);
@@ -103,6 +137,8 @@ void MyEroraSensor::setup()
     _button4.setPressMs(pressMs);
 
     _buttonController.setup();
+
+    #endif
 
     _webController.setup();
     
@@ -151,14 +187,25 @@ void MyEroraSensor::setup()
 
 void MyEroraSensor::loop()
 {
+    _bootButton.tick();
+    
+    #ifdef ERORA_SENSE_SUPPORTS_BUTTONS
     _buttonController.loop();
+    #endif
+
     _webController.loop();
+
+    #ifdef ERORA_SENSE_SUPPORTS_MQTT
     _mqttController.loop();
+    #endif
 
     _smartSensor.loop();
 
     _cabinetLights.loop();
+
+    #ifdef ERORA_SENSE_SUPPORTS_DISPLAY
     _display.loop();
+    #endif
 
     _discoveryService->loop();
 }
@@ -317,6 +364,8 @@ void MyEroraSensor::_startAPMode()
     #endif
 }
 
+#ifdef ERORA_SENSE_SUPPORTS_MQTT
+
 void MyEroraSensor::_initMQTTController() {
     std::string topicPrefix(_getMQTTTopicPrefix());
     Log.infoln("MQTT topic prefix is \"%s\"", topicPrefix.c_str());
@@ -337,11 +386,20 @@ std::string MyEroraSensor::_getDefaultMQTTSensorTopicPrefix() {
     return prefix;
 }
 
+#endif
+
 void MyEroraSensor::_registerObservers()
 {
+    #ifdef ERORA_SENSE_SUPPORTS_DISPLAY
     _smartSensor.bindObserver(_display);
+    #endif
+
     _smartSensor.bindObserver(_webController);
+
+    #ifdef ERORA_SENSE_SUPPORTS_MQTT
     _smartSensor.bindObserver(_mqttController);
+    #endif
+
     // _smartSensor.bindStateObserver(_webController);
 
     #ifdef USE_THREE_BUTTON_CONTROLLER

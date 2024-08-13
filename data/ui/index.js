@@ -432,6 +432,11 @@ function onSingleMessage(message)
             onPowerMessage(args);
         }
 
+        else if (cmd == "inspect") {
+            args = argsStr.split(" ");
+            onInspectMessage(args);
+        }
+
         else if (cmd == "fan-speed") {
             args = argsStr.split(" ");
             onFanSpeedMessage(args);
@@ -805,6 +810,36 @@ function onPowerMessage(args)
 
         else {
             console.log("ws: expected true/false for power command, but got " + state);
+        }
+    }
+}
+
+function onInspectMessage(args) 
+{
+    if (args.length == 0) {
+        console.log("ws: missing argument (state) from received inspect command");
+    }
+
+    else
+    {
+        state = args[0];
+
+        if ((state == "on") || (state == "true")) {
+            document.getElementById('inspection-light-off').classList.remove("show-element");
+            document.getElementById('inspection-light-on').classList.remove("hide-element");
+            document.getElementById('inspection-light-off').classList.add("hide-element");
+            document.getElementById('inspection-light-on').classList.add("show-element");
+        } 
+
+        else if ((state == "off") || (state == "false")) {
+            document.getElementById('inspection-light-off').classList.remove("hide-element");
+            document.getElementById('inspection-light-on').classList.remove("show-element");
+            document.getElementById('inspection-light-off').classList.add("show-element");
+            document.getElementById('inspection-light-on').classList.add("hide-element");
+        }
+
+        else {
+            console.log("ws: expected on/off, true/false for power command, but got " + state);
         }
     }
 }
@@ -1557,6 +1592,10 @@ function onLampRGBChange(picker, propertyName) {
     setLampRGB(hex);
 }
 ***/
+
+function turnInspectionLightOn() {
+    wsSend("inspect on");
+}
 
 function onLampRGBButtonClicked() {
     colorPicker.on("input:end", onLampRGBColorPicked);
@@ -3710,6 +3749,25 @@ makeGauges();
     function getRandomNumber(min, max) {
         let n = Math.floor(Math.random() * (max - min + 1)) + min;
         return n;
+    }
+
+    var watchdogTimerID = 0;
+
+    function initWatchdog() {
+        watchdogTimerID = setTimeout(
+            () => { onWatchdog(); },
+            5 * 60 * 1000  /* 5 minutes */
+        );
+    }
+
+    function resetWatchdog() {
+        clearTimeout(watchdogTimerID);
+        initWatchdog();
+    }
+
+    function onWatchdog() {
+        /* TODO: ? Dim display? Show "disconnected"? Then resetWatchdog() will restore if necessary. */
+    
     }
 
     let fanRotationAngle = 1;
