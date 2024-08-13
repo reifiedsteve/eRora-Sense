@@ -1,9 +1,6 @@
 # Build version header writer
 # S.J.Morley, Reified Ltd.
 
-# IMPORTANT: This file is auto-generated prior to every build. 
-# Do not edit.
-
 import os
 import datetime
 
@@ -13,6 +10,7 @@ def write_version_file(filename):
     build_date = now.strftime('%Y-%m-%d')
     build_time = now.strftime('%H:%M:%S')
     with open(filename, 'w') as f:
+        f.write(f'// This file is auto-generated. Do not edit.\n')
         f.write(f'#define BUILD_VERSION "{build_version}"\n')
         f.write(f'#define BUILD_DATE "{build_date}"\n')
         f.write(f'#define BUILD_TIME "{build_time}"\n')
