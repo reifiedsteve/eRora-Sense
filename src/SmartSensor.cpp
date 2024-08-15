@@ -108,7 +108,7 @@ void SmartSensor::adjustFanSpeed(int delta) {
 void SmartSensor::triggerInspectionLight() {
     _ScopedLock lock(_mutex);
     Log.infoln("SmartSensor: trigger inspection light.");
-    _triggerInspectionLight();
+    _setInspectionLightMode(true);
 }
 
 void SmartSensor::reboot()
@@ -303,9 +303,9 @@ bool SmartSensor::_setFanSpeed(int newFanSpeed)
     return changed;
 }
 
-void SmartSensor::_triggerInspectionLight() {
+void SmartSensor::_setInspectionLightMode(bool on) {
     if (_cabinetLights) {
-        _cabinetLights->triggerInspectionLight();
+        _cabinetLights->setInspectionMode(on);
         // Note: _cabinetLights has an observer that we've set
         // to call _informOfInspectionLight(true), so no need
         // to do it explicitly here as well.

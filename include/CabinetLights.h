@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <FastLED.h>
 
 #include "Chronos/TimeSpan.h"
@@ -17,15 +18,15 @@ public:
 
     explicit CabinetLights(size_t noOfLEDs);
 
-    void setColour(const CRGB& rgb);
+    void setAmbientColour(const CRGB& rgb);
     void setInspectionColour(const CRGB& rgb);
-    void setInspectionTime(const TimeSpan& interval);
+    void setInspectionAutoOffTime(const TimeSpan& interval);
     void setMaximumBrightness(int brightness);
     void setCurrentLimit(unsigned mA);
 
     void setPower(bool on);
 
-    void triggerInspectionLight();
+    void setInspectionMode(bool on);
 
     typedef std::function<void(bool onOff)> ObserverFunc;
     void observeInspectionLight(ObserverFunc func);
@@ -52,7 +53,7 @@ private:
     bool _inspecting;
 
     TimeSpan _inspectionPeriod;
-    CountdownTimer _inspectionTimer;
+    CountdownTimer _inspectionAutoOffTimer;
     ObserverFunc _observerFunc;
 
     TimeSpan _loopPeriod;

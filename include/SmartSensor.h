@@ -129,7 +129,7 @@ private:
     bool _setPower(bool on);
     bool _setFanSpeed(int speedSetting);
 
-    void _triggerInspectionLight();
+    void _setInspectionLightMode(bool on);
 
     void _processTemperature(float temperature);
     void _processHumidity(float relHumidity);

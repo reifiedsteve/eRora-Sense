@@ -9,7 +9,7 @@ CabinetLights::CabinetLights(size_t noOfLEDs)
     , _power(false)
     , _inspecting(false)
     , _inspectionPeriod(TimeSpan::fromSeconds(30))
-    , _inspectionTimer(_inspectionPeriod.millis())
+    , _inspectionAutoOffTimer(_inspectionPeriod.millis())
     , _observerFunc()
     , _loopPeriod(TimeSpan::fromMilliseconds(50)) // Static colours so doesn't need to be fast.
     , _loopTimer(_loopPeriod.millis(), CountdownTimer::State::Running)
@@ -17,7 +17,7 @@ CabinetLights::CabinetLights(size_t noOfLEDs)
     _leds.resize(_noOfLEDs);
 }
 
-void CabinetLights::setColour(const CRGB& rgb) {
+void CabinetLights::setAmbientColour(const CRGB& rgb) {
     _colour = rgb;
 }
 
@@ -25,9 +25,9 @@ void CabinetLights::setInspectionColour(const CRGB& rgb) {
     _inspectionColour = rgb;
 }
 
-void CabinetLights::setInspectionTime(const TimeSpan& interval) {
+void CabinetLights::setInspectionAutoOffTime(const TimeSpan& interval) {
     _inspectionPeriod = interval;
-    _inspectionTimer.setCountdown(_inspectionPeriod.millis());
+    _inspectionAutoOffTimer.setCountdown(_inspectionPeriod.millis());
 }
 
 void CabinetLights::setMaximumBrightness(int brightness) {
@@ -46,13 +46,24 @@ void CabinetLights::setPower(bool on) {
     }
 }
 
-void CabinetLights::triggerInspectionLight() {
-    if (_power) {
-        if (!_inspecting) {
-            _inspecting = true;
-            _notifyObserver(_inspecting);
+void CabinetLights::setInspectionMode(bool on)
+{
+    if (_power)
+    {
+        if (on) {
+            if (!_inspecting) {
+                _inspecting = true;
+                _notifyObserver(_inspecting);
+            }
+            _inspectionAutoOffTimer.restart();
         }
-        _inspectionTimer.restart();
+        
+        else {
+            if (_inspecting) {
+                _inspecting = false;
+                _notifyObserver(_inspecting);
+            }
+        }
     }
 }
 
@@ -83,7 +94,7 @@ void CabinetLights::_setLedsColour()
 
     if (_power) 
     {
-        if (_inspecting && _inspectionTimer.hasExpired()) {
+        if (_inspecting && _inspectionAutoOffTimer.hasExpired()) {
             _inspecting = false;
             _notifyObserver(_inspecting);
         }
@@ -93,7 +104,7 @@ void CabinetLights::_setLedsColour()
 
     else {
         if (_inspecting) {
-            _inspectionTimer.expire();
+            _inspectionAutoOffTimer.expire();
             _inspecting = false;
             _notifyObserver(_inspecting);
         }

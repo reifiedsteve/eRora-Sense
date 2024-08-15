@@ -62,11 +62,13 @@ MyEroraSensor::MyEroraSensor(OnboardLEDBlinker& blinker)
 
 void MyEroraSensor::setup()
 {
-    // Default is 400,000. 
+    // Use default i2c pins (SDA:21, SCL:22),
+    // Bus speed: Default is 400,000. 
     // 10Khz is fast enough but more reliable with longer wires.
-    // But BME680 requires minimum of 100KHz.
+    // However, BME680 requires minimum of 100KHz.
+    Wire.setPins(SDA, SCL);
     Wire.setClock(100000); 
-
+    
     delay(500);
 
     #ifdef ERORA_SENSE_SUPPORTS_DISPLAY
@@ -99,9 +101,9 @@ void MyEroraSensor::setup()
 
     _cabinetLights.setCurrentLimit(_systemSettings.getLEDsPSUMilliamps());
     _cabinetLights.setMaximumBrightness(_userSettings.getCabinetLightBrightness());
-    _cabinetLights.setColour(_userSettings.getCabinetLightColour());
+    _cabinetLights.setAmbientColour(_userSettings.getCabinetLightColour());
     _cabinetLights.setInspectionColour(_userSettings.getCabinetInspectionLightColour());
-    _cabinetLights.setInspectionTime(_userSettings.getInspectionTime());
+    _cabinetLights.setInspectionAutoOffTime(_userSettings.getInspectionTime());
     _smartSensor.bindCabinetLights(_cabinetLights);
     
     #ifdef ERORA_SENSE_SUPPORTS_MQTT
