@@ -1,4 +1,4 @@
-#if 1
+#include "_Build/Version.h"
 
 #include <SPIFFS.h>
 
@@ -115,11 +115,11 @@ void setup()
     /// initLogging(LOG_LEVEL_INFO);
 
     Log.infoln("============================================");
-    Log.infoln("eRora smart multi-sensor. ver 0.1a");
-    Log.infoln("Built on %s at %s.", __DATE__, __TIME__);
+    Log.infoln("eRora smart multi-sensor. ver %s.", BUILD_VERSION);
+    Log.infoln("Built on %s at %s.", BUILD_DATE, BUILD_TIME);
     Log.infoln("Author: Steve Morley.");
     Log.infoln("Web: www.reified.co.uk");
-    Log.infoln("(c) 2024 Reified Ltd.");
+    Log.infoln("(c) 2022-2024 Reified Ltd.");
     Log.infoln("============================================");
 
     #ifdef DISABLE_LOGGING
@@ -129,6 +129,8 @@ void setup()
     initFileSystem();
     scanWiFiNetworks();
     
+    delay(1000); // Gives sensor time to power up fully.
+
     myErora = new MyEroraSensor(blinker);
     myErora->setup();
 
@@ -148,4 +150,3 @@ void loop()
     #endif
 }
 
-#endif
