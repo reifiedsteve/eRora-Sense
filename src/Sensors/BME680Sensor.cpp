@@ -161,10 +161,9 @@ bool BME680Sensor::_init()
 
 bool BME680Sensor::_readMeasurements()
 {
-    bool gotNewReadings(_sensor.run());
+    static CountdownTimer logTimer(5000, CountdownTimer::State::Running);
 
-    // Log.verboseln("BME680 stable: %s.", String(_sensor.stabStatus));
-    // Log.verboseln("BME680 run-in: %s.", String(_sensor.runInStatus));
+    bool gotNewReadings(_sensor.run());
 
     if (gotNewReadings)
     {
@@ -215,8 +214,15 @@ bool BME680Sensor::_readMeasurements()
     }
 
     else {
-        // Log.verboseln("BME680,run returns false");
+        if (logTimer.hasExpired()) {
+            Log.verboseln("BME680,run returns false");
+            Log.verboseln("BME680Sensor: bsec status is %d.", (int)_sensor.bsecStatus);
+            Log.verboseln("BME680Sensor: stable: %s.", String(_sensor.stabStatus));
+            Log.verboseln("BME680Sensor: run-in: %s.", String(_sensor.runInStatus));
+            logTimer.restart();
+        }
     }
 
     return gotNewReadings;
 }
+
