@@ -25,7 +25,7 @@ struct PinAssignments
     
     // Al I2C devices use Arduino TwoWire abstraction, using the
     // default SDA,SCL pins i.e. SDA is GPIO-21, SCL is GPIO-22
-    // A 1602 LCD di    msplay is attached via I2C, as is the BME680 sensor.
+    // A 1602 LCD display is attached via I2C, as is a BME680 sensor.
 };
 
 
